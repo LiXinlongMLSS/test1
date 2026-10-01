@@ -1,0 +1,4446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>萤 · 白鲸塔</title>
+<style>
+:root{
+  --bg:#08090d;
+  --panel:#11141b;
+  --panel2:#171b24;
+  --line:rgba(255,255,255,.09);
+  --line2:rgba(255,255,255,.18);
+  --ink:#d9d6d0;
+  --dim:#767c88;
+  --blood:#b3272b;
+  --blood2:#e0474c;
+  --jade:#4fb3a5;
+  --gold:#c9a227;
+  --purple:#8e6bb0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:
+    radial-gradient(1200px 700px at 70% -10%, #1a2233 0%, transparent 60%),
+    radial-gradient(800px 600px at 0% 110%, #2a1220 0%, transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:"Noto Serif SC","Songti SC","Source Han Serif SC",Georgia,serif;
+  font-size:18px;
+  line-height:2;
+  letter-spacing:.02em;
+  min-height:100%;
+  overflow-x:hidden;
+}
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:99;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='.035'/></svg>");
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px;display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start}
+html{-webkit-text-size-adjust:100%}
+body{-webkit-tap-highlight-color:rgba(179,39,43,.18)}
+button,.choice,.pick,.wbtn,.rm{touch-action:manipulation}
+
+/* ---------- 手机 / 窄屏 ---------- */
+@media(max-width:900px){
+  .wrap{grid-template-columns:1fr;gap:16px}
+  aside{position:static;padding-top:0}
+  .card{margin-bottom:12px}
+}
+@media(max-width:760px){
+  body{font-size:16.5px;line-height:1.9}
+  .wrap{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
+  header{margin-bottom:14px;padding-top:env(safe-area-inset-top)}
+  .hud{padding:9px 14px;gap:5px 13px;font-size:11.5px}
+  .brand{font-size:12.5px;letter-spacing:.2em}
+  .hud .it{gap:5px}
+  .bar{width:50px;height:5px}
+  .hud button{font-size:12px;padding:7px 11px;min-height:34px}
+  main{padding-bottom:28px}
+  .chapter{margin:20px 0 10px;font-size:11px;letter-spacing:.26em}
+  .prose p{margin-bottom:16px}
+  .choices{gap:9px;margin-top:22px}
+  .choice{font-size:16px;line-height:1.6;padding:14px 14px 14px 17px;min-height:50px}
+  .choice .hint{font-size:11.5px;margin-top:6px}
+  .choice:hover{transform:none}
+  .death{padding:20px 17px}
+  .death::before{font-size:86px;top:-14px;right:-6px}
+  .death h2{font-size:19px}
+  .death .tagline{font-size:12px;margin-bottom:16px;padding-bottom:12px}
+  .death .prose p{font-size:16.5px;line-height:1.95;margin-bottom:15px}
+  .autopsy{padding:15px 14px;margin-top:20px}
+  .autopsy h4{font-size:11.5px;letter-spacing:.18em;margin-bottom:12px}
+  .autopsy dl{grid-template-columns:1fr;gap:0}
+  .autopsy dt{padding-top:13px;font-size:11.5px}
+  .autopsy dd{font-size:15.5px;line-height:1.8}
+  .slot{font-size:14.5px;padding:9px 0}
+  .slot .rm{min-height:36px;padding:8px 15px;font-size:12px}
+  .stats{font-size:11.5px;gap:10px}
+  .wbtn{font-size:14.5px;padding:13px;min-height:48px}
+  .grid{grid-template-columns:1fr 1fr;gap:8px}
+  .ent{font-size:14px;padding:10px}
+  .ent small{font-size:11px}
+  .modal{padding:14px 10px 40px}
+  .mbox{padding:18px 15px}
+  .mbox h2{font-size:17px}
+  .tabs button{padding:8px 13px;font-size:12px;min-height:36px}
+  .pick{padding:12px;font-size:14.5px;min-height:48px}
+  .pick small,.pick .perk,.pick .draw{font-size:11.5px}
+  .picklist{max-height:none}
+  .foot{font-size:11px;padding:26px 0 calc(30px + env(safe-area-inset-bottom))}
+}
+@media(max-width:420px){
+  body{font-size:16px}
+  .grid{grid-template-columns:1fr}
+  .hud{font-size:11px;gap:4px 10px}
+  .bar{width:42px}
+}
+
+/* ---------- HUD ---------- */
+header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+  background:linear-gradient(180deg,rgba(8,9,13,.94),rgba(8,9,13,.72));
+  border-bottom:1px solid var(--line);margin-bottom:22px}
+.hud{max-width:1180px;margin:0 auto;padding:12px 18px;display:flex;flex-wrap:wrap;gap:7px 22px;align-items:center;
+  font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:13px;letter-spacing:.06em}
+.brand{color:var(--blood2);font-weight:700;letter-spacing:.28em;font-size:14px}
+.hud .it{display:flex;align-items:center;gap:7px;color:var(--dim)}
+.hud .it b{color:var(--ink);font-weight:500}
+.bar{width:72px;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;transition:width .35s ease}
+.b-hp i{background:linear-gradient(90deg,#7a1f22,#e0474c)}
+.b-ex i{background:linear-gradient(90deg,#5a4a1a,#c9a227)}
+.b-su i{background:linear-gradient(90deg,#1f4a5a,#4fb3a5)}
+.hud .spacer{flex:1}
+.hud button{background:none;border:1px solid var(--line);color:var(--dim);font:inherit;font-size:12.5px;
+  padding:4px 11px;cursor:pointer;border-radius:3px;letter-spacing:.08em}
+.hud button:hover{color:var(--ink);border-color:var(--line2)}
+.alarm-on{color:var(--blood2)!important;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+
+/* ---------- 主区 ---------- */
+main{min-height:60vh;padding-bottom:40px}
+.chapter{font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.34em;color:var(--dim);
+  margin:28px 0 14px;display:flex;align-items:center;gap:12px}
+.chapter::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.prose p{margin:0 0 18px;text-indent:2em}
+.prose p.na{text-indent:0}
+.prose em{color:var(--gold);font-style:normal}
+.prose .warn{color:var(--blood2)}
+.prose .cool{color:var(--jade)}
+.prose q{color:var(--jade);font-style:normal}
+.prose .inner{color:var(--dim);font-style:italic}
+.sep{height:1px;background:var(--line);margin:22px 0}
+
+.choices{margin-top:28px;display:flex;flex-direction:column;gap:10px}
+.choice{
+  position:relative;text-align:left;background:linear-gradient(90deg,rgba(255,255,255,.035),rgba(255,255,255,.008));
+  border:1px solid var(--line);color:var(--ink);padding:15px 18px 15px 22px;
+  font:inherit;font-size:17px;line-height:1.65;cursor:pointer;border-radius:2px;
+  transition:all .16s ease;overflow:hidden}
+.choice::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blood);transform:scaleY(0);transform-origin:top;transition:transform .2s}
+.choice:hover{background:linear-gradient(90deg,rgba(179,39,43,.14),rgba(255,255,255,.02));border-color:var(--line2);transform:translateX(3px)}
+@media(hover:none){.choice:hover{transform:none}}
+.choice:hover::before{transform:scaleY(1)}
+.choice .hint{display:block;font-family:ui-monospace,monospace;font-size:12.5px;color:var(--dim);margin-top:7px;letter-spacing:.04em;line-height:1.6}
+.choice .hint .ok{color:var(--jade)}
+.choice .hint .bad{color:var(--blood2)}
+.choice .hint .risk{color:var(--gold)}
+.choice.gold::before{background:var(--gold)}
+.choice.gold:hover{background:linear-gradient(90deg,rgba(201,162,39,.14),transparent)}
+.choice.jade::before{background:var(--jade)}
+.choice.jade:hover{background:linear-gradient(90deg,rgba(79,179,165,.13),transparent)}
+
+/* ---------- 侧栏 ---------- */
+aside{position:sticky;top:78px;padding-top:26px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:16px;margin-bottom:14px}
+.card h3{font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.24em;color:var(--dim);
+  font-weight:500;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.slot{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.055);font-size:15px}
+.slot:last-child{border-bottom:0}
+.slot .k{font-family:ui-monospace,monospace;font-size:11px;color:var(--dim);letter-spacing:.08em;flex:0 0 46px}
+.slot .v{flex:1;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot .v.empty{color:#5a606c;font-style:italic}
+.slot .rm{flex:0 0 auto;background:rgba(179,39,43,.16);border:1px solid rgba(179,39,43,.55);color:var(--blood2);
+  cursor:pointer;font-family:ui-monospace,monospace;font-size:11.5px;letter-spacing:.08em;
+  padding:3px 10px;border-radius:2px;transition:all .15s}
+.slot .rm:hover{background:rgba(179,39,43,.45);color:#fff}
+.stats{display:flex;gap:14px;flex-wrap:wrap;font-family:ui-monospace,monospace;font-size:12px;color:var(--dim);margin-top:12px;line-height:1.9}
+.stats span b{color:var(--ink)}
+.wbtn{width:100%;margin-top:12px;background:none;border:1px solid var(--line2);color:var(--ink);
+  padding:11px;font:inherit;font-size:14.5px;cursor:pointer;border-radius:2px;letter-spacing:.06em}
+.wbtn:hover{background:rgba(255,255,255,.05)}
+.wbtn:disabled{opacity:.32;cursor:not-allowed}
+.wbtn.danger{border-color:rgba(179,39,43,.5);color:var(--blood2)}
+.wbtn.danger:hover{background:rgba(179,39,43,.16)}
+.picklist{display:flex;flex-direction:column;gap:7px;max-height:400px;overflow:auto;margin-top:8px}
+.wbar{display:flex;align-items:center;gap:10px;margin:18px 0 8px}
+.wbar .rm{flex:0 0 auto;background:rgba(179,39,43,.16);border:1px solid rgba(179,39,43,.55);color:var(--blood2);
+  cursor:pointer;font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.05em;
+  padding:5px 12px;border-radius:2px;transition:all .15s}
+.wbar .rm:hover{background:rgba(179,39,43,.45);color:#fff}
+.pick{text-align:left;background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--ink);
+  padding:10px 12px;font:inherit;font-size:14.5px;line-height:1.6;cursor:pointer;border-radius:2px}
+.pick:hover{border-color:var(--jade);background:rgba(79,179,165,.1)}
+.pick.own{border-color:var(--gold);background:rgba(201,162,39,.09)}
+.pick small{display:block;font-family:ui-monospace,monospace;font-size:11.5px;color:var(--dim);margin-top:4px}
+.pick .perk{display:block;font-family:ui-monospace,monospace;font-size:11.5px;color:var(--gold);margin-top:3px}
+.pick .draw{display:block;font-family:ui-monospace,monospace;font-size:11.5px;color:var(--blood2);margin-top:2px}
+.codebox{font-family:ui-monospace,monospace;font-size:12px;color:var(--dim);white-space:pre-wrap;line-height:1.75;word-break:break-word}
+
+/* ---------- 死亡 ---------- */
+.death{border:1px solid rgba(179,39,43,.5);background:linear-gradient(180deg,rgba(179,39,43,.10),rgba(0,0,0,.25));
+  padding:30px;border-radius:3px;margin:22px 0;position:relative;overflow:hidden}
+.death::before{content:"死亡";position:absolute;right:-14px;top:-30px;font-size:140px;font-weight:900;
+  color:rgba(179,39,43,.07);letter-spacing:-.04em;pointer-events:none}
+.death h2{font-size:22px;color:var(--blood2);letter-spacing:.14em;margin-bottom:8px;font-weight:600}
+.death .tagline{font-family:ui-monospace,monospace;font-size:13px;color:var(--dim);letter-spacing:.06em;margin-bottom:20px;
+  padding-bottom:14px;border-bottom:1px solid rgba(179,39,43,.25)}
+.death .prose p{text-indent:2em;margin-bottom:18px;line-height:2.02;font-size:18px}
+.autopsy{margin-top:24px;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.022);
+  border-radius:2px;padding:20px 22px}
+.autopsy h4{font-family:ui-monospace,monospace;font-size:12.5px;letter-spacing:.26em;color:var(--dim);
+  margin-bottom:16px;font-weight:500}
+.autopsy dl{display:grid;grid-template-columns:84px 1fr;gap:10px 16px;font-size:16px;line-height:1.85}
+.autopsy dt{font-family:ui-monospace,monospace;font-size:12.5px;color:var(--dim);letter-spacing:.05em;padding-top:5px}
+.autopsy dd{color:#c9c6c1;margin:0}
+.autopsy dd.cause{color:var(--blood2);font-weight:500}
+@media(max-width:560px){.autopsy dl{grid-template-columns:1fr;gap:2px 0}.autopsy dt{padding-top:10px}}
+.death .meta{font-family:ui-monospace,monospace;font-size:11px;color:var(--dim);margin-top:16px;letter-spacing:.08em}
+
+/* ---------- 图鉴 ---------- */
+.modal{position:fixed;inset:0;background:rgba(4,5,8,.9);backdrop-filter:blur(6px);z-index:200;
+  display:none;padding:30px 16px;overflow:auto}
+.modal.on{display:block}
+.mbox{max-width:760px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:24px}
+.mbox h2{font-size:16px;letter-spacing:.2em;color:var(--blood2);margin-bottom:6px}
+.mbox .sub{font-family:ui-monospace,monospace;font-size:11px;color:var(--dim);margin-bottom:20px;letter-spacing:.08em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:9px}
+.ent{border:1px solid var(--line);padding:11px 13px;border-radius:2px;font-size:14.5px;background:rgba(255,255,255,.02)}
+.ent.locked{color:#3d424c;font-style:italic}
+.ent b{display:block;color:var(--ink);font-weight:500}
+.ent.locked b{color:#3d424c}
+.ent small{font-family:ui-monospace,monospace;font-size:11.5px;color:var(--dim)}
+.ent.got{border-color:rgba(179,39,43,.45);background:rgba(179,39,43,.07)}
+.ent.got b{color:var(--blood2)}
+.mbox .close{margin-top:22px;background:none;border:1px solid var(--line2);color:var(--ink);
+  padding:11px 24px;font:inherit;font-size:15px;cursor:pointer;border-radius:2px}
+.tabs{display:flex;gap:7px;margin-bottom:18px;flex-wrap:wrap}
+.tabs button{background:none;border:1px solid var(--line);color:var(--dim);font-family:ui-monospace,monospace;
+  font-size:12.5px;padding:6px 14px;cursor:pointer;border-radius:2px;letter-spacing:.1em}
+.tabs button.on{color:var(--ink);border-color:var(--blood);background:rgba(179,39,43,.12)}
+.foot{color:#3d424c;font-family:ui-monospace,monospace;font-size:11.5px;text-align:center;padding:34px 0 44px;letter-spacing:.14em}
+.mbox h2{font-size:20px;letter-spacing:.2em;color:var(--blood2);margin-bottom:8px}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px}
+::-webkit-scrollbar-track{background:transparent}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hud">
+    <span class="brand">萤</span>
+    <span class="it">体力 <span class="bar b-hp"><i id="hpbar" style="width:100%"></i></span><b id="hpv">100</b></span>
+    <span class="it">注目 <span class="bar b-ex"><i id="exbar" style="width:0"></i></span><b id="exv">0</b></span>
+    <span class="it">嫌疑 <span class="bar b-su"><i id="subar" style="width:0"></i></span><b id="suv">0</b></span>
+    <span class="it">时刻 <b id="clk">23:40</b></span>
+    <span class="it" id="alarmwrap">警备 <b id="alv">常态</b></span>
+    <span class="spacer"></span>
+    <button id="btnGear">着装</button>
+    <button id="btnCodex">死法图鉴</button>
+    <button id="btnRestart">重开</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <main>
+    <div id="chapter"></div>
+    <div id="story" class="prose"></div>
+    <div id="choices" class="choices"></div>
+  </main>
+
+  <aside>
+    <div class="card">
+      <h3>着装 <span style="color:#4a4f59">WOOD</span></h3>
+      <div id="slots"></div>
+      <div class="stats" id="statline"></div>
+      <button class="wbtn" id="btnWardrobe">调整着装</button>
+      <button class="wbtn danger" id="stripAll">全部脱下</button>
+    </div>
+    <div class="card">
+      <h3>随身</h3>
+      <div id="bag" class="codebox">（空）</div>
+    </div>
+  </aside>
+</div>
+
+<div class="foot">萤 · 白鲸塔 &nbsp;|&nbsp; 一场可以输的戏</div>
+
+<div class="modal" id="modal">
+  <div class="mbox">
+    <h2 id="mtitle">死法图鉴</h2>
+    <div class="sub" id="msub"></div>
+    <div class="tabs" id="mtabs"></div>
+    <div id="mbody"></div>
+    <button class="close" id="mclose">合上</button>
+  </div>
+</div>
+
+<script>
+/* =======================================================================
+   萤 · 白鲸塔  —— 文字冒险 / 单文件
+   本文件由四段拼接：引擎、装备表、死法表、场景图。
+   ======================================================================= */
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+const SLOT_NAMES = {outer:'外层', top:'上身', bottom:'下身', underwear:'内衣', socks:'袜子', shoes:'鞋', tool:'随身'};
+const SLOT_ORDER = ['outer','top','bottom','underwear','socks','shoes','tool'];
+
+/* ------------------------------------------------------------------ */
+/* 装备表                                                              */
+/* ------------------------------------------------------------------ */
+const WEAR = {};
+function def(o){ WEAR[o.id] = o; }
+
+/* ---------------- 外层 ---------------- */
+/*
+  每件衣服都带 tags（供场景判定识别）与 perk/draw（写清它的特殊效果与代价）。
+  tags 关键词：silent 静音 · formal 正式 · uniform 制服 · shiny 反光 · sheer 轻薄透
+             armored 防护 · warm 保暖 · bare 赤裸 · lace 蕾丝 · wet 防水
+             pocket 有口袋 · heel 高跟 · grip 抓地 · loose 宽松 · tight 紧身 · loud 招眼
+*/
+def({id:'trench', slot:'outer', name:'黑色长风衣', stealth:16, mobility:2, armor:4, charm:2, expo:-12,
+  tags:['pocket','loose'], 
+  perk:'内衬可藏刀，血迹被衣摆压住；所有"藏东西过检查"的判定 +12%',
+  draw:'下摆长，翻窗、钻管道时会被勾住',
+  desc:'内衬撕开可以藏一把刀。衣摆长过膝，压得住血迹。'});
+def({id:'raincoat', slot:'outer', name:'半透明雨衣', stealth:8, mobility:8, armor:0, charm:-2, expo:4,
+  tags:['shiny','wet'],
+  perk:'雨水不沾身，涉水与湿地移动不受减速',
+  draw:'灯下反光，摄像与人眼都容易抓到；里面穿什么一清二楚',
+  desc:'廉价塑料，会在灯下反光。好处是滴水不沾，坏处是里面穿什么一清二楚。'});
+def({id:'gown', slot:'outer', name:'墨绿晚礼裙', stealth:-6, mobility:-8, armor:0, charm:26, expo:10,
+  tags:['formal','loud'],
+  perk:'宴会场合理由入场；"伪装成宾客"一类判定 +30%',
+  draw:'跑不动。任何需要奔跑、翻越的判定 -25%',
+  desc:'开背到腰。穿上它，你是一张请柬；脱掉它，你是一把刀。'});
+def({id:'overalls', slot:'outer', name:'工装连体服', stealth:12, mobility:-2, armor:6, charm:-6, expo:-16,
+  tags:['uniform','pocket'],
+  perk:'被当成维修工；在机房、设备层、后厨不会被多看一眼',
+  draw:'宴会厅一类场合进不去，会当场被保安拦下',
+  desc:'维修组制服。口袋里有一只扳手和半包烟。'});
+def({id:'nothing_outer', slot:'outer', name:'（不穿外层）', stealth:-4, mobility:6, armor:0, charm:6, expo:14,
+  tags:['bare','tight'],
+  perk:'少了四斤布，翻窗、钻缝、攀爬的判定 +8%',
+  draw:'没有口袋，藏不住刀；血迹直接留在皮肤上',
+  desc:'把外层留在天桥上，轻了四斤，也薄了一层。'});
+
+/* ---------------- 上身 ---------------- */
+def({id:'turtleneck', slot:'top', name:'黑色高领衫', stealth:12, mobility:2, armor:2, charm:2, expo:-10,
+  tags:['silent','tight'],
+  perk:'高领遮住喉咙与颈上的疤；被搜身时"检查颈部"的判定不会触发',
+  draw:'领子被抓住就是致命处',
+  desc:'高领。遮住喉咙，也遮住颈上的疤。'});
+def({id:'silkblouse', slot:'top', name:'米白真丝衬衫', stealth:-2, mobility:2, armor:0, charm:16, expo:8,
+  tags:['formal','sheer'],
+  perk:'不发出任何摩擦声；社交类判定 +14%，被搭话时更容易脱身',
+  draw:'白色，见血就没法遮掩',
+  desc:'纽扣很小，第三颗松了。'});
+def({id:'camisole', slot:'top', name:'黑色吊带背心', stealth:2, mobility:6, armor:0, charm:12, expo:18,
+  tags:['sheer','tight'],
+  perk:'肩背完全自由，爬管、翻越时不会被布料卡住',
+  draw:'肩带一断就全部松脱；注目度持续偏高',
+  desc:'肩带两根，细得像蛛丝。'});
+def({id:'bodysuit', slot:'top', name:'紧身战术背心', stealth:10, mobility:8, armor:14, charm:4, expo:6,
+  tags:['armored','tight'],
+  perk:'凯夫拉衬层，刀伤与钝击伤害减半，"被捅一刀还站得住"的判定 +35%',
+  draw:'在宴会场太显眼，被认出是防具就会被扣下',
+  desc:'凯夫拉衬层。它救过你一次，肋上留着一块椭圆形的青。'});
+def({id:'bare_top', slot:'top', name:'（上身赤裸）', stealth:-10, mobility:4, armor:-4, charm:18, expo:38,
+  tags:['bare','exposed'],
+  perk:'"被当作玩物""色诱"一类判定 +40%；被人控制时反抗判定 +15%（他们不防）',
+  draw:'任何需要伪装成员工的场合直接失败；保安第一反应是把你扣下来',
+  desc:'空气直接贴上皮。冷，但灵活得可怕。'});
+
+/* ---------------- 下身 ---------------- */
+def({id:'trousers', slot:'bottom', name:'直筒西裤', stealth:12, mobility:4, armor:2, charm:4, expo:-8,
+  tags:['pocket','loose'],
+  perk:'膝弯有暗袋；"带工具过检查"判定 +10%',
+  draw:'无',
+  desc:'膝弯处缝了暗袋。'});
+def({id:'leggings', slot:'bottom', name:'运动紧身裤', stealth:6, mobility:14, armor:0, charm:8, expo:10,
+  tags:['tight','grip'],
+  perk:'攀爬、翻窗、长途奔跑判定 +12%，不会打滑',
+  draw:'臀部与腿的线条全部可见，注目度不易降下去',
+  desc:'像第二层皮肤。翻窗、爬管、跑，都是它。'});
+def({id:'slit_skirt', slot:'bottom', name:'高开叉长裙', stealth:-4, mobility:-6, armor:0, charm:22, expo:16,
+  tags:['formal','loud'],
+  perk:'宴会厅、贵宾通道的社会身份判定 +24%',
+  draw:'迈不开腿。被追时判定 -30%',
+  desc:'开叉到大腿根。走路要慢，慢得让人心慌。'});
+def({id:'short_shorts', slot:'bottom', name:'工装短裤', stealth:4, mobility:10, armor:0, charm:6, expo:14,
+  tags:['uniform','pocket'],
+  perk:'工具环上有真东西；"临时找一件工具"的判定天然成功',
+  draw:'腿暴露在外，护栏、铁丝、管道会直接划伤',
+  desc:'腰上挂一圈工具环。'});
+def({id:'bare_bottom', slot:'bottom', name:'（下身赤裸）', stealth:-12, mobility:6, armor:-4, charm:20, expo:46,
+  tags:['bare','exposed'],
+  perk:'极端的赌。所有"被当成可支配物"的路线对你敞开，色诱类判定 +50%',
+  draw:'注目度几乎无法下降，任何巡逻都会第一个注意到你',
+  desc:'你把这当成一种武器，只要你不去想它其实是裸着。'});
+
+/* ---------------- 内衣 ---------------- */
+def({id:'plain', slot:'underwear', name:'黑色无痕内衣', stealth:4, mobility:2, armor:0, charm:2, expo:0,
+  tags:['silent'],
+  perk:'不勒，不响。长途移动与攀爬时不会分心',
+  draw:'无',
+  desc:'普通，不勒，不响。'});
+def({id:'lace', slot:'underwear', name:'黑色蕾丝内衣', stealth:0, mobility:0, armor:0, charm:14, expo:8,
+  tags:['lace','sheer'],
+  perk:'在需要"被看见"的场合有加成；勾引类判定 +16%',
+  draw:'笨重且会磨皮肤，长时间行动体力消耗更快',
+  desc:'你只在两种场合穿它：杀人前，或被人杀前。'});
+def({id:'none_under', slot:'underwear', name:'（不穿内衣）', stealth:-2, mobility:4, armor:0, charm:16, expo:20,
+  tags:['bare','exposed'],
+  perk:'布料不再限制动作；贴身缠斗与钻缝判定 +12%',
+  draw:'一旦外层被扯开，就是完全失守。被人抓住时不会有任何缓冲',
+  desc:'空。风一过就知道自己是空的。'});
+
+/* ---------------- 袜子 ---------------- */
+def({id:'nylon', slot:'socks', name:'黑色连裤丝袜', stealth:10, mobility:2, armor:0, charm:8, expo:2,
+  tags:['silent','sheer','tight'],
+  perk:'丝面几乎不发声，脚步判定 +10%；配礼服或短裙都成立',
+  draw:'一勾就破。被抓住脚踝、被铁丝网刮到时直接毁掉，魅力加成归零',
+  desc:'二十丹尼，薄得能看见皮肤下的青色血管。钩丝的地方在右膝内侧。'});
+def({id:'fishnet', slot:'socks', name:'黑色网袜', stealth:0, mobility:0, armor:0, charm:16, expo:12,
+  tags:['loud','sheer'],
+  perk:'在夜场、宴会、包厢里被当成"自己人"；混入人堆的社交判定 +20%',
+  draw:'被保安盘查时，注目度加成翻倍——它几乎等于一份供词',
+  desc:'网眼大得能塞进一根手指。你其实讨厌它，但它确实是好用的。'});
+def({id:'crew', slot:'socks', name:'白棉短袜', stealth:6, mobility:6, armor:0, charm:-4, expo:-4,
+  tags:['warm','silent'],
+  perk:'吸汗防滑，长时间行走与攀爬不磨脚',
+  draw:'配礼服完全不成立',
+  desc:'最普通的那种，脚踝处洗得发白。'});
+def({id:'stocking', slot:'socks', name:'吊带长筒袜', stealth:2, mobility:-6, armor:0, charm:20, expo:16,
+  tags:['formal','sheer','lace'],
+  perk:'配合晚礼裙，能进任何宴会厅；贵宾与礼宾判定 +22%',
+  draw:'吊带松了就得停下来扣。被追时判定 -20%',
+  desc:'丝质，蕾丝边，用四根吊带固定在大腿上。你出门前检查过两遍。'});
+def({id:'no_socks', slot:'socks', name:'（不穿袜子）', stealth:2, mobility:0, armor:0, charm:4, expo:4,
+  tags:['bare','grip'],
+  perk:'鞋里没有隔层，脚背直接贴着皮，走起来更贴脚，鞋松了也立刻知道',
+  draw:'鞋帮磨脚踝。走久了会破皮，跑起来每一步都疼',
+  desc:'鞋里空着，脚背直接贴上皮革。走两步你就知道今晚会记住这件事。'});
+
+/* ---------------- 鞋 ---------------- */
+def({id:'boots', slot:'shoes', name:'软底短靴', stealth:14, mobility:8, armor:4, charm:0, expo:0,
+  tags:['silent','grip'],
+  perk:'旧橡胶底，木地板上像猫；踢门、踹人都不会崴脚',
+  draw:'无',
+  desc:'鞋底是旧橡胶，踩在木地板上像猫。'});
+def({id:'heels', slot:'shoes', name:'细跟高跟鞋', stealth:-10, mobility:-10, armor:0, charm:20, expo:0,
+  tags:['heel','formal','loud'],
+  perk:'声音与轮廓都是"这里的客人"；社交与混入判定 +18%',
+  draw:'跑、跳、爬全部 -30%。鞋跟一断就是当场废掉一只脚',
+  desc:'九公分，缎面，底下是一根很细的钢钉。你穿着它走过红毯，也穿着它在雨里站过四十分钟。'});
+def({id:'sneakers', slot:'shoes', name:'旧跑鞋', stealth:6, mobility:16, armor:2, charm:-4, expo:0,
+  tags:['grip','tight'],
+  perk:'跑、跳、急停，全部判定 +16%',
+  draw:'鞋型太日常，正式场合一眼就不对',
+  desc:'鞋带系了两次死结。'});
+def({id:'barefoot', slot:'shoes', name:'（赤足）', stealth:12, mobility:4, armor:-6, charm:2, expo:6,
+  tags:['bare','grip','silent'],
+  perk:'脚趾能扣住铁架的横杆、门槛和瓷砖边，不靠鞋底也不会滑；落地时可以用脚掌一点点卸力，比靴子轻',
+  draw:'踩到玻璃、金属屑、裸露的电缆，直接进入致命判定',
+  desc:'脚掌直接读地面的每一度温差。但踩到玻璃就等于结束。'});
+
+/* ---------------- 随身 ---------------- */
+def({id:'blade', slot:'tool', name:'陶瓷折刀', stealth:14, mobility:0, armor:0, charm:0, expo:0,
+  tags:['silent'],
+  perk:'过金属门不响；近身刺杀判定 +15%',
+  draw:'短。对体格差距大的目标只能贴到怀里才有效',
+  desc:'过安检不响。刃长七公分，足够进到颈动脉。'});
+def({id:'wire', slot:'tool', name:'绞索钢丝', stealth:16, mobility:0, armor:0, charm:0, expo:0,
+  tags:['silent'],
+  perk:'背后接近的绞杀判定 +20%，几乎不流血',
+  draw:'必须贴到对方背上。被发现就是零',
+  desc:'两端缠了布。安静，但需要近身。'});
+def({id:'spike', slot:'tool', name:'发簪钢锥', stealth:8, mobility:0, armor:0, charm:8, expo:0,
+  tags:['formal'],
+  perk:'插在发髻里像饰品，任何搜身都不会查；被近身制住时挣脱判定 +25%',
+  draw:'四寸，太短，够不到要害深处',
+  desc:'插在发髻里像饰品。拔出来是锥子，四寸。'});
+def({id:'syringe', slot:'tool', name:'琥珀色注射器', stealth:0, mobility:0, armor:0, charm:0, expo:0,
+  tags:['silent'],
+  perk:'下毒判定 +30%，不需要接近目标，只要你碰得到杯子',
+  draw:'一旦那杯酒被换过，死的就可能是你',
+  desc:'三秒起效，十分钟内呼吸停止。注射进酒里比扎人更容易。'});
+def({id:'no_tool', slot:'tool', name:'（空手）', stealth:2, mobility:2, armor:0, charm:0, expo:0,
+  tags:[],
+  perk:'没有任何金属与刃口，被彻底搜身也不会被当成杀手',
+  draw:'面对面时你只能靠身体。所有战斗判定 -25%',
+  desc:'什么也不带，什么也不会有痕迹。'});
+
+/* 场景获得的装备 */
+def({id:'guard_jacket', slot:'outer', name:'保安的藏青外套', stealth:10, mobility:0, armor:8, charm:-2, expo:-6,
+  tags:['uniform','pocket'],
+  perk:'穿上它就是楼里的人；所有"盘问/巡检"类判定 +25%',
+  draw:'尺码偏大，跑起来晃；被真正的保安问起搭档名字时会露馅',
+  desc:'刚从他身上剥下来，还带着体温和一股汗味。'});
+def({id:'apron', slot:'outer', name:'后厨围裙', stealth:6, mobility:0, armor:2, charm:-6, expo:-4,
+  tags:['uniform'],
+  perk:'后厨、传菜通道里完全隐形；沾上的油污能盖住血渍',
+  draw:'出了后厨就是最不该出现的人',
+  desc:'油渍在胸前勾出一张模糊的地图。'});
+def({id:'towel', slot:'outer', name:'浴巾', stealth:2, mobility:-2, armor:0, charm:14, expo:4,
+  tags:['bare','loose'],
+  perk:'在泳池、SPA、卧室区域被视为"当然是这里的客人"，不会被要求出示证件',
+  draw:'仅此而已。别的地方它挡不住任何东西，也挡不住任何人',
+  desc:'白色，短，边缘有一道没洗掉的唇膏。'});
+def({id:'lab_coat', slot:'outer', name:'白大褂', stealth:10, mobility:-2, armor:2, charm:6, expo:-8,
+  tags:['uniform','pocket'],
+  perk:'顶层服务人员与医护的通行证；他身上那件，穿在你身上刚刚过膝',
+  draw:'布料上有他的味道。时间久了，你自己会闻到',
+  desc:'胸口的口袋插着三支笔，其中一支没水了。'});
+def({id:'host_dress', slot:'outer', name:'备用的迎宾裙', stealth:-2, mobility:-4, armor:0, charm:20, expo:8,
+  tags:['formal','uniform'],
+  perk:'大堂与宴会厅里，你就是背景的一部分——除非有人认脸',
+  draw:'一旦被真正认出来，这条裙子会把你钉在原地',
+  desc:'竹青色，挂在休息室的衣架上，尺码刚好。'});
+
+/* ---------------- 道具（不占着装槽，只进随身包） ---------------- */
+def({id:'lockpick', slot:'misc', name:'撬锁器', stealth:0,mobility:0,armor:0,charm:0,expo:0, desc:'一组钢片，能开老式的弹子锁。'});
+def({id:'lipstick', slot:'misc', name:'口红', stealth:0,mobility:0,armor:0,charm:0,expo:0, desc:'别人的。色号很艳。'});
+def({id:'duct_tape', slot:'misc', name:'一截胶带', stealth:0,mobility:0,armor:0,charm:0,expo:0, desc:'粘性还在。'});
+def({id:'bandage', slot:'misc', name:'布条', stealth:0,mobility:0,armor:0,charm:0,expo:0, desc:'随手撕的，但能止血。'});
+def({id:'doorcard', slot:'misc', name:'货梯门禁卡', stealth:0,mobility:0,armor:0,charm:0,expo:0, desc:'普通员工卡。刷不了高层客梯。'});
+def({id:'vipcard', slot:'misc', name:'贵宾卡', stealth:0,mobility:0,armor:0,charm:0,expo:0, desc:'上面没有名字，只有一个烫金的鲸。'});
+def({id:'boning_knife', slot:'misc', name:'剔骨刀', stealth:0,mobility:0,armor:0,charm:0,expo:0, desc:'短，薄，比折刀好用，也比折刀难藏。'});
+def({id:'chef_coat', slot:'misc', name:'厨师服', stealth:0,mobility:0,armor:0,charm:0,expo:0, desc:'白的，胸口有两处洗不掉的血点。'});
+def({id:'champagne', slot:'misc', name:'一杯香槟', stealth:0,mobility:0,armor:0,charm:0,expo:0, desc:'你其实一口都没喝。'});
+def({id:'blacklist', slot:'misc', name:'那份名单', stealth:0,mobility:0,armor:0,charm:0,expo:0, desc:'七个名字。第七个是你的代号。'});
+def({id:'blackcase', slot:'misc', name:'黑色公文包', stealth:0,mobility:0,armor:0,charm:0,expo:0, desc:'他保险柜里的东西。你没打开过。'});
+
+
+
+/* ------------------------------------------------------------------ */
+/* 死法表                                                              */
+/* ------------------------------------------------------------------ */
+const DEATHS = {};
+function D(id, o){ o.id = id; DEATHS[id] = o; }
+
+/* ================= 处决类：被人抓住以后 ================= */
+D('taser', {name:'电击棒', kind:'处决', tagline:'两万伏，然后是绳子',
+  text:`第一下打在腰侧的时候，你以为是有人从背后伸手进来，隔着皮肉握住了你的脊椎，然后猛地一攥。膝盖先着地，牙齿咬到舌头，血腥味在嘴里散开，你才听见自己已经在叫了，那声音比你想象中短，也比你想象中小。
+第二下落在后颈。整个人像被人从身体里抽走了一部分，视野白了一瞬又回来，回来的时候，手已经不听使唤了。刀从指间掉在瓷砖上，弹了一下，转了两圈，停住。
+他们把你按在地上。一只手掌压着你的后脑，把半边脸按进地砖的缝里，粗糙的那一面磨着颧骨；另一只手从腰后抽出一卷束线带，"咔"地拉出一段。这个声音你听过很多次，在训练场，在别人的手腕上，只是从来没有在这个方向响起过。
+"几楼的？"有人问，语气像在问一个迟到的人。
+你说不出话，不是不想说，是舌头还不归你管。束线带先绕手腕，再绕脚踝，收到能听见皮下有什么细小的东西被挤开。最后才是正题——第三根，绕过脖子。
+收紧的那一下你才明白，前面两根不是用来绑你的，是用来让你没法用手去挡第三根的。进气变成一条细哨音，出气也是，两条哨音中间夹着一段越来越长的空白。地砖是凉的，汗是热的，两样东西在你脸下面交替着，很快你就分不清了。
+最后你看见的是天花板上的日光灯，一格一格往后退，像有人在拖着你走。
+你确实在被拖。膝盖在地砖上蹭出两道温热的痕，一直延伸进货梯后面的黑暗里。
+灯灭了。`,
+  after:`走廊的监控在天亮前被格式化了。保洁阿姨第二天早上在货梯后面拖出一卷地毯，嘀咕了一句"谁把地毯乱扔"。`,
+  struggle:{label:'用后脑撞他的鼻梁', base:0.28, tag:'force', ok:'kick_escape', backup:'taser2'}});
+
+D('taser2', {name:'再收紧一次', kind:'处决', tagline:'第二次尝试，没有第二次机会',
+  text:`你撞到了，但那不是鼻子，是下巴——骨头很硬，震得你自己的后脑发麻。
+他的头往后一仰，然后慢慢低下来，看着你，眼神里没有愤怒，只有那种正在做一件例行工作却被人打扰的不耐烦。他用手背擦了下巴，看了一眼手背，没出血。
+"还动。"
+他把那根束线带重新从你脖子上绕过去，这一次没有留缝，收得很干脆，像是本来打算做的最后一件事被提前了。
+气管被压成一条细缝，空气只能从那道缝里进出，每一下都带着哨音。视野的边缘开始起白点，白点连成片，像冬天玻璃上结的霜，从四角往中间爬。你想抬脚，脚不动；你想抓他的手腕，手指只能在他袖子上划出一点点皱。
+最后你把舌头伸了出来，不是你想伸的，是肌肉先松了。
+他站起来，抖了抖裤子上的灰，不看你了，低头点了根烟。火光在他脸上亮了一下，又暗下去。
+你躺在那儿，仍然睁着眼。烟味的尾端很淡，飘了大概十几秒才散。`});
+
+D('neck', {name:'折断颈椎', kind:'处决', tagline:'一声很轻的响',
+  text:`他从背后抱住你的头，两只手一左一右扣在你的耳后，手很暖，力道却像一副早就量过尺寸的夹子。
+你其实认得这个动作。训练手册第十七页有图解，配的文字是"单手即可以最小的体力消耗完成，适用于体重差二十公斤以内的目标"。当时你还在旁边画了个圈，写了句"如果对方有头发会更省力"。
+你挣扎，指尖抠进他的前臂，指甲在旧伤疤上滑过去，断了两根。他没有躲，也没有加快，只是把你的头往一个方向慢慢转，转到某个角度之后停了一下，像在确认位置。
+然后是一声很轻的响。不是电影里那种"咔嚓"，更像有人在很近的地方掰断了一根干树枝，脆、短、微不足道。
+世界翻了个面。你还睁着眼，还能感觉到光，但脖子以下全部消失了，像被人从肩膀那里干净地剪掉。呼吸还在继续，只是不再由你决定节奏——它自己往下走，一下比一下浅。
+他把你放下，让你侧躺在地毯上，动作甚至算得上温柔，还顺手把你的裙子往下拉了拉，让裙摆盖住膝盖。
+你最后看到的是地毯的绒毛，一根一根，很近，很近，其中几根上沾着一小块你出门前没擦干净的泥。
+几分钟后有人进来，说了句"处理一下"，然后是拖拽的声音。你被卷进那块地毯里，卷得很紧，紧到你的脸贴着自己的膝盖。`});
+
+D('choke', {name:'抹布', kind:'处决', tagline:'在机房的角落里被捂死',
+  text:`机房六十度，四台离心机在响，声音连成一片，像是有人把整个房间放进了水里。你进来的时候满身是汗，汗把衣服黏在背上，每一寸布料都贴得很实。
+他从后面把一块浸过清洁剂的抹布按在你的脸上，动作快而熟练，一只手扣着你的后脑，另一只手压着布料。
+你抓，你蹬，你的指甲在水泥地上刮出十道白痕，其中一道一直拖到了墙根。清洁剂的味道从鼻腔一路烧进喉咙深处，像有人把一整瓶氨水直接灌进了你的肺。那不是呛，那是烧，从里面开始烧。
+你的身体开始抽搐，不是你让它抽的。腰、腿、手指，各自为政，各自在跟那块布较劲。他一条腿压着你的胳膊，膝盖顶住你乱踢的小腿，始终很有耐心，像是做过很多次，也像是不介意做多久。
+三十秒。一分钟。两分钟。你听见自己的心跳在耳朵里越来越慢，到最后变成一种很大的、隔着一层水的声音。
+然后它停了。
+他等了十几秒才松开手，把抹布拎起来看了一眼，扔进门口的塑料桶。桶盖上写着"请勿饮用"，字是打印的，下面还贴了一张已经卷边的值班表。
+你脸朝下趴在那儿，眼睛仍然睁着，瞳孔上蒙了一层灰。离心机还在响，声音一点没变。`});
+
+D('beaten', {name:'棍棒', kind:'处决', tagline:'三个人，一根消防斧柄',
+  text:`你被围在楼梯间的转角，退到墙和墙的交界，背后没有路了。
+第一个人用斧柄打你的膝窝，你跪下去，膝盖磕在水磨石上，那一下的声音比痛先到；第二个人从侧面打你的后背，你趴下去，脸贴着地；第三个人打你的手，你松开刀，刀滑出去三米，卡在防火门的门缝里。
+之后他们不再有章法了，只是打。斧柄落下来的地方越来越多，肩、肋、腰、大腿外侧，每一处疼的等级都不一样，混在一起变成一种很响的白噪音。
+肋骨断了三根，其中一根往里扎进了肺，你每次吸气都能听见自己胸口的嘶嘶声，像漏气的轮胎。你想咳嗽，但咳嗽需要的气你吸不进来。
+你的脸贴在冰凉的水磨石上，血从嘴角流出去，沿着地砖的缝铺成一小片，边缘慢慢往外渗。
+在那之前，你一直在数。这大概是某种本能，给疼痛编号，就等于把它放进盒子里。你数到二十七。
+第二十八下打在太阳穴上。
+你没数完。`,
+  struggle:{label:'抓他的脚踝', base:0.2, tag:'force', ok:'hostage_moment', backup:'beaten2'}});
+
+D('beaten2', {name:'二十八下之后', kind:'处决', tagline:'他们打累了才停',
+  text:`你抓到了脚踝。只是抓到了，手指像钩子一样扣在袜子和裤脚之间那一小截皮肤上，扣住的那一刻你甚至有点高兴。
+他低头看了一眼，把脚抽出来——不快，甚至有点随意——然后鞋跟碾在你的手背上，一次，两次，三次。骨头的响比骨头本身更清晰，那是你自己的骨头，你听得出来。
+"这女的有病。"
+他们打得更随意了，像在拆一个已经没人要的旧柜子，敲一敲，踹一踹，看哪块先掉。有人在过程中还接了个电话，说了句"马上下来"，然后就站在旁边等你不动为止。
+你不再感到疼，只感到一种很深的下沉，像掉进一块湿透了的棉花里，越沉越暖。你想起安全屋窗上贴的那张报纸，湿了又干，干了又湿，边缘已经卷起来。
+最后你听见有人说"够了"，然后是脚步声远去，防火门被带上，金属碰撞的余音在井道里荡了几秒。
+你还是躺在那儿。血从台阶的缝里往下渗，一层一层，每一层的颜色都比上一层深。夜里有人经过了一次，脚步停了半秒，然后继续往上走了。`});
+
+D('sniper', {name:'对街的枪', kind:'处决', tagline:'你甚至没听见枪声',
+  text:`你在天桥的玻璃幕墙里看到了自己的倒影，还伸手理了一下头发。那绺头发被雨粘在脸侧，你把它拨到耳后，动作很随意，像所有站在雨里等车的人。
+对面的楼顶，一支枪口正对着这个倒影。瞄准镜里的十字线落在你的耳后三公分处，那是最稳的位置——他在等一个不动的瞬间，而你刚好给了他。
+八百米，风偏半格。他扣扳机的时候，你正在想"这件衣服是不是太薄了"。这是你最后一个完整的念头，它甚至不是什么重要的念头。
+子弹从右太阳穴进，左颧骨出。
+你站着，还站了零点七秒。这零点七秒里你什么都想不起来，什么都听不见，耳道里只有一片很长的嗡鸣，眼睛还睁着，看着白鲸塔的灯一层一层地亮，亮到你数不清。
+然后你向前倒进雨里。
+雨是热的。不，雨是冷的，热的是你自己。热水从你的头发里流出去，被雨水稀释，在你脸边积成一小片浅浅的暖，很快就凉了。`,
+  after:`"回廊"在凌晨三点确认了信号中断。第二天，任务派给了代号"竹"的另一个人。没有人提起你。这就是这一行的规矩。`});
+
+D('hostess', {name:'迎宾的尽头', kind:'处决', tagline:'被认出来的时候，你还微笑着',
+  text:`你把托盘举起来，笑容标准得可以写进培训手册——下巴收一点，眼睛弯一点，视线落在客人肩膀上方，不直视。这套你练过。
+大堂经理走过来，他也笑，笑得比你更好看，也比你更稳。
+"三号的那个迎宾，今天休息。"他说，语气像是在聊天气，"你是谁？"
+你抬手，但他的手更快，一支钢笔已经抵在你的颈侧。笔尖是淬过的，你能感觉到那一小点凉，就贴在颈动脉跳动的地方，随着你的心跳一下一下地晃。
+"别在这里。"他还在笑，眼睛看着你身后的大厅，"血不好擦。"
+两个穿黑西装的人一左一右架住了你的胳膊，动作很轻，轻得像在扶一位喝多了的客人。你的脚被抬离了地面，那双九公分的鞋在红毯上划了一下，划出一道很浅的痕。
+你被带进员工通道。门在身后关上，把弦乐和大厅的暖气一起关在外面。
+里面很黑，只有尽头的应急灯。你听见布料摩擦的声音，听见自己心跳的声音，听见有人在很近的地方把笔帽旋上。
+然后——`,
+  struggle:{label:'用发簪刺他', base:0.34, tag:'mobility', ok:'corridor_break', backup:'hostess2'}});
+
+D('hostess2', {name:'员工通道', kind:'处决', tagline:'后面的事没有人拍下来',
+  text:`发簪拔出来了，但是你算错了距离，也算了错方向——你以为他站在那儿，其实他退了半步。
+簪子钻进他的衣领，卡在锁骨上面，只划出一道白印，白得几乎看不见。
+"还挺野。"
+他被按在管理员的铁柜上。你的脸贴着柜门，铁是冰的，上面贴着一张员工排班表，塑封过，边缘翘起来。你的呼吸喷在上面，把它吹得一下一下地鼓。
+他从你的后颈落下那支笔，很细，很凉，像一根针穿过了你从来没被碰过的地方。
+你听见自己身体里有东西在漏，那种声音像水管里的水在慢慢找出口。
+有人在门外敲门："经理？"
+"没事。"他说，声音一点没变，"猫打翻了东西。"
+你顺着柜门滑下去，手指还勾着那张排班表，把它撕下来的一角。那一角上有一个名字，被你的指甲划破了。`});
+
+D('knife', {name:'被自己的刀', kind:'处决', tagline:'反杀失败',
+  text:`你扑上去的那一秒就知道错了。这个认知没有让你停下来，它只是让你在往下坠的时候多了一层旁观者的清醒。
+他的重心没有偏，他的下盘像浇在水泥里的铁。他侧身，抓你的手腕，一拧——
+刀转了方向，握柄朝天，刀刃朝着你自己。
+你的手臂被别到背后，他的体重压上来，带着你的手，把你的刀送进了你自己的肋下。
+很慢。他做得很慢，慢得你能感觉到金属在皮肉里推开的每一寸，能感觉到它擦过肋骨的表面，滑进去，然后停在某个地方。
+"我干这行二十二年了。"他在你耳边说，气息很稳，没有一点喘息，"你太瘦了。"
+你跪下去的时候，他松了手，退开半步，站着看你。
+你捂着肋侧，血从指缝里涌出来，一滴一滴落在他的鞋尖上。他皱了皱眉，骂了一句，把脚往旁边挪了挪，然后从口袋里掏出手机，看了眼时间。`,
+  struggle:{label:'撑起来再撞一次', base:0.24, tag:'force', ok:'desperate_out', backup:'bleed'}});
+
+D('bleed', {name:'失血', kind:'处决', tagline:'你爬了很久，只爬了三米',
+  text:`你在地上爬。地毯是浅色的，你的手印一个接一个地留在上面，像有人打翻了一整罐红漆，又用袖子胡乱地拖了几道。
+你数自己的呼吸。第一下很深，第二下浅一点，第三下开始有点甜。那种甜你也熟悉——十七岁那年，你在体校的澡堂里晕倒过一次，醒来的时候闻到的是同样的味道，铁锈，和温水煮过的铁锈。
+你爬到门口。门是关着的，白色的，上面有一块小小的牌子写着"消防通道保持畅通"。
+你把脸贴在门缝下面，那儿有一线光，很薄，从走廊的灯那里漏进来，落在你的睫毛上。
+然后你就没有再往前。不是你不想，是你的手臂已经不接受指令了，它们在动，但方向不对。
+第二天早上，人们发现一个穿着风衣的年轻女人趴在走廊尽头，姿势像是在吻地板。
+最先发现她的那个保洁员说，她的一只手是握着的，像抓着什么东西。他们掰开来看，里面什么也没有。`,
+  struggle:{label:'用牙咬开自己的手腕止血', base:0.3, tag:'wit', ok:'crawl_out', backup:'bleed2'}});
+
+D('bleed2', {name:'止不住', kind:'处决', tagline:'你咬到了，但太晚了',
+  text:`你咬下去了——不是手腕，是手腕下面更靠近血管的那一块。牙齿陷进自己的皮肉，很疼，但那点疼跟肋下那个洞比起来什么都不是。
+压不住。
+血还是从指缝里往外冒，只是换了节奏，一涌一涌的，像有人在你的身体里打拍子，而你的手指跟不上那个拍子。
+你开始冷。不是天气的冷，是从骨头缝里往外渗的那种冷，从脚趾开始往上，一层一层地把感觉关掉。
+你的睫毛上凝了一层很细的汗珠，你甚至能感觉到它们在结。
+最后你想的是两件事：风衣的内衬是不是剪开了？刀是不是还藏在里面？
+答案是：是。
+那把刀就在你左肋下面那一层布和布之间，一直贴着你的身体，跟着你从安全屋走到这里。
+但没有人会知道你到底埋了什么。明早来的人会把你和那件风衣一起装进袋子，编号，登记，然后在单子上写"无随身物品"。`});
+
+/* ================= 意外类：楼自己会杀人 ================= */
+D('shaft', {name:'电梯井', kind:'意外', tagline:'二十七米，一点五秒',
+  text:`检修门的锁比看上去好开，你用了不到四十秒，还顺手把锁舌按了回去，让门看起来是关着的。这是个好习惯，很多人在这一步就露馅了。
+你踩上去的那一步，踩的不是检修台，是一块被拆掉一半的配重盖板。它在你脚下轻轻一翘，像有人在下面用肩膀顶了一下。
+盖板翻下去，你跟着翻下去。
+你伸手，手指擦过钢缆，钢缆上全是油，那种黑而稠的润滑油，冰冷的、滑得像活的东西。你抓到了一手油和一声自己都没听清的音节，那个音节很短，短到你自己都不确定是不是从你嘴里出来的。
+下落的时候人是可以思考的，这一点你以前不知道。你想了三件事：今天是几号；风衣现在留在外面了，里面还有半包烟；如果下面是配重块的话，大概会很快。
+是配重块。
+二十七米，一点五秒。一点五秒里你经历了六十公斤的加速、八吨的静止，和一声闷响。那声闷响之后，井道里安静得出奇，只有钢缆还在轻轻地嗡，像一根被拨过的弦。
+井道顶上有一只灯还亮着，黄色的，一直亮着。它照着底下那堆不再动的东西——风衣的一角被甩在外面，露出一段白的手腕。
+<span class="inner">（后来检修工写报告时写：井底有异物，疑似违规丢弃的服装模特。）</span>`});
+
+D('compactor', {name:'垃圾压缩机', kind:'意外', tagline:'按下去的时候，你正在里面',
+  text:`垃圾道的滑门在你身后合上了，合得很轻，轻得让你以为它只是没关严。
+你顺着湿滑的不锈钢壁往下滑，滑进一个大约两平米的铁箱。铁箱里有一股很浓的味道，是剩饭、消毒水和某种已经发酵很久的甜。你在那股味道里站起来，抬头。
+头顶的灯闪了两下，红了。
+你看着那盏红灯，用了大概三秒钟才明白它是什么意思。
+液压臂开始往下压。它启动的时候没有警报，只有液压油流动的声音，很平稳，像一个正在慢慢呼吸的人。
+你尖叫，拳头砸在铁壁上，砸出四个闷响。垃圾箱里没有人听得见尖叫，只有回声，和回声撞在回声上的回声，那声音听上去竟然很陌生，不像你的。
+液压板先贴到你的头顶，你弯下腰；贴到你的背，你跪下去；贴到你的膝盖，你只能抱着自己的小腿，像抱一个婴儿。你最后能看见的地方是两片铁板之间那条越来越细的缝。
+然后肋骨开始断。一根，两根，接着是连着的一排，声音很密，像有人在很远的地方放鞭炮。你的脸被压在自己的膝盖上，嘴唇碰到的是自己的皮肤。
+四点零七分，清运车把那个箱子倒进了货车。厂里的人后来把它丢进了填埋场，没人打开过。
+<span class="inner">（那件风衣和别的东西一起压在最底下，二十公分厚，还在原来的位置。）</span>`});
+
+D('rebar', {name:'钢筋', kind:'意外', tagline:'从四层掉进一根竖着的钉子上',
+  text:`你从通风井的第四层失手，脚下一块石膏板在你还没站稳的时候就塌了。
+坠落大概只有三米，很短，短得你甚至来得及在心里骂一句。
+底下是施工用的钢筋束，被雨淋得发黑，断口还带着毛刺，其中一根朝上，直径两公分。
+它从你的左后腰进去，从你小腹的侧面出来。你听见的不是刺穿的声音，而是一种更怪的、很闷的"咕"——像有人把一根钉子敲进了一块湿木头。
+你被钉在钢筋上，脚离地四十公分，整个人挂在那根朝上的钉子上，书包一样。
+你没有立刻死。这是最糟的部分。
+你抓着钢筋，手在往下滑，血让整根钢筋变得像抹过油；你喊，喊出来的都是气，气在雨里散得很快；你看见自己的血顺着钢筋往下淌，在水泥地上积成一小汪，越扩越大，边缘慢慢爬过一块碎砖。
+你在那根钢筋上待了四十分钟。四十分钟里，你数过三辆经过的车、两次门响、一次手机铃声。雨一直下，把血冲淡，冲成一圈越来越浅的红，到最后只剩下一层很薄的粉色，随时会被下一阵雨带走。
+最后是一个夜班工人发现的。他吐了，然后打电话，说话一直在抖，说了三遍才把地址说清楚。
+<span class="inner">（清理的人用了一把液压剪，剪断钢筋的时候，你已经不在上面了。）</span>`,
+  struggle:{label:'把自己拔下来', base:0.16, tag:'mobility', ok:'impale_out', backup:'rebar2'}});
+
+D('rebar2', {name:'拔不出来', kind:'意外', tagline:'你试过了，这就是结果',
+  text:`你抓住钢筋，把自己往上撑。
+钢筋在你的身体里转了半圈。这一点点转动，是今晚所有事情里最糟的一件。
+眼前全白了，耳边的雨声变成一片长长的嗡鸣，你差点直接昏过去，但你没有——疼把你钉在清醒里，一寸都不许你走。
+你松手，又挂回去，这一挂比刚才更低了一点，脚背碰到了地面，脚尖撑着，像踮着脚往前看的人。
+血开始换成另一种流法，一汩一汩的，每一汩都带走一点温度。你不再喊了，因为喊很费力气，而力气要留着——留着干什么？你也不知道，你只知道不能把它用掉。
+你把脸仰起来，让雨落在脸上。雨是干净的，从很远的地方来，经过很多屋顶，落在你脸上还是干净的。你是脏的。
+大概二十分钟后，你不再感到腰以下的部分。
+再十分钟后，你不再感到任何部分。你没有闭眼，雨一直落在你睁着的眼睛里，把它冲得很亮。`});
+
+D('cable', {name:'钢缆', kind:'意外', tagline:'脖子被夹在两层钢索之间',
+  text:`你在电梯轿厢顶上，趴着，两只手扣着顶板的边缘，膝盖夹在两根加强筋之间。
+轿厢在上行。风从井道顶上灌下来，灌得你睁不开眼，只能把脸埋在小臂上，靠声音判断高度。
+穿过四十三层的时候，你没有抬头。这是你今晚做对的最后一件事——如果抬头，你会看见反绳轮正在转。
+对重的反绳轮在那一刻开始转动，一股钢缆从你左侧掠过去，很快，带着油腥味。你下意识地歪了一下头，那个动作纯粹是本能，跟判断无关。
+钢缆卡进了你的颈侧，然后被自身的张力拉紧。
+它没有切断你。它只是把你按在了梁上——就像两根手指按住一颗弹珠。颈椎在零点三秒内被拧到了一个不可能的角度，气管断成两截，颈动脉被拉成一根绷紧的线，但没有破。
+你挂在井道里，随着轿厢的震动轻轻晃，晃得很规律。
+四十六层到四十七层，十二秒。这十二秒里，人已经不能算人了——你的脚还在轻轻蹬，跟呼吸没有关系，跟什么都无关。
+最后轿厢停了，门开了。灯照上来的时候，井道里那点轻微的晃动也停了。`});
+
+D('door', {name:'电梯门', kind:'意外', tagline:'一半在里面，一半在外面',
+  text:`门开始合的时候，你把右腿伸了进去。这是本能，任何一扇要关的门前，人都会这么干。
+传感器没响。这是一部老式货梯，传感器十年前就坏了，一直靠"有人看见就按开门键"维持——这件事你当然不知道，你只知道门没有退回去。
+电梯启动了。
+门缝从你的右侧腰线开始收紧。金属先压扁你的髋部，那种感觉不像被夹，更像被两只手按着往里挤，然后是腹腔，然后你听见自己身体里有什么东西被挤破的声音——很湿，很闷，像踩破一个装满水的袋子。
+轿厢在上升，你被留在了楼层之间。上层的地砖离你的脸大概半米，你能看见地砖上有一道旧划痕，横着，一直延伸到墙边。
+你的上半身还在外面。手指在地砖上抓，抓出五道血痕，指甲盖翻起来两个。你的下半身跟着轿厢上去了。
+你在中间。
+你在中间待了大概九十秒。九十秒里你一直醒着，你的手还在动，还在往前抓，抓的是那片够不到的地砖。
+<span class="inner">（后来验房报告上写着：该货梯门机感应失效，建议停用。）</span>`, 
+  struggle:{label:'用刀卡住门缝', base:0.3, tag:'wit', ok:'door_escape', backup:'door2'}});
+
+D('door2', {name:'门还是合上了', kind:'意外', tagline:'刀断了',
+  text:`陶瓷刀的刃卡进了门缝，你甚至感觉到它咬住了金属——有那么半秒，门停了一下。
+然后它断了。断面很白，很干，躺在地砖上像一小截粉笔，不像能杀人，也不像能救人。
+门继续合。你听见自己的骨盆发出一连串细碎的响，像踩碎一盒饼干，那种声音太日常了，日常到你几乎以为有别的东西在坏。
+你开始大量出汗，然后开始发抖，然后不再抖。身体自己知道什么时候该放弃。
+电梯上行到第四十层。门开了。
+里面的人先是愣住，然后有两个当场吐了，还有一个瘫坐在地，一直在说"不是我不是我"，说了三遍才有人去扶他。
+保洁组用了三个小时，换了整层的地砖，把那扇门卸下来重新装了一遍。门是新的时候，感应是好的。`});
+
+D('dog', {name:'犬', kind:'意外', tagline:'两条杜宾，一个没关的笼门',
+  text:`你从地下二层的坡道翻进来，落地的时候右脚踩到一个空的狗食盆。盆是铁的，在水泥地上滚了三米，声音在车库里绕了三圈才停。
+三米之外，笼门是开的。
+第一条扑上来的时候你出刀了，刀划开了它的肩，皮肉翻开，露出一层很白的筋膜。它只是摇头，甩出一圈血，又扑回来——狗不知道疼，或者说，它知道，但它不在乎。
+第二条从侧面咬住了你的小腿，牙齿穿过肌肉，咬到了骨头，你听见"咯"的一声，像咬开一颗硬糖。你被拖倒，后脑磕在一辆车的保险杠上。
+它们不咬喉咙。它们受过训练，不咬喉咙——它们咬的是你的小臂、你的大腿内侧、你的腹部。这是程序，不是饥饿。
+四十七秒。
+四十七秒之后，你的两条手臂都已经不能用了，小臂上各自有一个洞，洞的边缘像被撕过的纸。腹部缺了一大块，肠子滑出来，在你身下摊开，冒着热气，热气在冷车库的空气里很快就看不见了。
+它们坐在旁边喘气，舌头很长，很红，偶尔低头舔一下自己的爪子。其中一条把鼻子凑到你的脸旁边，闻了两下，走开了。
+保安赶到的时候，只来得及把狗喊住。他站在两米外看了一会儿，然后用手里的对讲机说了句"叫人来"，声音很平，像在说天气。`,
+  struggle:{label:'把刀横进它嘴里', base:0.2, tag:'force', ok:'dog_live', backup:'dog2'}});
+
+D('dog2', {name:'它比你想的快', kind:'意外', tagline:'手腕被咬断了',
+  text:`你举刀横过去，对准那张张开的嘴，那里面全是牙和一条颜色很深的舌头。
+它偏头，咬住了你的手腕。
+牙齿切进腕骨，你听见的不是骨头断的声音，是韧带被撕开的声音，像拉开一条拉链。刀掉在地上，弹了一下，滑到车底。
+第二条从你背后上来，前爪搭在你肩上，把你压下去。它的体重比你重，呼吸打在你的后颈上，热的，带腥味。
+你趴在自己的血里，脸侧着，一只眼睛能看见那把刀就在三十公分以外，刀身上还沾着第一条狗的血。
+你伸出左手，指尖离刀柄差一点。你差一点就够到了，你甚至觉得自己碰到了。
+然后第一口咬在你的后颈上。`});
+
+D('car', {name:'车', kind:'意外', tagline:'地下四层，倒车的时候',
+  text:`地下四层的坡道很窄，柱子上包了橡胶，橡胶被蹭得发白。
+你从两辆车之间穿过去。你算过间距，六十公分，你的肩宽三十五，够。你算得很对。
+这是一辆加长的黑车，正在倒。倒车雷达坏了，或者司机没看，或者——这种事不需要原因，你后来想明白的唯一一件事就是它不需要原因。
+保险杠撞在你的髋上，你飞出去，撞到柱子。那一下你的尾椎先撞上去，然后是后脑，眼前闪了一片白。
+第二下更重。车轮从你的胸口压过去，你听见自己的胸廓像一堆晾衣杆那样散开，那一下很响，比车声还响，也比你想的清楚得多。
+车轮又退回来，压了一次。这次是头。左边这一下之后，世界只剩下右边一半，然后又少了。
+司机下来的时候一直在打电话，说的是"我这边路上堵，马上到"，一直在说，一直没低头。他从车头绕到车尾，看了一眼地面，皱了皱眉，回到车上，把车往前开了一米，停进了车位。`});
+
+D('pool', {name:'泳池', kind:'意外', tagline:'水深三米，你在水底',
+  text:`你从池边滑下去的时候没出声。这才是最讽刺的部分——你练了七年怎么不出声，最后用在了自己的死上。
+水是温的，比空气暖，所以第一下接触的时候身体是放松的，甚至有点舒服。然后你踩空了，脚下没有底，池底在很深的地方。你呛了第一口水。
+池底是大理石纹的瓷砖，铺成一头鲸的轮廓，白线勾边，眼睛是深蓝色的两小块。你在鲸的眼睛上挣扎。
+腿抽筋了，从脚弓开始，一直抽到大腿根，整条腿变成一根绷紧的木头，不听使唤，只想往下沉。你划水，划得越来越难看，手臂每一次抬起来都比上一次低。
+指甲抠进防滑槽，槽里有一层滑腻的藻，摸上去像坏掉的肥皂。你抠不住。
+最后你不再划了，你只是看着头顶。
+头顶的水面很亮，那盏灯在水面碎成一万片，一直在晃，晃得让人很想睡。你吐了最后一口气，那口气变成一串珍珠，一个一个升上去，越往上越大，到了水面就没了。
+你没有升上去。
+<span class="inner">（第二天早班的服务员捞了四十分钟，用的是一根带钩的长杆。）</span>`,
+  struggle:{label:'蹬池壁往浅水区弹', base:0.32, tag:'mobility', ok:'pool_out', backup:'pool2'}});
+
+D('pool2', {name:'浅水区还有十米', kind:'意外', tagline:'腿不听',
+  text:`你蹬了池壁，身体从水下射出去，大概四米。这一段是有效的，你甚至觉得自己能行。
+然后腿彻底废了，像两根别人的东西挂在你身上，你能感觉到它们在往下沉，但收不回来。
+你换成一个自己都看不起的姿势，双手扒着池底往前刨，头抬起来喝水，再抬起来喝水。水从鼻子里进去，从喉咙里往上顶，顶得你想吐。
+喝到第三口的时候你放弃了抬头。
+浅水区在十米外，坡道在那里，一级一级往上走，每一级都很白、很清楚。你在水下睁着眼，能一直看到第七级。
+你伸手，手指碰到了第一级。那一下很实在，你能感觉到瓷砖的光滑和那道防滑槽。就碰到了。
+然后你滑下去，滑回鲸的眼睛那里。池底的水纹把你的头发托起来又放下，托起来又放下，一直到很晚。`});
+
+D('freezer', {name:'冷库', kind:'意外', tagline:'零下二十五度，门在外面锁上',
+  text:`你被人反手塞进冷库的时候，还在心里算时间——你算过，从这扇门到下一班巡检，二十分钟，二十分钟足够你出去。
+门是电控的，密码锁装在正面，你在里面看不到键盘上有没有留下指纹。
+你用刀撬门缝，撬了十七分钟，刀尖崩了一小块，然后是整片刃口，最后刀断了。
+第一小时，你还在跳，跺脚，搓手，把手指塞进胳肢窝里。手指从疼到麻，从麻到没有感觉，从没有感觉到像五根别人的东西插在掌心里。
+第二小时，你开始脱衣服。这是真的——冻死的人最后都会脱衣服，因为血管收缩到极限之后会突然放开，大量血液回到体表，人会感到一阵猛烈的热。你在那一阵热里把风衣脱了，把高领衫也脱了，钮扣冻得发脆，一扯就掉。
+你赤身站在零下二十五度的铁板地上，感到非常温暖，非常困。
+第三小时，你从货架下面找到一个纸箱，空的，印着冷冻牛肉的字样。你坐进去，抱着膝盖，缩成很小的一团，把下巴搁在膝盖上。
+第四小时，你的呼吸变成每分钟三次、两次、一次，每一次呼出去的白雾都比上一次短。
+第二天早上，厨师长拉开库门的时候，看见的是货架之间一个坐着的小姑娘，蒙着一层白霜，睫毛上挂着很细的冰，手上还抓着那件风衣的一角。
+她看起来不到二十岁。他后来跟人说起这件事，只说了一句"那个女孩子，坐得很整齐"。`,
+  struggle:{label:'用发簪短接门锁电路', base:0.22, tag:'wit', ok:'freezer_out', backup:'freezer2'}});
+
+D('freezer2', {name:'电路烧了', kind:'意外', tagline:'火花之后是更深的黑',
+  text:`你把发簪捅进锁体的缝里，听见"啪"的一声，一串小火花溅出来，打在你的指腹上，一点感觉都没有。
+锁上的指示灯从红变绿——你几乎笑了，那半秒里你甚至连出去以后第一件事干什么都想好了。
+然后绿变成全灭。
+短路把这一路的供电一起烧断了。冷库里那盏主灯灭了，备用应急灯亮起来，昏黄的一小盏，挂在高处，照着你和你呼出的白雾，把你的影子拉得很长，投在两排货架上。
+你开始拍门，拍到手失去知觉，拍到手变成两块没有感觉的肉，指节上的皮一层层留在铁门上。你用脚踢，踢到鞋掉了；你把额头抵在门上哭，眼泪结冰的时候，粘住了睫毛，你眨眼的时候能听见很轻的、像撕裂纸片一样的声音。
+你闭上眼睛，只想睡一会儿。
+你睡了一会儿。
+你睡得很久。`});
+
+D('steam', {name:'蒸汽', kind:'意外', tagline:'锅炉房的一根三寸管道',
+  text:`你踩上管道的时候，阀门在楼上被人转开了——有人要试压，值班表上写着零点四十，你看过那张表，你只是没有算到自己会在零点四十还站在这里。
+第一秒是白，铺天盖地的白，整个房间被抹掉了。
+第二秒是烫。不是热的烫，是那种一次性把"疼"这个字用光的烫。
+水蒸气从你右边的袖口、领口、裤脚同时灌进去。它没有火那样明亮的攻击性，它只是进去，进到布料和皮肤之间，然后在那里把水分全部交出来。皮整张地从肉上掀起来，像沸水里的番茄。
+你想喊，但空气已经被烫进了气管，声带在第一声里就烧坏了。你发出的是一种很轻的、漏气的声音。
+你从管道上掉下去，掉了两米半，摔在铁丝网上，铁丝网也开始烫，你背上的皮肤在网格里留下了一个一个菱形的印。
+你在那里翻滚，翻滚的时候皮一块块地留在铁丝上，先是后背，然后是手背，然后是脸。
+保洁员是最先到的。他后来说，他这辈子第一次听见有人在完全没有声音的情况下尖叫——他说他能听见，是因为那声音是从她自己身体里面传出来的，闷在胸腔里，一直没停。`});
+
+D('fan', {name:'排风扇', kind:'意外', tagline:'头发被卷进去了',
+  text:`你从风管里钻出来的时候，头发散了一绺，湿的，粘在脖子上。那不是大问题，你以前也遇到过。
+排风扇的叶片是铸铝的，转速两千四，装在铁栅后面，隔着三十公分。
+那绺头发先被吸进去，然后头皮被吸进去。整个头被拽向铁栅，你的脸颊撞在铁框上，颧骨凹了一块，右边眼睛当场就看不见了。
+电机不减速。它从来没减速过，它的控制柜里没有"人"这个选项。
+你伸手去抓铁栅，手指伸进叶片之间——三根手指切下来，落在你脚边，很白，很干净，像刚洗过的。你甚至低头看了一眼，那一眼里你还认得出那是自己的东西。
+你的头和风扇之间只剩下一层脖子。
+最后是脖子。
+有大概两秒钟，你另外那只手还在动，还在往铁栅那边伸。然后它不动了。
+那天，机房的人只看见铁栅上挂着一团黑。他们以为是别人扔的假发，还跟保洁抱怨了一句。保洁用长柄夹把它取下来的时候，才发现上面连着一整个人的重量。`});
+
+D('fall', {name:'坠落', kind:'意外', tagline:'外墙，四十六层',
+  text:`你挂在幕墙外侧的检修轨上，风把雨衣吹得鼓起来，像一面旗，也像要把你从轨道上撕下去。
+往下看是什么都没有——城市在雨里，是一团很大的模糊的光，红的一条，白的一条，中间隔着一道很深的黑。
+手指扣着轨道的边缘，边缘只有三指宽，上面有一层薄薄的氧化粉，摸上去像干了的肥皂。
+左手先滑的。
+然后是右手。
+四十六层，落地大概十八秒。前五秒你还能听见风，之后听不见了，风太大，把你自己的声音也吹散了，你张着嘴，但已经没有声音在出来。
+那十八秒里，你想起的是很琐碎的事：今晚出门前你没锁安全屋的窗；冰箱里还有半盒没吃完的东西；训练场的教官说过一句"跳下去的人，总是先看下面"，而你看了。
+落地的时候，雨还在下。雨点继续落在你的睫毛上，落在你没有焦距的眼睛里，落在你摊开的手心里。过了很久才有人停下来看，那个人先拍了张照片，然后才打电话。`});
+
+D('glass', {name:'玻璃', kind:'意外', tagline:'你选了门，门其实是墙',
+  text:`你扑向那面"门"。走廊的灯在它上面留下一块反光，看起来确实像一扇通到外面的门。
+它是玻璃墙，落地的那种，中间嵌了一条细得几乎看不见的装饰线，你撞上去之前的那半秒，才看见那条线。
+玻璃没有碎。是你的锁骨先断了。那一下的钝痛从肩膀一直传到牙根，你咬到了自己的舌头。
+第二下你用手肘砸，砸开了一个拳头大的洞，边缘全是尖的，像一圈牙。洞口后面是风，是雨，是四十六层高的黑。
+你的冲力把你送进了洞和洞里的自己。
+三根肋骨的断口从你右侧的胸壁穿出去，一截玻璃插在你的肋间，被你自己的冲力推得更深。你的身体有一半在墙里，一半在墙外，中间那段挂在玻璃的断口上，像挂在一排钉子上。
+风从墙外的雨幕里灌进来，把你的血吹成扇形，溅在那面墙上，一直溅到两米高，形状很像一棵倒过来的树。
+第二天清洗外墙的吊篮工人说，那面玻璃三年没擦过，那天倒是干净了。他还说，那棵血画出来的树，是整个东立面唯一他没擦掉的东西——因为他不敢碰。`});
+
+/* ================= 屈辱类：他们不急着杀你 ================= */
+D('crew', {name:'值班室', kind:'屈辱', tagline:'四个人，一盏台灯，两个钟头',
+  text:`他们把你按在值班室那张桌子上的时候，你还在骂人。骂的是最难听的那些，骂到有人笑了一声，说"嘴巴挺硬"。
+第一个小时，你骂。嗓子是从第二十三分钟开始哑的，到后来只剩下气声，你还是在骂。
+第二个小时，你不出声了，只是咬着嘴唇，咬到出血，血从嘴角流到下巴，再滴到桌沿上，一滴一滴，节奏很慢。台灯就在你脸边，灯罩的铁边烤着你的左耳，很烫，你偏不过去。你能看见桌面上的划痕，看见有人用钥匙在角上刻了一个名字，看见桌角有一小片烟灰，还有一只没盖笔帽的圆珠笔，随着桌子一起轻轻震。
+你身后的呼吸声一重一重，均匀，甚至不着急。中间他们交接了一次班，有一个人先去泡了碗面，回来的时候身上带着那种廉价的红烧味，然后换手，接着来。没有人说话。整个房间里最响的是那盏台灯的电流声。
+你像一件放在这间屋子里的公用设备。有人用，有人换，没有人看它一眼。
+中间有一次，你说"我叫萤"。
+没有人问你是谁。那句话掉在地上，像一张没扔进垃圾桶的纸。
+两个小时后，他们开始头疼怎么办。有人说得处理掉，有人说等天亮，最后是那个泡面的人拍的板。
+你被套上麻袋。麻袋上有一层霉味，还有一种很熟悉的味道——速溶咖啡。以前在训练营，每天早上都有那个味道。
+你被搬进货梯。门关上的时候，你想的居然是：这件风衣很贵，别弄脏了。`,
+  after:`"回廊"的第二号人物在三天后看了监控。他关掉屏幕，点了一支烟，抽了一半，摁灭，然后给另一个新人打电话。他说：以后不要派女人单独进楼。`,
+  struggle:{label:'趁换手的那一秒反击', base:0.18, tag:'force', ok:'break_room', backup:'crew2'}});
+
+D('crew2', {name:'你反抗了，所以他们更慢', kind:'屈辱', tagline:'区别只在于时间',
+  text:`你踢到了一个人的下巴，他被踢得退了两步，扶着墙骂了一句脏话，嘴里有血。
+这一脚值得吗？值。它给你换来了一点很实在的东西：他们不再把你当成一件随手的物件，而是当成一头需要先砸服的牲口。物件不需要被教育，牲口需要。
+第一下是手电筒敲的，敲在你的膝盖上，敲完以后你的左腿就再也伸不直了。
+你跪在水泥地上，膝盖里像是灌进了一把碎玻璃，每动一寸都响。
+然后是第二下，第三下，第四下，不需要数，因为他们不数。
+之后的事他们做得更慢，也更有条理，像是对一台已经被拆开的机器做例行维护——哪里松了拧哪里，哪里响了一声就再看一眼。
+你不再感到屈辱了。羞耻是一种需要力气的情绪，而你身上已经没有力气分给它，剩下的那一点全用来呼吸了。
+凌晨一点四十分，他们把你塞进垃圾箱，盖上了盖。铁盖落下来的声音很大，在空车库里回了两下。`});
+
+D('toy', {name:'玩物', kind:'屈辱', tagline:'目标说：先留着',
+  text:`你被带到他面前的时候，风衣的扣子已经被扯掉了三颗，高领衫的领子被拉得变形，露出锁骨。你没有低头，你只是站着，因为你的手还被反绑在背后。
+他坐在那张很长的办公桌后面，看文件，没抬头。桌上有一盏带铜座的台灯，还有一杯已经凉透了的茶。
+"哪里捡的？"
+"三十九层，往上的检修梯。"带你来的人回答，语气像在报一件快递。
+他把文件翻过去一页，拿起笔签了名，很慢，笔画收得很干净。然后他抬眼。
+那一眼里不带任何欲望——这才是最可怕的部分。他看你，像在看一件还没开封的东西，在估量值不值得拆，拆了以后放在哪。
+"留着。"他说，"我这两天心情不太好。"
+于是你被留在顶层。
+四十八小时。四十八小时里，你被当作一件家具、一个垫子、一个可以随时使用的容器。你被搬动，被摆成别人需要的姿势，被打开，被合上。这中间有人送来过一次餐，餐盘放在你旁边的地毯上，没有人给你。你有名字，但没有一个人叫；你会说话，但没有一个人听。你只听见过一次自己的声音，是你在他抽屉开合的时候下意识说了一句"别"，那声音很轻，谁都没有反应。
+第三天的凌晨，他兴致过去了，对你的存在感到了一点点麻烦，那种麻烦很像桌上多了一只用过的杯子。
+"送下去，别脏了地毯。"
+你被两个助理一左一右抬进了那部直达地下四层的货梯。电梯下行的时候，你听见他们在讨论周末去哪里。`,
+  after:`他后来在自己的日程本上写：周三，清理。那两个字夹在"体检"和"见王总"之间，用的是同一支铅笔。`,
+  struggle:{label:'在被抬走前咬住他的袖口', base:0.14, tag:'wit', ok:'spit_on_him', backup:'toy2'}});
+
+D('toy2', {name:'清理', kind:'屈辱', tagline:'连挣扎都算作打扰',
+  text:`你咬住了他的袖口。
+布料在牙齿之间磨，很粗糙，带着一股熨过头的浆味。你咬得很紧，紧到牙龈开始发酸，牙关在抖，但你就是不松。
+他终于低头看你。那一眼里没有怒意，甚至没有任何情绪，只有一点点轻微的厌烦，像看见一只弄脏了书页的虫。
+他把袖子从你嘴里抽出来，抽得不快，你甚至听见布料从牙齿上刮过去的那一声。他抬起手腕，看了看那一小圈湿痕，看了看表，然后从内袋里抽出一方手帕。
+他擦手，一根手指一根手指地擦，擦到第三根的时候停下来，把手帕随手扔下来。
+白色的棉布正好盖在你的脸上。
+手帕上是他香水的味道，一种很冷的木质调，混着一点纸和墨。你在那股味道里喘不上气，吸气的时候布料贴着鼻孔，被吸进去一点，又被呼出来的气顶开。
+你的眼睛一直睁着，能看见白手帕上慢慢渗出一小片粉红——那是你的嘴唇，还在出血。
+助理把你抬出去。货梯下行，楼层数字在门外一格一格跳，你听不见，你只听见盖子合上的声音。
+然后是一声响，很小，像有人轻轻拍了一下手，然后拍完就忘了。`});
+
+D('cargo', {name:'货', kind:'屈辱', tagline:'被装进冷冻车的第三层',
+  text:`他们给你打了一针。针头很细，扎在颈侧，像被蚊子咬了一口，你甚至来得及扭头看了一眼那个打针的人。
+你说不出话是从舌根开始的，然后是下颌，然后是整个口腔变成一块很沉的肉。手脚是接着不听的，最后是眼皮，眼皮垂到一半就不肯再往上抬了，你在那半开的视野里看着天花板往后退。
+你被放进一个纸箱。箱子上印着某家酒业的字，箱里垫着一层泡沫，很软，软得让人想睡。有人在你身上盖了什么，很轻。
+装卸的时候你醒过来大概半分多钟。这半分多钟是你这一晚最清醒的时候。
+你在半分钟里知道了几件事：这是一辆冷链车，因为底盘一直在震，空气是冷的；箱子是叠起来的，你在第三层，上面压着两层，你听得见重物落上去时的闷响；右边的箱子里有东西在动，很轻，很规律，像指甲在刮纸板。
+你还知道了一件事：你没有害怕，你只是很累。这大概是麻药的关系，但也不全是。
+然后你又被黑暗收走了。
+你最后被运去了哪里，没有记录。
+"回廊"的档案里，你的名字后面写着两个字：失联。
+在这套系统里，失联比死亡更干净——死亡要写报告，要有人签字，要有人问一句"她是怎么进去的"；失联只需要一个省略号。`,
+  after:`那辆车在凌晨四点十七分通过了一个没有摄像头的路口。之后再没有人查过它的去向。`});
+
+D('bid', {name:'落槌', kind:'屈辱', tagline:'第三十七号，起拍价',
+  text:`你醒来的时候，手腕上有两个环。
+环是皮革的，里面衬着软垫，扣得很专业——专业得让你知道，扣它的人扣过很多次，从来没有出过错。环上接着皮带，皮带拉紧，把两条手臂固定在一把椅子的两侧，椅子的坐垫是布的，很干净。
+房间是红的。不是装修的红，是布的红，四壁垂着厚重的绒，连门帘都是。空气里有脂粉味、雪茄味，和一点点汗。
+你身上那件风衣不见了，高领衫也不见了，鞋也被脱掉了。只剩下最里面的那一层，而那唯一的一层，是半透明的。
+帘子被拉开。台下有二十几个人的脸，坐得很低，灯从台下打上来，把他们的下巴照得发亮，眼睛全在暗处，像一排没有情绪的洞。
+"第三十七号。"台上的人说，声音很平，"十九到二十三之间，无病史，未开刃，起拍价不高——"
+帘子又合上了。
+你听见外面的人在加价，数字一个一个往上跳，跳得很快，中间夹着笑声和掌声。有人在数钱，纸币翻动的声音很清脆。
+你把手腕往皮革上磨。你磨了整整四个小时，从左边磨到右边，磨破了自己，皮开了一道很长的口子，血把软垫浸黑了一小块。
+皮带没有断。你也没有停。到后来你不再是为了挣脱，只是因为你不知道除了这件事还能做什么。`,
+  struggle:{label:'把皮带扣咬下来', base:0.2, tag:'mobility', ok:'bid_break', backup:'bid2'}});
+
+D('bid2', {name:'卖掉了', kind:'屈辱', tagline:'成交价不如一条好狗',
+  text:`你咬到了皮带扣，牙齿崩了一小块，碎渣在舌头上硌着。
+扣是铜的，边缘有倒刺。你的舌头被划开，血从嘴角流出来，顺着下巴滴在你自己的膝盖上，一小点一小点。
+门开了。
+进来的男人很高，穿一件熨得笔挺的浅灰西装，手里拿着一份文件，很薄，只有两页。他走到灯下，把文件翻开，看了看，又看你。
+他看你的手腕，看你的嘴，看那截还沾着血的铜扣。
+"有牙。"他说，回头对台上的人点了下头，"加价。"
+外面的人又笑了一阵，笑声很松，像是听完了一个不错的小段子。
+他把你从椅子上拎起来，动作不粗鲁，甚至因为太熟练而显得体贴——他先松开你左边的手环，再松右边，没有让皮带抽到你的脸。他扶着你的手肘，让你站稳，等你脚跟落了地才松开。
+出门的时候，你最后回头看了一眼。红色的房间，红色的布，红色的灯。
+帘子后面还有一个编号三十八的椅子，上面空着，坐垫上有一块很新鲜的压痕。`});
+
+D('exposed', {name:'被看见的东西', kind:'屈辱', tagline:'你身上没有一处可以遮的',
+  text:`他们是从设备层的拐角一起转出来的，两个人，一个拿手电，一个手里还端着一杯没喝完的茶。
+手电的光先落在你的肩膀上，然后往下，一直落到脚背，再折回来，停在你脸上。光很稳，没有晃——这是训练过的反应，遇到不该出现的东西，第一件事是看清它，而不是喊。
+他们两个都愣住了。那愣住的半秒，是今晚你唯一的机会，而你没有用上，因为你也在愣。
+"……你从哪儿上来的？"
+你没有回答。你身上已经没有可以回答这个问题的地方了。所有的布都在下面几层，留在楼梯、留在车库、留在某个已经记不清的转角。你站在那里，两手垂着，像一件被搬错了房间的家具。
+拿茶的那一个先动了。他把杯子放在旁边的风柜上，放得很轻，像是怕惊到什么。
+"叫人。"他说。
+另一个人没有去叫人。他往前走了一步，又一步，走得很慢，绕着你，像在判断一件东西的成色。
+你终于往后退。退到管壁上，背后是温的，机器在里面响。
+他们交换了一个眼神。那个眼神你见过，在很多地方见过，那不是"怎么处理"的眼神，那是"谁先来"的眼神。
+后面的事情，没有人在控制室里看见。那一排摄像头的线，上个月就被老鼠咬断了两根，一直没修。
+四个小时以后，他们把你从设备层抬到货梯上。抬的方式很随便，一只手抓脚踝，一只手抓手腕，中间那段垂下去，在货梯的地板上拖着。
+天亮之前，那辆清运车照例来了一趟。`,
+  after:`那两个人后来都调走了，一个去了南区的仓库，一个回了老家。没有人问过他们那天晚上在三十九层做什么。`});
+
+/* ================= 极刑类：楼里那些不讲道理的东西 ================= */
+D('acid', {name:'清洁剂', kind:'极刑', tagline:'“生物酶”是一种很诚实的名字',
+  text:`你被推进后厨的洗消间，门从外面插上了，插销是铁的，落进去的时候有两声。
+地上有三个灰塑料桶，两个贴着"清水"的标签，第三个没有标签。你退了一步，脚跟撞在那个没标签的桶上。
+桶倒了。液体泼在你的两截小腿上，顺着袜子和鞋面往里渗，三十秒之内没有任何感觉。你甚至松了口气，以为那真是水。
+一分钟之后，你的小腿开始滑黏。
+你低头看。皮肤在往下掉，不是被烧焦的那种黑，是像蜡一样，一块一块地软化、脱离、滑下去，底下露出来的东西是白的，湿的，亮得反光。你想把腿抬起来，抬到一半发现脚踝已经不听使唤了。
+你尖叫，撞门。门是防火板，很厚，撞上去只有闷响。你把腿从桶边挪开，但液体已经浸透了裤脚，正顺着布料往上爬，爬过大腿，爬到膝盖，所到之处布料和皮肤一起发生了变化。
+你用手去擦。手也开始滑黏。
+四十分钟后，你蜷在洗消间的角落里，两条腿从膝盖往下只剩下一半，小臂上有几处已经能看到肌腱，它们随着你的呼吸一动一动，颜色比你想的要白。
+你还活着。这才是最不公平的部分——化学伤不像刀伤，它不让你昏过去，它让你一直在这里。
+保洁班长第二天早上开门，看到的是一个还在轻轻发抖的小东西。他后来辞职了，去了一个不需要进洗消间的岗位。`});
+
+D('hook', {name:'挂钩', kind:'极刑', tagline:'冷库的滑轨，一匹马用的钩子',
+  text:`挂钩原本是吊整只牛用的，单钩，两条轨道，一共四十米，挂在冷库的天花板下面。
+他们把铁丝扣穿过你的手腕，绕了两圈，拧紧，然后把铁丝挂在钩子的第二格里。铁丝勒进皮肉的时候，你听见自己叫了一声，那声音在冷库里没有回声，被冻住了。
+电机开始转。轨道上的滑轮发出很规律的咔嗒声。
+你被吊起来。脚尖离地大约二十公分的时候，铁钩的尖端滑进了你的右侧肩胛下方，从腋窝深处顶出来——不，它没有穿出来，它卡在了肩胛骨和胸廓之间那一层很薄的间隙里，然后被你的体重压实。
+你整个人的重量，从那一刻起，就靠这两块骨头承担。
+你能听见自己的骨头在响。那种响声很细小，一粒一粒的，像有人在很近的地方嗑瓜子，很有耐心。
+他们就这么把你吊着往前送，走了六米，停下来，说了几句话，又走。轨道上的灯是一格一格的，从你头顶一格一格地退过去。
+你的影子落在地上，随着移动轻轻晃，晃得越来越慢。
+大约十一分钟后，你的肩膀脱臼了，人往下坠了半个手掌。你没有掉下去，钩子还在，只是你更低了一点，脚尖几乎碰到地。
+这时候他们才推来了那辆不锈钢的推车。推车的轮子有一个是坏的，一直响。`});
+
+D('vise', {name:'液压平台', kind:'极刑', tagline:'车库里那台修车用的升降机',
+  text:`他们把你平放在升降台上，脸朝上，然后在平台和上面的水泥梁之间垫了两块砖，留下大约十二公分的空隙。这个高度是量过的，不是随手垫的。
+液压泵开始工作。那种声音很好听，低沉的、匀速的、像一台很健康的机器。
+第一次压力上来的时候，你只是觉得闷，像被很厚的被子压着，胸口有点上不来气，但还能上。
+第二次，你的肋骨从最下面两根开始断，断口向内，你能感觉到骨头断的时候那一下错位，很清脆，也很近。
+第三次，你的骨盆发出一种很低的声音，不是"咔"，是"噗"，很闷，像一个装了水的袋子被踩到。
+第四次的时候，你已经不是在呼吸了，你是在被呼吸——那两块东西在替你完成吸气呼气，你只是躺在里面，等着。
+最后的画面很奇怪。你的视野忽然变宽了，看见了天花板的灯，看见了灯旁边的蜘蛛网，看见了蜘蛛网上粘着一只很小的飞虫，翅膀还在动。
+然后灯熄了。
+他们把压力泄掉，把你从台子上刮下来的时候，用了两把铁锹和一瓶水。其中一把铁锹的边是卷的，卷口的地方沾着别的东西。`});
+
+D('train', {name:'地铁', kind:'极刑', tagline:'撤离的最后一秒',
+  text:`撤离路线是穿过地下四层，接一条废弃的检修隧道，从地铁三号线的存车线出来。这条路线你在出发前走过一遍，用脚一步一步量过，从洞口到站台的边缘是八米。
+你比预定时间晚了十五分钟。这十五分钟是你自己在四十七层的走廊里花掉的——你在那里站了一会儿，什么也没做，只是站着。
+列车正在进站，风先从隧道里来了，很长，很硬，带着铁屑的味道，把你整个人按在墙上，头发往后扯。
+你算了一下，八米，三秒半，够。
+你跑了六步。第七步踩在一片油上。那片油是从某台施工机械的液压管里漏出来的，很薄，铺在混凝土上几乎是透明的。
+你趴倒在轨道中间。
+列车进站的灯把整条隧道照得像白天，白得什么都看不见，只有那一片光越来越大。
+司机看见了一切。他拉了紧急制动，制动距离一百四十米，车速六十。这两个数字在那一瞬间全都没有用。
+他看见的是一个穿黑色风衣的女人，先撑起上半身，然后抬头，看灯，然后不再动了。
+相撞的时候，你大概只感到了最后的加速度——很干净，像被人从背后推了一把。
+之后的事情，由清洁班负责。他们把那一整段轨道换了，换了三节。`});
+
+D('vault', {name:'保险柜', kind:'极刑', tagline:'目标书房里那个两米高的东西',
+  text:`保险柜的门是液压的，关的时候靠自重，门板一百二十公斤。这件事你不知道，说明书上写着"请勿在门体回位过程中将肢体置于柜内"，用四国语言，你只看过中文那一行。
+你当时半个身子探在柜子里翻文件，右膝跪在柜底，左手撑着柜壁，只有脚后跟在外面。
+柜门开始回位。你先听见的金属摩擦声很轻，像黑胶唱片开始转，那种"沙"的一下，在安静的房间里非常清楚。
+你退。退不出去——是你自己的姿势卡住了退路，膝盖找不到支点，肩膀转不过来。
+门板从你的背上压过来，把你的上半身折成一个不该有的角度。
+一百二十公斤的钢门咬住你的第十三节脊椎，把它压碎了。你听见"咔"的一声，很短，然后腰以下就消失了，像有人关掉了一盏灯。
+你还活着。脊椎断在这个位置的伤者，通常能活很久，很久。
+你在那个柜子里待了七个小时。肺一分钟比一分钟浅，你自己能数出来。前两个小时你还在喊，后来喊不动了，因为喊需要腹部的力量，而你的腹部已经不归你管。
+柜门内侧有一层镜面，你能看见自己，也能看见身后的房间——深蓝色的地毯，两只倒着的酒杯，一对正在脱外套的男女。
+他们谁也没往柜子这边看一眼。中间那个男人朝这边走了两步，你几乎要叫出声，但他只是来拿茶几上的烟。`});
+
+D('hypo', {name:'毒酒', kind:'极刑', tagline:'酒杯换错了，就这么简单',
+  text:`计划里，琥珀色的注射器是给目标的。你练过三次，每次都是同一条路线、同一个托盘、同一个角度。
+酒在托盘上，两杯。你端过去的时候，多看了一眼对面——那个正在敬酒的客人，他的手表在你眼前闪了一下，反光落在你的睫毛上。
+你分神了零点五秒。
+零点五秒，足以让服务生顺手把托盘上的两只杯子转了个身。他不知道里面有什么，他只是习惯性地把杯柄朝向客人。
+你按计划退到柱子后面，等着。三分钟。五分钟。你甚至看了一眼表，确认自己没有早退。
+你等到的不是目标倒地，是心口一阵很轻的麻。
+麻从指尖开始，沿着手臂内侧往上爬，爬到腋下，爬到胸，然后在某一瞬间猛地一收，像有人在你胸腔里握了一下拳头。
+你伸手抓柱子。抓空了，你的手掌像是穿过了那根柱子。
+手里的托盘掉在地上，碎玻璃的声音在大厅里很清脆，几十个人回头看你。音乐没有停，只是有人把音量调小了。
+你想说话。舌头已经是一块别人的肉，很沉，放在你的嘴里。
+你跪下去，侧躺在地毯上。有人叫医生，医生来得很快，从你倒下到有人蹲在你身边，不超过九十秒。但十毫升已经很够了。
+最后的视野里是那盏水晶灯，一万个切面，每个切面里都映着一个躺着的姑娘。`,
+  after:`验尸报告写的是「急性心衰」。没有人查过那杯酒。琥珀色的注射器还贴在你暗袋里，没有被发现，和别的遗物一起收进了证物袋，编号 1731，在架子上躺了六年。`});
+
+
+
+/* ------------------------------------------------------------------ */
+/* 场景图                                                              */
+/* ------------------------------------------------------------------ */
+const S = {};
+
+/* ==================================================================== */
+/* 序章                                                                  */
+/* ==================================================================== */
+S.brief = {
+  chapter:'序章 · 雨',
+  text:`雨已经下了一整夜，看样子还会再下一夜。
+你站在白鲸塔对面的天桥上，手肘搭在湿透的栏杆上，看着那栋楼。四十七层，通体玻璃幕墙，从底下往上看，像一柄竖起来的刀，刀尖那里有一盏灯还亮着。
+耳麦里有电流声，失真，冷，像有人在很远的地方翻一张旧报纸。
+　<q>目标在顶层。零点到两点之间守卫换班，那是唯一的缝。</q>
+　<q>他手上有一份名单，纸的，就放在书房里。名单上有我们七个人的名字和住址。</q>
+　<q>萤。</q>
+有人叫你的代号。你"嗯"了一声，声音比你自己预想的要轻。
+　<q>七个人里，已经死了三个。别让我派第二个进去。</q>
+你把耳麦摘下来，塞进领口。雨落在你的肩上，很快就把那件黑色长风衣洇湿了一片，颜色变深，贴着皮肤变凉。
+桥下的车流是红的和白的，一条河的两岸。你要从这一岸，走到那栋楼的顶上去。`,
+  choices:[
+    {label:'检查一遍身上的东西', natime:true, to:'prep'},
+  ]
+};
+
+/* ==================================================================== */
+/* 安全屋 / 装备                                                          */
+/* ==================================================================== */
+S.prep = {
+  chapter:'零 · 安全屋',
+  allowWardrobe:true,
+  text:()=>{
+    const st = statSum();
+    let t = `安全屋在便利店的楼上，一间六平米的隔间，窗户被一张报纸糊住，报纸上有半版的招工启事。
+桌上摊着今晚能带走的东西，摊得很散，像是有人出门前犹豫了很久。你站在镜子前面。镜子上有一道裂，从左上角斜下来，把脸切成不相等的两半，你习惯了，甚至觉得这样看起来更顺眼一点。
+<em>换衣服是这一行里最像女人的时刻。</em>这句话是跟一个老前辈学的，当时她把一支口红拧开又合上，拧开又合上，说了三遍。她后来死在一辆车的后备箱里，穿着的是那天最贵的一条裙子。
+现在的你：
+　隐匿 ${st.stealth>=0?'+':''}${st.stealth}　机动 ${st.mobility>=0?'+':''}${st.mobility}　防护 ${st.armor>=0?'+':''}${st.armor}　魅力 ${st.charm>=0?'+':''}${st.charm}
+　注目度 <b style="color:${totalExpo()>=60?'var(--blood2)':totalExpo()>=45?'var(--gold)':'var(--jade)'}">${totalExpo()}</b>${bareCount()?`　暴露部位 <b style="color:var(--blood2)">${bareCount()}</b>`:''}`;
+    if(tagNames().length) t += `\n　身上带着的特性：<span class="cool">${tagNames().join(' · ')}</span>`;
+    t += `\n<span class="inner">（左边的镜子是你自己，右边的是别人眼里的你。两边都不太像。）</span>`;
+    t += `\n门外的雨没停。你还有四小时二十分。`;
+    return t;
+  },
+  choices:[
+    {label:'打开衣箱，重新搭配', hint:'七件可以随便换、随便脱——每一件的效果和代价都写在上面', act(){ openWardrobe(); }},
+    {label:'清点随身包', hint:()=>s.bag.map(x=>WEAR[x]?WEAR[x].name:x).join('、')||'空',
+      act(){ flash(s.bag.map(x=>'· '+(WEAR[x]?WEAR[x].name:x)).join('　')||'（空）'); }},
+    {label:'出门。往白鲸塔去', cls:'jade', time:8, act(){ checkpoint('安全屋门口'); go('outer'); }},
+  ]
+};
+
+/* ==================================================================== */
+/* 外围                                                                  */
+/* ==================================================================== */
+S.outer = {
+  chapter:'一 · 外围',
+  allowWardrobe:true,
+  text:()=>{
+    let t = `白鲸塔的东侧是一片小广场，西侧是半地下的车库坡道，北面有一根从三层开始往上爬的外挂消防梯，南面正门灯火通明——今晚四十二层有一场酒会，门口停着十七辆车，每一辆的车门上都挂着一层发亮的雨水。
+你贴着那排梧桐站在阴影里。雨从叶子上漏下来，一滴一滴，不急，落在你的肩上、发梢上、手背上。你把湿透的头发从脸上抹开，抬头。
+四十七层，像一柄竖起来的刀。
+<em>这四个方向你只能挑一个，然后祈祷自己没有挑错。</em>`;
+    if(countTag('formal') >= 2) t += `\n<span class="cool">你这一身在路灯下站着，已经有两个路过的男人回头了。正门那条路，今晚是为你留的。</span>`;
+    else if(hasTag('uniform')) t += `\n<span class="cool">这身制服让你看起来像是刚从哪个班组下班的。挺好——大部分人不会多看一个下班的人第二眼。</span>`;
+    else if(hasTag('loud') || totalExpo() >= 55) t += `\n<span class="warn">你身上露出来的部分太多，风一吹就知道。今晚这条街上的摄像头不止白鲸塔自己的。</span>`;
+    if(bareCount() >= 3) t += `\n<span class="warn">你几乎什么都没穿地站在雨里。冷是小事，问题是：这样走进任何一扇门，你都不需要解释，别人会自己替你编一个理由。</span>`;
+    if(isBare('shoes')) t += `\n<span class="cool">你光着脚。石板是凉的，湿的，每一处不平都硌在脚心。好处只有一个：湿石板上靴底会滑，脚趾不会。坏处是这双脚一旦踩到什么，没有人能替你挡。</span>`;
+    return t;
+  },
+  choices:[
+    {label:'正门。假装是迟到的宾客', hint:'要穿得像样，还要笑得像样',
+      time:6, act(){ checkpoint('外围 · 正门外'); go('gate_front'); }},
+    {label:'北面外挂消防梯，从三层进', hint:'最直接，也最容易掉下去',
+      time:5, act(){ checkpoint('外围 · 消防梯下'); go('fire_ladder'); }},
+    {label:'西侧车库坡道，从地下二层进', hint:'那儿有狗',
+      time:6, act(){ checkpoint('外围 · 坡道口'); go('garage'); }},
+    {label:'南面管沟。脏，但没人走', hint:'又窄又暗，水有半米深',
+      time:7, act(){ checkpoint('外围 · 管沟口'); go('sewer'); }},
+    {label:'先把鞋脱了。光脚踩石板，比湿靴底稳', hint:'赤足 · 唯一的用处是不打滑',
+      show:()=>s.worn.shoes,
+      time:2,
+      act(){
+        doff('shoes');
+        flash('鞋塞在梧桐树根下面。石板很凉。');
+        go('outer');
+      }},
+    {label:'先蹲一会儿，数一数巡逻', hint:'花时间，但能看清节奏', cls:'jade', time:9,
+      act(){ s.flags.scouted = true; s.susp -= 6; go('scout'); }},
+  ]
+};
+
+S.scout = {
+  chapter:'一 · 外围',
+  text:()=>{
+    let t = `你蹲在空调外机后面，蹲了九分钟，蹲到小腿开始发麻。
+巡逻是两个人一组，逆时针，一圈十一分钟。第二个人走路有点跛，左脚落地的时候会顿一下，所以你听得出他们什么时候转到背面。
+正门口的迎宾每半小时换一次，换班的空档大约五十秒——够一个人走完红毯。
+北面消防梯三层那扇窗没有锁死，窗缝是干的，说明里面既没开空调，也没人。
+你有把握了。把握这个词在你身上一向卖不出价钱，但总比没有好。`;
+    if(isBare('shoes')) t += `\n<span class="cool">你光着脚蹲在这儿。没有鞋，脚底反而分得出两种地面：广场那一片石板是干的，车道那一带的水还没退。</span>`;
+    return t;
+  },
+  choices:[
+    {label:'正门', time:6, act(){ checkpoint('外围 · 正门外'); go('gate_front'); }},
+    {label:'北面消防梯', time:3, act(){ checkpoint('外围 · 消防梯下'); go('fire_ladder'); }},
+    {label:'西侧车库', time:5, act(){ checkpoint('外围 · 坡道口'); go('garage'); }},
+    {label:'南面管沟', time:6, act(){ checkpoint('外围 · 管沟口'); go('sewer'); }},
+  ]
+};
+
+/* ---------------- 正门 ---------------- */
+S.gate_front = {
+  chapter:'一 · 正门',
+  text:()=>{
+    let t = `正门是六扇黄铜框的玻璃门，门童两个，迎宾三个，穿的都是竹青色的裙子，裙摆压得很平。
+你站在雨里，看见自己在玻璃上的倒影被水汽泡肿了，肩膀比平时宽一点，脸比平时糊一点。
+门口那条红毯湿了一半，踩上去会响，干了的那一半不会。
+灯光从门里斜着铺出来，正好照在你站的位置上。你身上这身布，在那种灯下会变成什么样子，你自己心里有数。
+　注目度 <b style="color:${totalExpo()>=60?'var(--blood2)':'var(--ink)'}">${totalExpo()}</b>　魅力 <b>${statSum().charm}</b>`;
+    if(countTag('formal') >= 2) t += `\n<span class="cool">全套正装。迎宾看你的第一眼就已经替你编好了身份，他们要的只是一个理由。</span>`;
+    if(hasTag('uniform')) t += `\n<span class="warn">你穿着制服。可是制服也分哪一种——后厨的、机房的、还是保安的，门童分得清。</span>`;
+    if(countTag('sheer') >= 2) t += `\n<span class="warn">你身上两层都是透的。站在这盏灯下面，等于什么都没穿，只是慢了一点。</span>`;
+    if(hasTag('heel')) t += `\n<span class="cool">九公分的鞋。走路的声音会替你说话，说的是"我是被请来的"。</span>`;
+    if(isBare('shoes')) t += `\n<span class="cool">你光着脚站在红毯边上。门童的目光往下扫了一次，又抬起来——那一眼里的东西，你打算用。</span>`;
+    else if(isBare('socks')) t += `\n<span class="warn">门童的视线在你这双脚上多停了一瞬。这种天，来喝喜酒的女人不会不穿袜子——他记住了这一处，虽然他自己也说不上为什么。</span>`;
+    return t;
+  },
+  choices:[
+    {label:'（这一身就是请柬）挺直背，从正门走进去', hint:'正式着装 · 迎宾会替你拉门',
+      show:()=>countTag('formal')>=2,
+      cls:'jade', time:3,
+      act(){
+        flash('迎宾替你拉开了那扇黄铜框的门。');
+        checkpoint('正门 · 已入场');
+        go('ballroom');
+      }},
+    {label:'走过去，把头发甩到后面，说“三号桌的客人”',
+      hint:'社交判定', time:4,
+      test:{tag:'charm', base:0.5, label:'混入', ok:'ballroom', bad:'gate_caught',
+            tagBonus:{formal:0.12, heel:0.06, lace:0.04}}},
+    {label:'绕到侧门，那儿只有一个门童',
+      hint:'潜行判定，避开迎宾', time:6,
+      test:{tag:'stealth', base:0.46, label:'绕行', ok:'ballroom', bad:'gate_caught'}},
+    {label:'先在门口的花坛边把外层脱了，只留里面那一身',
+      hint:'注目度上升，但更像“被带进来的女伴”', time:2,
+      act(){
+        if(has('gown')||has('silkblouse')){
+          s.expo += 10; s.susp += 8;
+          flash('你把外层留在了花坛里。');
+        } else {
+          flash('你里面这身，进门会更像进错地方。');
+        }
+        go('gate_front_2');
+      }},
+    {label:'退回外围，换一个方向', time:3, act(){ go('outer'); }},
+  ]
+};
+
+S.gate_front_2 = {
+  chapter:'一 · 正门',
+  text:()=>`花坛里多了一件湿透的衣服。
+你站在门灯的边缘，皮肤上是雨和风。
+门童的目光从你的脸移到你的锁骨，又移回来，笑了一下——那笑容里有种很具体的、可以讨价还价的东西。
+<span class="warn">你在被看着。注目度已经升到 ${totalExpo()}。</span>`,
+  choices:[
+    {label:'不看他们，径直走进去', time:3,
+      test:{tag:'charm', base:0.62, label:'硬闯', ok:'ballroom', bad:'gate_caught'}},
+    {label:'对那个笑得最明显的门童说“借个火”', time:3,
+      test:{tag:'charm', base:0.68, label:'周旋', ok:'ballroom', bad:'gate_caught'}},
+    {label:'把衣服捡回来穿上', time:2, act(){ s.expo -= 10; go('gate_front'); }},
+  ]
+};
+
+S.gate_caught = {
+  chapter:'一 · 正门',
+  text:`"请柬。"门童说。
+"放在车上。"
+"哪辆车？"
+你报了一个昨晚在停车场看到的车牌。他把对讲机举到嘴边。
+<span class="warn">三秒。你只有三秒决定是跑，还是演。</span>`,
+  choices:[
+    {label:'拔刀。进宴会厅之前先见血', hint:'最凶的选项', time:1,
+      test:{tag:'force', base:0.34, label:'先手', ok:'ballroom_blood', bad:'hostess', hard:true}},
+    {label:'转身跑。跑回雨里', time:1,
+      test:{tag:'mobility', base:0.55, label:'脱身', ok:'outer', bad:'hostess'}},
+    {label:'演。哭，说他是你男朋友，说他打你', time:2,
+      test:{tag:'charm', base:0.58, label:'做戏', ok:'ballroom', bad:'hostess'}},
+  ]
+};
+
+/* ---------------- 消防梯 ---------------- */
+S.fire_ladder = {
+  chapter:'一 · 消防梯',
+  text:`消防梯是那种刷了红漆的铁架子，从三层一直通到四十六层，中间每隔九层有一个检修平台。
+铁是滑的。雨在上面铺了薄薄一层膜，像有人特意涂了油。
+你握住第一根横杆，掌心立刻被冻得一缩。
+三层那扇窗确实没锁。但你要先上去。`,
+  choices:[
+    {label:'直接爬。快，但铁是湿的', hint:'机动判定', time:5,
+      test:{tag:'mobility', base:0.52, label:'徒手攀爬', ok:'hvac', bad:'ladder_slip',
+            tagBonus:{grip:0.08, tight:0.05}}},
+    {label:'把鞋脱了，赤脚爬', hint:'脚掌更稳，但容易划开',
+      time:4,
+      act(){
+        if(s.worn.shoes) { doff('shoes'); s.expo += 2; }
+        go('fire_ladder_2');
+      }},
+    {label:'先用腰带把自己和铁架系在一起，一段一段挪', hint:'慢，但摔不下去', time:12,
+      act(){ s.flags.belted = true; go('hvac'); }},
+  ]
+};
+
+S.fire_ladder_2 = {
+  chapter:'一 · 消防梯',
+  text:`脚掌贴上铁横杆的那一刻，你听见自己吸气的声音。
+冷从脚底一直顶到小腿。雨从你的脚踝往下淌，每一根横杆都在动。
+第五层有人的窗户开着一条缝。你停下来，屏住呼吸。
+里面是一台电视，在放一场很旧的球赛，有人在骂裁判。
+<span class="cool">没有人在看你。</span>你继续往上。`,
+  choices:[
+    {label:'继续爬，到三层那扇窗', time:5,
+      test:{tag:'mobility', base:0.66, label:'赤足攀爬', ok:'hvac', bad:'ladder_slip'}},
+    {label:'翻进第五层的窗，从楼里走', time:4,
+      test:{tag:'stealth', base:0.5, label:'入户', ok:'corridor3', bad:'ladder_slip'}},
+  ]
+};
+
+S.ladder_slip = {
+  chapter:'一 · 消防梯',
+  text:`右脚在第七根横杆上滑了一下。
+你的身体向外荡出去，右手死死攥着上一格，肩关节里发出一声闷响。
+你吊在半空，二十米以下是小广场，广场上有一个垃圾桶，一只猫正在翻。
+<span class="warn">手臂在发颤。你得决定：是拼命往回翻，还是放手赌一把下面的雨棚。</span>`,
+  choices:[
+    {label:'手臂发力，把身体甩回梯子', hint:'机动判定 · 失败即坠落', time:1,
+      test:{tag:'mobility', base:0.44, label:'回翻', ok:'hvac', bad:'fall', hard:true}},
+    {label:'松手，往雨棚上跳', hint:'很低，但雨棚是玻纤板', time:1,
+      test:{tag:'mobility', base:0.3, label:'赌一把', ok:'canopy', bad:'fall', hard:true}},
+  ]
+};
+
+S.canopy = {
+  chapter:'一 · 消防梯',
+  text:`你落在雨棚上。
+玻纤板"啪"地塌下去一块，接住了你的腰和大腿，没有接住你的右肩。
+右肩撞在钢架上，你听见骨头的声音，然后是整条手臂的钝痛，从肩到指尖，一片空白。
+你从雨棚边缘滚下去，落在垃圾桶旁边的水泥地上，摔得胃里一阵翻。
+那只猫看了你一眼，走了。
+<span class="warn">你的右臂已经抬不起来了。体力掉了一半。</span>`,
+  choices:[
+    {label:'忍着痛，从后门溜进去', time:8,
+      act(){
+        s.hp -= 46; s.susp += 12; s.flags.armHurt = true;
+        if(s.worn.shoes) loseGear('shoes','落地那一下，两只鞋都甩出去了。');
+        checkpoint('受伤 · 后门'); go('kitchen_side');
+      }},
+    {label:'撤退。今晚打不了了', time:4,
+      act(){ s.hp -= 46; s.flags.armHurt = true; go('retreat'); }},
+  ]
+};
+
+S.retreat = {
+  chapter:'终 · 空手',
+  text:`你抱着右臂，从垃圾桶后面翻出围栏。
+雨把一切都盖住了，包括你走路的姿势——一瘸一拐，也很难看。
+你回到安全屋，把衣服全部脱下来，塞进塑料袋，坐在床边，一直坐到天亮。
+手机亮了一次，是"回廊"的消息：
+　<q>名单上，又多了两个名字。</q>
+你把手机扣在桌上，没有回。
+<em>你没有死。但你也没有成功。</em>有些晚上就是这样过去的。`,
+  choices:[
+    {label:'再进去一次', hint:'回到外面，重新选一条路', cls:'jade',
+      act(){ s.hp = Math.min(100, s.hp + 30); s.susp = Math.max(0, s.susp - 30); s.t = T0 + 40; go('outer'); }},
+    {label:'从头开始', act(){ newGame(); }},
+  ]
+};
+
+/* ---------------- 车库 ---------------- */
+S.garage = {
+  chapter:'一 · 地下车库',
+  text:`坡道是螺旋的，一圈一圈往下，墙面上每隔十米一盏黄灯。
+你贴着墙根走。空气里有汽油、橡胶，和另一种更湿的味道——你认得那种味道，是狗。
+地下二层停着九辆车，其中一辆的后备箱开着，里面露出一截塑料布。
+北墙有个笼子，笼门虚掩。
+再往里，是货梯的入口，卷帘门拉起来一半。`,
+  choices:[
+    {label:'贴着车与车之间的空隙，绕过去', hint:'潜行判定，避开狗笼',
+      time:5,
+      test:{tag:'stealth', base:0.5, label:'潜行绕行', ok:'freight', bad:'garage_dog',
+            tagBonus:{silent:0.07, grip:0.04}}},
+    {label:'先去把狗笼的门扣上', hint:'要先靠近那个笼子',
+      time:4,
+      test:{tag:'stealth', base:0.44, label:'扣笼', ok:'garage_dog_ok', bad:'garage_dog', hard:true}},
+    {label:'从两辆正在挪的车之间穿过去', hint:'间距只有六十公分',
+      time:4,
+      test:{tag:'mobility', base:0.42, label:'穿车间', ok:'car_cache', bad:'acc_street', hard:true}},
+    {label:'掀开那辆开着后备箱的车的塑料布', hint:'看看那是什么',
+      time:3,
+      act(){ s.flags.sawBody = true; go('garage_body'); }},
+    {label:'退回外围', time:3, act(){ go('outer'); }},
+  ]
+};
+
+S.garage_body = {
+  chapter:'一 · 地下车库',
+  text:`塑料布下面是一个男人，五十来岁，穿着保安制服，胸口的对讲机还在响。
+制服上有一个名牌：周怀安。他死不超过四十分钟，血还没完全凉。
+对讲机里的声音在说："老周，老周，回话。"
+<span class="cool">楼里已经有别人在动手了。</span>
+你想了两秒，把他的外套扒了下来。这件衣服，比你的风衣好用。
+口袋里还有一张卡，是通地下二层的门禁卡。`,
+  choices:[
+    {label:'把外套穿上，拿着卡走货梯', time:4,
+      act(){
+        if(!bagHas('guard_jacket')) s.bag.push('guard_jacket');
+        s.bag.push('doorcard');
+        don('outer','guard_jacket');
+        s.flags.guardCard = true;
+        go('freight');
+      }},
+    {label:'不管他，还是按原路走', time:2, act(){ go('garage'); }},
+  ]
+};
+
+S.garage_dog_ok = {
+  chapter:'一 · 地下车库',
+  text:`你走过去，把笼门上的插销压下去，压得很慢，很轻。
+狗在笼子里看着你，两条，杜宾，黑色的那种，眼睛里有灯的反光。
+你退开的时候，第一条站起来了，鼻子凑到铁网上，气喷在你的手背上，热的。
+你没有跑。你一步一步退到车后面。
+<span class="cool">它们没有叫。</span>`,
+  choices:[
+    {label:'趁现在，去货梯', time:4, act(){ checkpoint('车库 · 货梯前'); go('freight'); }},
+    {label:'掀开那辆车的塑料布看看', time:3, act(){ s.flags.sawBody = true; go('garage_body'); }},
+  ]
+};
+
+S.garage_dog = {
+  chapter:'一 · 地下车库',
+  text:`你的脚碰到了食盆。
+铁盆在水泥地上滚出去，声音在车库里绕了三圈，像有人敲了一下锣。
+两团黑的东西从笼子里立起来。
+<span class="warn">它们没有叫。杜宾不叫。它们只是在算距离。</span>`,
+  choices:[
+    {label:'跑。往坡道上跑', time:1,
+      test:{tag:'mobility', base:0.4, label:'狂奔', ok:'garage_run', bad:'dog', hard:true}},
+    {label:'不动。蹲下，把手伸出去', hint:'它们受过训练，或许认得这个动作', time:1,
+      test:{tag:'wit', base:0.3, label:'对峙', ok:'garage_stare', bad:'dog'}},
+    {label:'拔刀，正面迎上去', time:1,
+      test:{tag:'force', base:0.26, label:'搏杀', ok:'garage_kill', bad:'dog', hard:true}},
+  ]
+};
+
+S.garage_stare = {
+  chapter:'一 · 地下车库',
+  text:`你蹲下去，右手伸出去，手心向上，手背朝地。
+第一条走过来，鼻子贴在你手心里，湿的，热气一直透过皮肤。
+它闻了很久。然后它退回去，坐下了。
+第二条没坐。它绕到你侧后，你能听见它的爪子，一下，一下。
+你就那么蹲着，蹲了大概三分钟，膝盖麻得快要撑不住。
+<span class="cool">最后它躺下了，把下巴搁在前爪上，眼睛还半睁着看你。</span>
+你站起来的时候，后背全湿了。`,
+  choices:[
+    {label:'绕过它们，去货梯', time:4, act(){ checkpoint('车库 · 货梯前'); s.susp -= 5; go('freight'); }},
+  ]
+};
+
+S.garage_run = {
+  chapter:'一 · 地下车库',
+  text:`你往坡道上跑。
+橡胶鞋底在水泥上发出一串很脆的声音。
+狗在后面。它们比你快，但它们绕了远路——你在车与车之间钻，它们走的是直线。
+你冲到坡道口，钻进那扇半开的卷帘门。
+门缝只有四十公分。你侧身挤进去，肩膀被铁边刮掉一块皮。
+<span class="cool">两条狗在外面，撞在卷帘门上，声音很大。</span>
+然后有人喊了一声，狗跑了。
+卷帘门后面是一段很黑的走廊。你喘着，扶着墙，往里面走。`,
+  choices:[
+    {label:'顺着走廊走', time:6,
+      act(){
+        s.hp -= 8;
+        if(s.worn.shoes) loseGear('shoes','第二条狗咬住你的裤脚，连鞋一起拖走了。');
+        checkpoint('车库 · 内廊'); go('freight');
+      }},
+  ]
+};
+
+S.garage_kill = {
+  chapter:'一 · 地下车库',
+  text:`你没有退。
+第一条扑上来，你侧身，刀从它的肋下送进去，一路划开，血喷在你的裤腿上，热的，腥得呛人。
+它摔在一辆奔驰的车门上，把车漆刮出一道很长的白。
+第二条在你要转身的时候咬住了你的大臂。
+牙穿过你的衣袖，进到肉里，你能感到那四颗犬齿在你肌肉里各自的位置。
+你把刀换到左手，反手捅进它的眼睛。
+它松口了，退开，在地上打滚，声音很难听。
+你靠在车上喘气。两条狗，一死一伤。
+<span class="warn">你的左臂在流血。西装外套已经不成样子了。</span>`,
+  choices:[
+    {label:'撕下一块布，把胳膊缠上', time:3,
+      act(){ s.hp -= 24; s.bag.push('bandage'); s.flags.dogKill = true; checkpoint('车库 · 缠伤'); go('freight'); }},
+  ]
+};
+
+/* ---------------- 管沟 ---------------- */
+S.sewer = {
+  chapter:'一 · 管沟',
+  text:`管沟有一米二宽，水到膝盖，水面上漂着一层油和几片纸。
+你用手电照了一下，前面四十米处有一个检修井，再往前，是通往后厨的排水总管。
+味道很难闻。你把自己的呼吸放慢，改成用嘴呼、用鼻吸——这是老办法，能少闻到一半。
+水里有东西在动。不是人，是老鼠，很多。
+<span class="warn">最要命的是，管沟在中段收窄，只剩六十公分高。你得趴下去。</span>`,
+  choices:[
+    {label:'脱掉外层和鞋，把衣服举在头顶', hint:'泡了水的衣服会拖死你',
+      time:3,
+      act(){
+        if(s.worn.outer) doff('outer');
+        if(s.worn.shoes) doff('shoes');
+        s.expo += 4;
+        go('sewer_narrow');
+      }},
+    {label:'不管，直接往前趟', time:5,
+      test:{tag:'mobility', base:0.52, label:'涉水', ok:'sewer_narrow', bad:'sewer_slip'}},
+    {label:'退回去，改走别处', time:3, act(){ go('outer'); }},
+  ]
+};
+
+S.sewer_slip = {
+  chapter:'一 · 管沟',
+  text:`你的脚在沟底的淤泥里滑了一下。
+水一下子没到胸口。你呛了一口，那口水又苦又咸，胃里立刻翻上来。
+你撑住沟壁，把自己从水里拔出来，浑身发抖。
+<span class="warn">污水在你的领口里，顺着背往下走。</span>`,
+  choices:[
+    {label:'咬牙继续走', time:6, act(){ s.hp -= 12; s.susp += 4; go('sewer_narrow'); }},
+  ]
+};
+
+S.sewer_narrow = {
+  chapter:'一 · 管沟',
+  text:`中段的管壁压到六十公分。
+你趴下去，脸离水面只有五公分。手电用牙咬着，光柱被水反射回你的脸上。
+你往前爬。爬了大概二十米，前面的管径忽然又收窄——不是六十公分，是四十二。
+你的肩膀卡住了。`,
+  choices:[
+    {label:'把上身也脱光，抹上沟底的油', hint:'减少摩擦，但皮肤会被划开', time:4,
+      act(){ if(s.worn.top) doff('top'); s.expo += 10; s.hp -= 6; go('sewer_squeeze'); }},
+    {label:'硬挤过去', time:4,
+      test:{tag:'mobility', base:0.4, label:'硬挤', ok:'sewer_squeeze', bad:'drain', hard:true}},
+    {label:'退回去', time:6,
+      test:{tag:'mobility', base:0.5, label:'倒退', ok:'outer', bad:'drain', hard:true}},
+  ]
+};
+
+S.sewer_squeeze = {
+  chapter:'一 · 管沟',
+  text:`皮肤贴着水泥，一寸一寸地往前挪。
+水在你脸前面，你只能抬着头，脖子酸得像要断。
+肩膀过去的一瞬间，你听见了"嘶"的一声——不是管子，是你自己的皮肤。
+然后是前面，光。检修井的铁梯，从水里一直通到上面。
+你从水里站起来，水从你的身上往下淌，淌成一小片。
+<span class="warn">你在井底站了很久，才敢去爬那截梯子。</span>`,
+  choices:[
+    {label:'爬上去，进后厨', time:6,
+      act(){ s.hp -= 10; checkpoint('后厨 · 井口'); go('kitchen'); }},
+  ]
+};
+
+/* ==================================================================== */
+/* 二 · 楼内                                                            */
+/* ==================================================================== */
+S.hvac = {
+  chapter:'二 · 三层空调机房',
+  allowWardrobe:true,
+  text:`三层这扇窗后面是空调机房，六十度，机器在响，响得像一头在睡觉的牲口。
+地上是盘成一团的铜管和一只空的工具包。北面是竖井，里面有四根通风总管，一直通到顶。
+南面是走廊，走廊尽头有灯。
+你在这里有时间做一件事：把身上弄干，或者把衣服换掉。
+<span class="cool">这里是安全的。暂时。</span>`,
+  choices:[
+    {label:'用工具包里的抹布把身上擦干', hint:'恢复一点体力，降低注目',
+      time:5, act(){ s.hp = Math.min(100, s.hp+14); s.expo -= 6; flash('擦干了。人看起来不那么狼狈了。'); go('hvac'); }},
+    {label:'打开工具包，看看有什么能带走的', time:3,
+      act(){ s.bag.push('lockpick'); s.bag.push('duct_tape'); flash('拿到：撬锁器、胶带'); go('hvac'); }},
+    {label:'调整着装', act(){ openWardrobe(); }},
+    {label:'从通风竖井往上爬', hint:'四根管子，一路到三十九层',
+      time:8,
+      test:{tag:'mobility', base:0.46, label:'爬竖井', ok:'duct_up', bad:'hvac_fan', hard:true}},
+    {label:'走南面的走廊', time:4, act(){ checkpoint('三层走廊'); go('corridor3'); }},
+  ]
+};
+
+S.hvac_fan = {
+  chapter:'二 · 竖井',
+  text:`你爬到第九层的位置，管道转了一个九十度的弯。
+转弯处有一个检修口，检修口外面就是排风扇的铁栅。
+你想侧身过去，头发先被吸走了。
+<span class="warn">两千四百转。你还有半秒。</span>`,
+  choices:[
+    {label:'用刀把那一绺头发割断', hint:'保住头皮，丢掉头发', time:1,
+      test:{tag:'mobility', base:0.45, label:'割发', ok:'duct_up', bad:'fan', hard:true}},
+    {label:'拼命往后退', time:1,
+      test:{tag:'force', base:0.3, label:'后撤', ok:'hvac', bad:'fan', hard:true}},
+  ]
+};
+
+S.duct_up = {
+  chapter:'二 · 竖井',
+  text:`你在管道里爬了很久。
+管道是方的，边长八十公分，金属的接缝一格一格，像脊椎。
+里面很黑，但不冷——上一层楼的暖气从这里过，管壁是温的。
+你听见很多声音：楼在响，风在响，某个地方有人在笑，笑得很远。
+爬到三十几层的时候，你遇到了一个岔口：往东那条通到三十九层的设备层；往西那条更窄，但直上四十三层。`,
+  choices:[
+    {label:'往东。三十九层设备层', time:6,
+      test:{tag:'mobility', base:0.62, label:'侧身通过', ok:'mech39', bad:'duct_stuck'}},
+    {label:'往西。那条更窄的，直上四十三层', hint:'更危险，但更近', time:8,
+      test:{tag:'mobility', base:0.4, label:'窄管推进', ok:'floor43_duct', bad:'duct_stuck', hard:true,
+            tagBonus:{tight:0.05}, bareBonus:0.035}},
+  ]
+};
+
+S.duct_stuck = {
+  chapter:'二 · 竖井',
+  text:`你卡住了。
+不是肩膀，是髋。管道在这里又收了一格，你的骨盆塞在里面，进退都动不了。
+你听见不远的地方，有人在敲管道。"咚，咚，咚。"
+是检修工拿着扳手，一边走一边敲，这是他们的习惯，免得有人在里面。
+他停在你正上方的检修口外面，打开手电往下照。
+<span class="warn">光柱落在你的脸上。</span>`,
+  choices:[
+    {label:'把自己硬拽出来', time:2,
+      test:{tag:'mobility', base:0.35, label:'强脱', ok:'duct_free', bad:'choke', hard:true}},
+    {label:'不动。屏住呼吸，等他把手电关掉', time:3,
+      test:{tag:'wit', base:0.55, label:'装死', ok:'duct_free', bad:'choke'}},
+  ]
+};
+
+S.duct_free = {
+  chapter:'二 · 竖井',
+  text:`你把自己从那一格里拔了出来，代价是侧腰上一大片淤青，和一层脱掉的皮。
+管道在前面又分岔了。
+你不打算再赌第三次。`,
+  choices:[
+    {label:'往三十九层设备层', time:6, act(){ s.hp -= 15; checkpoint('三十九层 · 设备层'); go('mech39'); }},
+  ]
+};
+
+/* ---------------- 后厨 ---------------- */
+S.kitchen = {
+  chapter:'二 · 后厨',
+  allowWardrobe:true,
+  text:`后厨是白的，白得发亮，灯光没有一处阴影。
+十一个人在忙。切菜的、过油的、摆盘的。没有人抬头。
+墙上挂着一排围裙和一排刀。最左边那扇门是传菜梯，右边那条走廊通向宴会厅后面的服务通道。
+<span class="cool">你浑身是水。在这里站久了，会有人问。</span>`,
+  choices:[
+    {label:'摘一条围裙穿上', time:2,
+      act(){
+        s.bag.push('apron'); don('outer','apron');
+        s.expo -= 8; flash('你混进了白色里。');
+        go('kitchen');
+      }},
+    {label:'从墙上拿一把剔骨刀', time:2,
+      act(){ s.bag.push('boning_knife'); flash('拿到：剔骨刀'); go('kitchen'); }},
+    {label:'钻进传菜梯，让它往上走', hint:'空间很小，只有六十公分高',
+      time:6,
+      test:{tag:'mobility', base:0.44, label:'传菜梯', ok:'mech39', bad:'kitchen_lift', hard:true}},
+    {label:'从服务通道绕出去', time:5, act(){ checkpoint('服务通道'); go('corridor3'); }},
+    {label:'偷一套服务生的衣服', time:3, act(){ s.flags.hasWaiter = true; flash('你摸到了一件马甲和一条黑裤子。'); go('kitchen'); }},
+  ]
+};
+
+S.kitchen_lift = {
+  chapter:'二 · 后厨',
+  text:`传菜梯的轿厢是铝的，只有六十公分高，四十公分宽。
+你把自己折进去，膝盖顶着下巴。按钮就在你脸旁边，你够不到，得用鞋尖。
+梯子升到第二层的时候停了，门被拉开。
+一张脸出现在洞口——是个五十来岁的女厨工，手里端着一盘青菜。
+她看着你。你也看着她。
+<span class="warn">她张开嘴。</span>`,
+  choices:[
+    {label:'在她出声之前掐住她的喉咙', time:1,
+      test:{tag:'force', base:0.5, label:'灭口', ok:'lift_kill', bad:'choke', hard:true}},
+    {label:'"阿姨，别喊。"把刀亮出来', time:1,
+      test:{tag:'wit', base:0.5, label:'压制', ok:'lift_threat', bad:'choke'}},
+    {label:'把刀递给她，说“我要杀的是白先生”', hint:'赌她的恨',
+      time:1,
+      test:{tag:'charm', base:0.3, label:'赌', ok:'lift_ally', bad:'choke', hard:true}},
+  ]
+};
+
+S.lift_kill = {
+  chapter:'二 · 后厨',
+  text:`你抓住她的脖子，把她拉进轿厢。
+盘子摔在走廊上，青菜散了一地，声音在空走廊里滚了很久。
+四十七秒后，她不动了。
+你把她的厨师服脱下来，穿上，把她的身体推到轿厢角落，按了"关"。
+<span class="warn">你的手在抖。</span>你告诉自己那只是冷的。`,
+  choices:[
+    {label:'继续往上', time:6,
+      act(){ s.hp -= 6; s.susp += 18; s.flags.killedChef = true;
+             s.bag.push('chef_coat'); checkpoint('传菜梯 · 上行'); go('mech39'); }},
+  ]
+};
+
+S.lift_threat = {
+  chapter:'二 · 后厨',
+  text:`刀尖离她的眼睛只有一拃。
+她张开了嘴，但没有出声。
+"往上去。"你说，"三十九层。"
+她盯着你看了六秒，然后把盘子放在地上，按了按钮。
+电梯开始动。她背对着你，肩膀在抖。
+到三十九层，门开了。她还是没有回头。
+你走出去的时候，她说话了，声音很平：
+"往那边走，左手第三间，没有监控。"
+<span class="cool">你回头看她。她已经在擦地上的青菜了。</span>`,
+  choices:[
+    {label:'听她的，往左手第三间', time:5,
+      act(){ s.flags.chefHint = true; checkpoint('三十九层 · 传菜梯口'); go('mech39'); }},
+  ]
+};
+
+S.lift_ally = {
+  chapter:'二 · 后厨',
+  text:`你把刀递过去，刀柄朝着她。
+她的手抖了一下，然后握住了。
+"白先生。"她重复了一遍这个名字，像在嚼一样很硬的东西，"他上个月把我男人的工龄抹了。二十六年。"
+她把刀还给你，然后从裤兜里掏出一张卡。
+"这张是货梯的。能到四十一。上面两层要刷脸，你进不去。"
+她推开传菜梯的门，把你拉出去。
+"走廊尽头左转，第二个门是洗衣房，里面有制服。别让人看见你湿成这样。"
+<span class="cool">你看着她走回厨房，背影很直。</span>`,
+  choices:[
+    {label:'去洗衣房', time:5,
+      act(){ s.bag.push('doorcard'); s.flags.guardCard = true; s.flags.ally = true;
+             checkpoint('三十九层 · 传菜梯口'); go('mech39'); }},
+  ]
+};
+
+/* ---------------- 宴会厅 ---------------- */
+S.ballroom = {
+  chapter:'二 · 四十二层宴会厅',
+  allowWardrobe:true,
+  text:()=>{
+    let t = `宴会厅是一个巨大的圆，顶上是那盏水晶灯，一万个切面，每一片都在慢慢地转。
+大概五百个人，礼服的深色连成一片海，走动的时候整片海都在轻轻地晃。角落里有弦乐四重奏，拉的是你叫不出名字的东西，很好听，音量刚好让你听不清隔壁桌在说什么。
+服务生端着托盘从人群里穿来穿去，托盘上有香槟，也有别的东西——小食、毛巾、名片、偶尔一部手机。
+你混在人堆的边缘，靠着一根包了绒的柱子站着，手里什么都没有，这本身就是个问题：在这样的场合，站着不动比走动更显眼。
+<span class="cool">这里是你最安全，也是最危险的地方。没有人会看你第二眼；但只要你出一次错，五百个人会同时看见。</span>`;
+    if(countTag('formal') >= 2) t += `\n<span class="cool">你这一身在这里没有任何破绽。刚才有个男人替你让了半步路，还朝你举了一下杯——他以为他认识你。</span>`;
+    else if(countTag('uniform') >= 1) t += `\n<span class="warn">你身上这套不是礼服。服务生看你的时候先看你的鞋，然后看你的手，最后才看脸——他们在判断你是哪个部门的。</span>`;
+    else if(hasTag('loud') || totalExpo() >= 55) t += `\n<span class="warn">你露出来的部分比这场子里任何一个女人都多。已经有三拨人看过你，其中一拨看的时间太长，长到现在还在原地。</span>`;
+    if(hasTag('lace') || hasTag('sheer')) t += `\n<span class="cool">你身上有一层是透的。灯从头顶打下来的时候，你知道它是什么效果——你穿的时候就知道。</span>`;
+    return t;
+  },
+  choices:[
+    {label:'以客人的身份，径直走向东侧的服务门', hint:'正式着装 · 没有人会问你',
+      show:()=>countTag('formal')>=2,
+      cls:'jade', time:4,
+      act(){ s.susp -= 8; checkpoint('宴会厅 · 东侧'); go('service_door'); }},
+    {label:'从柱子的阴影里慢慢挪到东侧的服务门', hint:'潜行判定',
+      time:6,
+      test:{tag:'stealth', base:0.55, label:'穿过人群', ok:'service_door', bad:'ballroom_seen'}},
+    {label:'从一个托盘上顺一杯酒，装作在喝', hint:'融入得更自然',
+      time:3,
+      act(){ s.susp -= 6; s.bag.push('champagne'); flash('你有了一个道具。'); go('ballroom'); }},
+    {label:'凑到一群男人旁边，听他们说话', hint:'可能听到有用的东西',
+      time:5,
+      test:{tag:'charm', base:0.55, label:'搭话', ok:'ballroom_intel', bad:'ballroom_seen',
+            tagBonus:{formal:0.10, lace:0.06, sheer:0.04}}},
+    {label:'去勾上那个一直在看你的人', hint:'赌他身上有门卡',
+      time:6,
+      test:{tag:'charm', base:0.48, label:'钓', ok:'ballroom_fish', bad:'ballroom_seen'}},
+    {label:'接过陌生人递来的那杯酒', hint:'你从进门起就没喝过水',
+      time:3,
+      test:{tag:'wit', base:0.4, label:'识酒', ok:'ballroom_intel', bad:'acc_body'}},
+  ]
+};
+
+S.ballroom_seen = {
+  chapter:'二 · 宴会厅',
+  text:`有人拉住了你的手腕。
+"小姐。"是大堂经理。他笑得很标准，"您的请柬呢？"
+你开口，他抬手，制止了你要说的话。
+"或者——我们去后台聊一聊？"
+<span class="warn">周围有六个人已经不看节目了，他们在看你。</span>`,
+  choices:[
+    {label:'打。先手打掉他的鼻子', time:1,
+      test:{tag:'force', base:0.32, label:'先手', ok:'ballroom_blood', bad:'hostess', hard:true}},
+    {label:'笑得比他更标准，说“你确定要在这儿动手？”', time:1,
+      test:{tag:'charm', base:0.5, label:'反压', ok:'ballroom_bluff', bad:'hostess'}},
+    {label:'把酒泼在他脸上，趁乱跑', time:1,
+      test:{tag:'mobility', base:0.42, label:'脱身', ok:'service_door', bad:'hostess', hard:true}},
+  ]
+};
+
+S.ballroom_bluff = {
+  chapter:'二 · 宴会厅',
+  text:`你没有挣开手，你反而往前走了半步，让他不得不侧身。
+"三号桌的客人不喜欢等。"你说得很轻，"你要不要亲自去问他，为什么他的女伴站在门口？"
+他的笑停在脸上，停了两秒。
+两秒之后，他松了手。
+"抱歉。"他说，"祝您愉快。"
+你从他身边走过去，后背贴着你的裙撑，全是汗。
+<span class="cool">他还在看你。但他在犹豫。</span>`,
+  choices:[
+    {label:'快走，去东侧服务门', time:4,
+      test:{tag:'mobility', base:0.6, label:'脱离视线', ok:'service_door', bad:'hostess'}},
+  ]
+};
+
+S.ballroom_intel = {
+  chapter:'二 · 宴会厅',
+  text:`你端着酒，站在三个男人旁边，像一株摆放得当的植物。
+"……他最近心情不好，上周开了两个人。"
+"开人算什么，前天有人在四十层跳下去了。"
+"哪个？"
+"哪知道。保安说是个混进来的女人。"
+你握着杯脚的手收紧了半分。
+"白先生待会儿还上来吗？"
+"不上。他在四十七层的书房。今晚谁都不见。"
+<span class="cool">四十七层。书房。</span>`,
+  choices:[
+    {label:'记下这句话，往东侧服务门走', time:4,
+      act(){ s.flags.knowOffice = true; s.susp -= 4; go('service_door'); }},
+  ]
+};
+
+S.ballroom_fish = {
+  chapter:'二 · 宴会厅',
+  text:()=>{
+    let t = `他在看你，从十分钟前就在看。这不是错觉——你已经用余光确认过两次，第二次的时候他还在看。
+你走过去的时候，他正在和两个人说话。你没有打断，你就站在他旁边，端着酒，低着头，像在等谁。
+他停下来，侧过半张脸。"找谁？"
+"找我该找的人。"
+他笑了。从西装内袋里摸出一张卡，塞进你的手心里，指尖在你掌上停了一下。
+"四十一层以上的电梯要刷这个。"他说，"想清楚了再上去。上面不好玩。"
+<span class="cool">他不知道你是谁。他只是想看你想干什么。</span>`;
+    if(isBare('socks')) t += `\n他的目光在你脚踝那里落了一下，然后回到你脸上，笑意没变，但意思变了。
+"鞋是干的。"他说，"袜子呢？"`;
+    else if(hasTag('lace') || hasTag('sheer')) t += `\n他塞卡的时候，手指在你手心多停了一秒。那不是失误。`;
+    return t;
+  },
+  choices:[
+    {label:'把卡收进暗袋，走', time:3,
+      act(){ s.bag.push('vipcard'); s.flags.vipCard = true; s.susp += 4; go('service_door'); }},
+    {label:'再多聊两句，套他的话', time:5,
+      test:{tag:'charm', base:0.5, label:'套话', ok:'ballroom_intel', bad:'ballroom_seen'}},
+  ]
+};
+
+S.ballroom_blood = {
+  chapter:'二 · 宴会厅',
+  text:`你先动的手。
+他倒下去，手捂着鼻子，血从他指缝里溢出来，滴在那件挺好的西装上。
+周围安静了两秒。两秒之后，尖叫声开始，像退潮一样从中心往四周散开。
+<span class="warn">六秒之内，你会被包住。</span>`,
+  choices:[
+    {label:'往东侧服务门冲', time:1,
+      test:{tag:'mobility', base:0.55, label:'突围', ok:'service_door', bad:'beaten', hard:true}},
+    {label:'抓一个人当人质', time:1,
+      test:{tag:'force', base:0.4, label:'挟持', ok:'hostage_moment', bad:'beaten', hard:true}},
+    {label:'往天台楼梯方向跑', time:2,
+      test:{tag:'mobility', base:0.4, label:'上楼', ok:'stairwell', bad:'beaten', hard:true}},
+  ]
+};
+
+S.service_door = {
+  chapter:'二 · 服务通道',
+  allowWardrobe:true,
+  text:`服务门后面是窄的，只有一米八宽，墙上贴着"员工请勿停留"。
+左边是洗手间，右边是货梯通道，尽头是楼梯井。
+空气里有消毒水和烟。
+<span class="cool">你在这里有一点点时间。</span>`,
+  choices:[
+    {label:'进洗手间，把身上收拾一下', time:6,
+      act(){ s.hp = Math.min(100, s.hp+12); s.susp -= 8; checkpoint('四十二层 · 洗手间'); go('restroom'); }},
+    {label:'去货梯通道', time:4, act(){ checkpoint('货梯通道'); go('freight'); }},
+    {label:'去楼梯井', time:5, act(){ checkpoint('楼梯井'); go('stairwell'); }},
+  ]
+};
+
+S.restroom = {
+  chapter:'二 · 洗手间',
+  allowWardrobe:true,
+  text:`洗手间是米色的，三面镜子，一盏调光的灯。
+一个隔间的门虚掩着，里面没有人。
+洗手台上有别人留下的一支口红、一张纸巾、和一小片被撕下来的邀请函。
+热水龙头是感应的。你把两只手放在下面，热水冲上来，冲掉指缝里的血——那不是你的血，但没人会帮你区分。
+<span class="cool">这里可以换衣服。这是一个难得的时刻。</span>`,
+  choices:[
+    {label:'调整着装', act(){ openWardrobe(); }},
+    {label:'把口红和纸巾收了', time:2, act(){ s.bag.push('lipstick'); flash('拿到：口红'); go('restroom'); }},
+    {label:'用墙角那瓶清洁剂处理袖口的血渍', hint:'瓶子上印着“生物酶”',
+      time:3,
+      test:{tag:'wit', base:0.55, label:'辨瓶', ok:'restroom_clean', bad:'acc_waste'}},
+    {label:'洗掉身上的血和泥', time:6,
+      act(){ s.hp = Math.min(100, s.hp+16); s.expo -= 10; s.susp = Math.max(0,s.susp-14); flash('干净了。'); go('restroom'); }},
+    {label:'出去，走货梯', time:3, act(){ checkpoint('货梯通道'); go('freight'); }},
+    {label:'出去，走楼梯井', time:4, act(){ checkpoint('楼梯井'); go('stairwell'); }},
+  ]
+};
+
+/* ---------------- 三层走廊 / 楼梯井 ---------------- */
+S.corridor3 = {
+  chapter:'二 · 三层走廊',
+  text:`三层是行政部门，晚上没有人，灯只开一半。
+走廊很长，地毯是深灰的，吸掉所有脚步声——这既是好事，也是坏事，你听不见别人靠近。
+走廊中段有一个拐角，拐角后面是电梯厅。
+<span class="warn">你听见前面有两个人说话的声音，正在往这边走。</span>`,
+  choices:[
+    {label:'不躲。就当自己是在巡楼的', hint:'制服 · 保安不会拦自己人',
+      show:()=>hasTag('uniform'),
+      cls:'jade', time:4,
+      act(){
+        flash('他们的目光从你身上滑过去了，像滑过一根柱子。');
+        s.susp -= 12;
+        checkpoint('三层 · 电梯厅');
+        go('stairwell');
+      }},
+    {label:'闪进旁边的茶水间，等他们走过', time:5,
+      test:{tag:'stealth', base:0.62, label:'躲避', ok:'corridor3_pass', bad:'corridor3_caught',
+            tagBonus:{silent:0.06, bare:0.04}}},
+    {label:'快步穿过去，赌他们不看', time:3,
+      test:{tag:'stealth', base:0.42, label:'硬穿', ok:'corridor3_pass', bad:'corridor3_caught', hard:true}},
+    {label:'（身上已经没有几块布了）就这样走过去', hint:'暴露 · 他们第一反应是看，不是喊',
+      show:()=>totalExpo()>=65,
+      cls:'gold', time:3, hard:true,
+      test:{tag:'charm', base:0.4, label:'迎面走过', ok:'corridor3_pass', bad:'exposed'},},
+    {label:'先把外面那层脱了，把头发放开，装成加班的人', time:3,
+      act(){
+        if(s.worn.outer) doff('outer');
+        s.expo += 6;
+        go('corridor3_office');
+      }},
+  ]
+};
+
+S.corridor3_office = {
+  chapter:'二 · 三层走廊',
+  text:`你把头发放开，把袖子挽到肘上，手里抓着一叠不知道从哪儿拿的打印纸。
+两个人从拐角出来。他们看了你一眼。
+"还没走？"
+"把这个赶完。"你说，声音里带着一点加班的疲惫——这个东西你演得很熟练，因为你演过真的。
+他们点点头，走了。
+<span class="cool">你把手里的纸扔进了垃圾桶。</span>`,
+  choices:[
+    {label:'走到电梯厅', time:4, act(){ checkpoint('三层 · 电梯厅'); go('stairwell'); }},
+  ]
+};
+
+S.corridor3_pass = {
+  chapter:'二 · 三层走廊',
+  text:`你贴在茶水间的门后，听见两个人的脚步声从门口过去。
+"……四十七层那位今天没下来。"
+"他什么时候下来过。"
+"上次那个女的——"
+"行了，别说这个。"
+声音远了。
+茶水间里有一台饮水机，热水键的灯在闪。
+<span class="cool">你记住了"上次那个女的"这五个字。</span>`,
+  choices:[
+    {label:'出去，到电梯厅', time:4, act(){ s.flags.heardGossip = true; checkpoint('三层 · 电梯厅'); go('stairwell'); }},
+  ]
+};
+
+S.corridor3_caught = {
+  chapter:'二 · 三层走廊',
+  text:()=>{
+    let t = `拐角。正面撞上。
+两个保安，一个拿着手电，一个手里握着电击棒，已经握在掌心。
+"三层的？三层晚上没人。"
+手电的光打到你的脸上。
+<span class="warn">手电是白的，你的头发是湿的，你身上还带着雨的味道。</span>`;
+    if(isBare('shoes')) {
+      t += `\n拿手电的那个把光往下挪了半米，停在你的脚上。他停了很久，比看你的脸还久。
+"鞋呢？"他说，"这地上有水，冻着。"`;
+    } else if(isBare('socks')) {
+      t += `\n你的鞋是湿的，光打上去的时候，鞋口那里露出一截空的——没有袜子，也没有袜子勒出来的印。
+"这天儿不穿袜子？"拿手电的说，"你是哪个班组的？"`;
+    } else if(bareCount() >= 2) {
+      t += `\n光的落点很不客气，从上到下走了一遍，然后又走回来。拿电击棒的那个把手里的东西换到了另一只手上。`;
+    }
+    if(hasTag('uniform')) t += `\n<span class="cool">你穿着制服。他们先看你的工牌位置，那儿是空的。</span>`;
+    if(totalExpo() >= 65) t += `\n<span class="warn">他们两个人的目光都停得比该停的时间长。那种停顿里没有惊讶，只有计算。</span>`;
+    if(isBare('shoes')) t += `\n<span class="cool">你光着脚站在湿的走廊里，一只脚趾蜷着。拿手电的那个人的视线落在你脚上，停留的时间够你往侧面挪半步。</span>`;
+    return t;
+  },
+  choices:[
+    {label:'动，先打掉拿电击棒的那个', time:1,
+      act(){
+        s.hp -= 16;
+        if(s.worn.shoes) loseGear('shoes','缠斗里，右脚的鞋被拽掉了。');
+        go('fight_corridor');
+      }},
+    {label:'"我是四十二层的客人，走错楼层了"', time:1,
+      test:{tag:'charm', base:0.44, label:'撒谎', ok:'corridor3_bluff', bad:'taser',
+            bareSlot:'socks', bareSlotBonus:-0.12}},
+    {label:'不动，把两只手举起来', hint:'赌他们只是要问话', time:1,
+      test:{tag:'wit', base:0.36, label:'配合', ok:'corridor3_bluff', bad:'captured'}},
+    {label:'转身就跑', time:1,
+      act(){ if(s.worn.heels === undefined && s.worn.shoes && Math.random() < 0.5) loseGear('shoes','起步那一下，鞋留在原地了。'); },
+      test:{tag:'mobility', base:0.5, label:'跑', ok:'corridor3_run', bad:'taser'}},
+  ]
+};
+
+/* 被按住搜身：工具被夺，外层被剥 */
+S.captured = {
+  chapter:'二 · 被按住',
+  text:()=>{
+    let t = `你没有反抗。两只手举到肩膀的高度，掌心朝前——这个姿势你练过，练的时候教官说，一个人只要肯把手举起来，对面就会松掉三成警惕。
+果然松了。拿电击棒的那个把东西换到左手，右手从上往下拍你的口袋和腰侧。他拍得很熟，是从下往上的顺序：大腿外侧、腰、肋下、腋窝。
+然后他的手在你后腰停住了。
+他摸到了刀鞘，隔着布料按了两下确认形状，才把手伸进去。刀被抽出来的时候，刀鞘挂住了风衣的内衬，扯了一下。
+他退开半步，把刀举到眼前看了看，刃口在走廊的应急灯下没有反光——陶瓷刀都这样。
+"这玩意儿不响。"他说，"你不是来偷东西的。"
+另一个人的手已经从你的肩后面伸过来，抓着风衣的领子往下扯。扣子在第二颗那里崩开，然后是第三颗。衣服从他手里滑下去，落在地毯上，堆成一团。
+<span class="warn">你身上只剩一层。走廊里的空调在吹，你这才发现刚才一直在出汗。</span>`;
+    if(isBare('socks')) t += `\n<span class="cool">搜身的手在脚踝那里顿了一下。那里什么也没有，没有袜子，也没有袜子勒出来的印。他没说话，但他的手停的时间比别处长。</span>`;
+    return t;
+  },
+  choices:[
+    {label:'等他们转身的间隙，往楼梯口蹿', hint:'现在身上没武器', time:1,
+      test:{tag:'mobility', base:0.34, label:'脱身', ok:'stairwell', bad:'crew_pre', hard:true}},
+    {label:'先把话头抢过来：“你们两个今晚值几号岗？”', time:1,
+      test:{tag:'wit', base:0.4, label:'周旋', ok:'captured_talk', bad:'crew_pre'}},
+    {label:'什么也不做。让他们带你走', hint:'你还没想好', time:2,
+      act(){ go('crew_pre'); }},
+  ]
+};
+
+S.captured_talk = {
+  chapter:'二 · 被按住',
+  text:`"你们两个今晚值几号岗？"
+拿刀的那一个愣了一下。这句话问得太自然了，自然到他下意识要回答。
+另一个没愣。他已经在往对讲机上按了，但按到一半停了——他也在等第一个人怎么回。
+你们三个在走廊里僵了大概四秒。四秒之后，拿刀的那个把手垂了下去，刀尖朝地。
+"你他妈是谁。"
+"这话应该我问。"你说，"你们经理知不知道今晚楼下在办什么？"
+<span class="cool">你没有赢。你只是把四秒换成了八秒。八秒也够一个受过训练的人走出五米。</span>`,
+  choices:[
+    {label:'走出五米，进楼梯间', cls:'jade', time:1,
+      test:{tag:'mobility', base:0.5, label:'走人', ok:'stairwell', bad:'crew_pre'}},
+    {label:'再多说一句，把水搅浑', time:1,
+      test:{tag:'charm', base:0.34, label:'唬住', ok:'corridor3_pass', bad:'crew_pre'}},
+  ]
+};
+
+/* 值班室之前的处理：他们把你剥干净 */
+S.crew_pre = {
+  chapter:'二 · 被带走',
+  text:()=>{
+    let t = `他们没有在走廊里动手。他们是把你带走的——一个人在前面开路，一个人在后面推着你的肩胛骨，走得很平常，像是押着一个偷东西的员工去值班室。
+经过三道门，进了一间十几平米的屋子。屋里有张桌子，一盏台灯，一把椅子，墙角堆着两箱矿泉水。桌上有个泡面桶，还没扔。
+有人把台灯拧亮，转过来对着椅子。光很热，烤在你的左耳上。
+"坐。"
+你坐下了。
+然后其中一个绕到你背后，把手搭在你的肩上，开始解你身上剩下的那点东西。他解得不快，也不着急，像是在处理一件已经被登记在册的物品。`;
+    if(s.worn.top || s.worn.bottom) t += `\n<span class="warn">布料从你身上褪下去的时候，你能感觉到台灯的热换成了一层更直接的、没有遮挡的热。</span>`;
+    else t += `\n<span class="warn">你身上本来就没剩什么。他的手在你背上停了一下，好像在确认还有什么可以拿走的。</span>`;
+    t += `\n没有人说话。走廊尽头有一台饮水机在制热，咕咚一声，很久才响第二声。`;
+    return t;
+  },
+  allowWardrobe:false,
+  choices:[
+    {label:'（低头看自己的手）', time:1,
+      act(){
+        s.lost = s.lost || [];
+        ['outer','top','bottom','socks','shoes','underwear'].forEach(k=>{
+          if(s.worn[k]){ s.lost.push(s.worn[k]); s.worn[k] = null; }
+        });
+        if(s.worn.tool){ s.lost.push(s.worn.tool); s.worn.tool = null; }
+        die('crew');
+      }},
+  ]
+};
+
+S.corridor3_bluff = {
+  chapter:'二 · 三层走廊',
+  text:`"四十二层的客人。"你说，"电梯下错层了。"
+拿手电的那个愣了半秒。他看你——看你的鞋，看你的手腕，看你湿透的袖口。
+"客人穿这个鞋？"
+你笑了。你笑的时候往前走了半步。
+"你们这栋楼，客人的鞋也要登记吗？"
+<span class="cool">他犹豫了。犹豫是他今天犯的唯一一个错。</span>`,
+  choices:[
+    {label:'趁他犹豫，从他侧面走过去按电梯', time:2,
+      test:{tag:'charm', base:0.55, label:'走过', ok:'stairwell', bad:'taser'}},
+  ]
+};
+
+S.corridor3_run = {
+  chapter:'二 · 三层走廊',
+  text:`你跑了。
+地毯吞掉了你的脚步声，但吞不掉他们的对讲机。
+"三层！三层西侧！"
+你冲到楼梯井，推开防火门，一级一级往上跳。
+后面有脚步声，两个，也可能三个。
+你跳了三层楼，把防火门在身后关上，用肩膀顶着。
+<span class="warn">门被撞了一下。很重。</span>`,
+  choices:[
+    {label:'松手，继续往上跑', time:2,
+      test:{tag:'mobility', base:0.5, label:'甩开', ok:'stairwell', bad:'beaten', hard:true}},
+    {label:'把撬锁器插进门缝，卡住它', time:2,
+      act(){
+        if(bagHas('lockpick')){ s.bag.splice(s.bag.indexOf('lockpick'),1); s.susp+=15; flash('撬锁器断了，但门卡住了。'); go('stairwell'); }
+        else { flash('你手里没有能卡门的东西。'); go('corridor3_run2'); }
+      }},
+  ]
+};
+
+S.corridor3_run2 = {
+  chapter:'二 · 三层走廊',
+  text:`你手里什么都没有。
+门被撞开的时候，你还在楼梯上。
+一只手抓住了你的脚踝。`,
+  choices:[
+    {label:'用另一只脚踹他的脸', time:1,
+      test:{tag:'force', base:0.38, label:'踹开', ok:'stairwell', bad:'beaten', hard:true}},
+    {label:'抱住他的腿，一起往下滚', time:1,
+      test:{tag:'force', base:0.3, label:'同坠', ok:'corridor_break', bad:'beaten', hard:true}},
+  ]
+};
+
+S.stairwell = {
+  chapter:'二 · 楼梯井',
+  text:`楼梯井是混凝土的，每一层有一盏应急灯。
+你的脚步声在这里会响三遍，所以你学会了踩台阶的外缘——外缘是斜的，响得轻。
+楼层数字在墙上，红色的，一个一个往上跳。三十九。四十一。四十三。
+拐角处有一堆建筑垃圾：水泥袋、一截钢筋、一台坏了的推车。
+<span class="cool">你想起了那条从四层掉下去的路。在这里掉下去，不会有钢筋，只有三十米的空。</span>`,
+  choices:[
+    {label:'继续爬楼梯，一直到四十七层', time:14,
+      test:{tag:'mobility', base:0.6, label:'长途攀爬', ok:'floor43', bad:'stair_tired',
+            tagBonus:{grip:0.06, warm:0.04}}},
+    {label:'混进电梯厅，坐客梯上去', hint:'客梯要刷卡', time:5,
+      act(){ checkpoint('电梯厅'); go('elevator'); }},
+    {label:'从楼梯井外面的检修轨上去', hint:'外面是四十六层的风',
+      time:10,
+      test:{tag:'mobility', base:0.34, label:'检修轨', ok:'floor43_rail', bad:'fall', hard:true}},
+  ]
+};
+
+S.stair_tired = {
+  chapter:'二 · 楼梯井',
+  text:`你爬到四十一层的时候，大腿已经不听使唤。
+你坐在台阶上，喘。喘得很响，在井道里来回撞。
+上面两层有脚步声，往下走。皮鞋，走得不快。
+<span class="warn">他正朝你这一层来。</span>`,
+  choices:[
+    {label:'往上冲，抢在他之前过转角', time:2,
+      test:{tag:'mobility', base:0.42, label:'抢先', ok:'floor43', bad:'beaten', hard:true}},
+    {label:'缩进建筑垃圾后面，等他过去', time:4,
+      test:{tag:'stealth', base:0.55, label:'隐藏', ok:'floor43', bad:'beaten'}},
+  ]
+};
+
+S.floor43 = {
+  chapter:'二 · 四十三层',
+  allowWardrobe:true,
+  text:`四十三层是空的。
+装修到一半，地上铺着防尘布，墙上贴着"施工重地"。四根柱子，一地的电线卷。
+北边的电梯厅亮着灯，南边的楼梯继续往上，东边的走廊尽头有一扇双开门，门牌上写着"四十七层 · 换乘"。
+<span class="cool">这里是这栋楼的腰。再往上四层，就是他的书房。</span>
+你在这儿可以喘一口气。`,
+  choices:[
+    {label:'坐下来歇三分钟，数一数心跳', time:5,
+      act(){ s.hp = Math.min(100, s.hp+18); checkpoint('四十三层 · 空楼'); flash('你喘匀了。'); go('floor43'); }},
+    {label:'调整着装', act(){ openWardrobe(); }},
+    {label:'走东边的双开门，找上四十七层的路', time:6,
+      act(){ checkpoint('四十三层 · 双开门'); go('service_lift'); }},
+    {label:'走南边的楼梯，一直爬到四十七层', time:10,
+      test:{tag:'mobility', base:0.58, label:'最后四层', ok:'floor47', bad:'stair_tired'}},
+    {label:'蹲下去看看那口施工吊孔', hint:'底下是四十层的机电夹层',
+      time:5,
+      test:{tag:'mobility', base:0.44, label:'下吊孔', ok:'floor43_gap', bad:'acc_fall', hard:true}},
+  ]
+};
+
+S.floor43_duct = {
+  chapter:'二 · 竖井',
+  text:`窄管最后把你吐在了四十三层的吊顶里。
+你从石膏板上掉下来，摔在一堆防尘布上，砸起一片灰。
+灰进了肺，你捂着嘴咳，咳到眼泪都出来了。
+<span class="cool">但你在四十三层了。</span>`,
+  choices:[
+    {label:'歇一会儿', time:5, act(){ s.hp -= 12; checkpoint('四十三层 · 空楼'); go('floor43'); }},
+  ]
+};
+
+S.floor43_rail = {
+  chapter:'二 · 四十三层',
+  text:`检修轨只有三指宽，雨把铁润得发亮。
+你贴着幕墙，一格一格往上移。风从左侧来，把你的衣服全部吹向右边，像一面旗。
+四十三到四十六，三十米，你走了十一分钟。
+最后一段铁轨没接到四十七层——差两米。你得跳。`,
+  choices:[
+    {label:'跳', time:1,
+      test:{tag:'mobility', base:0.5, label:'跨跃', ok:'floor47', bad:'fall', hard:true}},
+    {label:'先往左，从四十六层的窗进去', time:3,
+      test:{tag:'mobility', base:0.6, label:'入窗', ok:'floor47_win', bad:'fall'}},
+  ]
+};
+
+S.floor47_win = {
+  chapter:'二 · 四十六层',
+  text:`四十六层是机房层，很暗，很热。
+你在黑暗里站了一会儿，让眼睛适应。脚底下是防静电地板，一格一格，摸上去是冷的。
+北侧有一部内部电梯，面板上只有一个按钮。
+<span class="cool">这个按钮只去一个地方。</span>`,
+  choices:[
+    {label:'按下去', time:3, act(){ checkpoint('四十六层 · 内部电梯'); go('floor47'); }},
+  ]
+};
+
+/* ==================================================================== */
+/* 三 · 上行                                                            */
+/* ==================================================================== */
+S.mech39 = {
+  chapter:'三 · 三十九层设备层',
+  allowWardrobe:true,
+  text:`三十九层是设备层，整层没有一间办公室，只有管道、风柜、和一台轰鸣的离心机。
+地面是水泥的，扫得很干净——干净得不像设备层。
+北侧有一部内部电梯，面板上的按钮被一块有机玻璃罩着，锁着。东侧墙上有通风管的检修口。
+南侧有一道门，写着"服务梯 · 仅限员工"。
+<span class="cool">你听见有人在很近的地方走动。脚步很慢，很规律。是巡检。</span>`,
+  choices:[
+    {label:'大大方方走过去，把工牌晃一下', hint:'制服 · 巡检不会问你第二句',
+      show:()=>hasTag('uniform'),
+      cls:'jade', time:4,
+      act(){ s.susp -= 10; checkpoint('三十九层 · 服务梯'); go('service_lift'); }},
+    {label:'（几乎什么都没穿）就这样走过去', hint:'暴露 · 他们会先愣住，然后才反应',
+      show:()=>totalExpo()>=65,
+      cls:'gold', time:3,
+      hard:true, test:{tag:'charm', base:0.45, label:'迎面走过', ok:'mech39_pass', bad:'exposed'}},
+    {label:'撬开电梯按钮的有机玻璃罩', time:6,
+      test:{tag:'wit', base:0.45, label:'撬锁', ok:'floor47_elevator', bad:'mech39_patrol', hard:true}},
+    {label:'走服务梯', time:5,
+      test:{tag:'stealth', base:0.5, label:'摸过去', ok:'service_lift', bad:'mech39_patrol'}},
+    {label:'钻回通风管，继续往上', hint:'你已经在里面待够了，但没人会想到',
+      time:8,
+      test:{tag:'mobility', base:0.42, label:'再爬竖井', ok:'duct_up', bad:'duct_stuck', hard:true}},
+    {label:'在这儿等巡检过去，顺便歇一会', time:7,
+      act(){ s.hp = Math.min(100,s.hp+12); checkpoint('三十九层 · 设备层'); flash('你把呼吸放平了。'); go('mech39'); }},
+    {label:'钻进蒸汽管道的夹层抄近路', hint:'三十九层的机器全都醒着',
+      time:8,
+      test:{tag:'mobility', base:0.36, label:'钻夹层', ok:'floor47_elevator', bad:'acc_machine', hard:true}},
+  ]
+};
+
+S.mech39_patrol = {
+  chapter:'三 · 三十九层设备层',
+  text:()=>{
+    let t = `巡检的手电扫过来。
+他看见你的时候，没有喊——他先把手电关了。这个反应很专业，专业得让你心里一沉。
+黑暗里，他说："几号？"
+<span class="warn">他以为你是自己人。也可能是他在诈你。</span>`;
+    if(isBare('shoes')) t += `\n他往前走了半步，脚步停在你面前。他看不见你的脸，但他低头看了一眼地面——设备层的地面有灰，灰上有一串没有鞋印的脚印。他没说话，把脚往后收了收。`;
+    else if(isBare('socks')) t += `\n他的目光在你脚踝那一截停了一下。三十九层的地面常年三十八度，穿不穿袜子这种事，在这层楼里只有两种人：忘了的，和不该来的。`;
+    return t;
+  },
+  choices:[
+    {label:'报一个假的工号', time:1,
+      test:{tag:'wit', base:0.45, label:'冒充', ok:'mech39_pass', bad:'taser'}},
+    {label:'不说话，往他的方向冲', time:1,
+      test:{tag:'force', base:0.42, label:'制服', ok:'mech39_kill', bad:'taser', hard:true}},
+    {label:'往风柜后面躲', time:1,
+      test:{tag:'stealth', base:0.48, label:'闪避', ok:'mech39_pass', bad:'taser'}},
+  ]
+};
+
+S.mech39_pass = {
+  chapter:'三 · 三十九层设备层',
+  text:`"三组，换班。"你说，"上面让我上来看一下风柜。"
+他沉默了三秒。这三秒里，你的心在耳朵里跳。
+"灯在你右手边。"他说完就走了，脚步还是那么慢。
+<span class="cool">你在原地站了很久，才发现自己一直没喘气。</span>`,
+  choices:[
+    {label:'去服务梯', time:4, act(){ checkpoint('三十九层 · 服务梯'); go('service_lift'); }},
+    {label:'去撬电梯按钮', time:6,
+      test:{tag:'wit', base:0.55, label:'撬锁', ok:'floor47_elevator', bad:'mech39_patrol'}},
+  ]
+};
+
+S.mech39_kill = {
+  chapter:'三 · 三十九层设备层',
+  text:`你在黑暗里扑过去。
+他比你想的壮。你们撞在风柜上，铁皮发出一声闷响，盖住了很多东西。
+四十七秒。他的对讲机掉在地上，红灯一闪一闪，有人在里面说话。
+你把对讲机踩碎。
+<span class="warn">你的手上是他的血，因为黑暗，看不出是谁的。</span>`,
+  choices:[
+    {label:'把他拖到风柜后面，去服务梯', time:5,
+      act(){
+        s.hp -= 14; s.susp += 22;
+        if(!bagHas('guard_jacket')) s.bag.push('guard_jacket');
+        s.flags.guardCard = true;
+        checkpoint('三十九层 · 服务梯');
+        go('service_lift');
+      }},
+  ]
+};
+
+S.service_lift = {
+  chapter:'三 · 服务梯',
+  text:`服务梯是一个铁笼子，外面刷着绿漆，按钮只有"上"和"下"。
+你按了"上"。
+电梯走得很慢，每一层都要顿一下。到了四十六层，它停了——不是到站，是有人在外面按了。
+门开了。
+外面站着一个人，穿着黑西装，手里端着一杯咖啡。
+他看着你。你看着他。
+<span class="warn">这一层没有员工。这一层只有四十七层的服务人员。</span>`,
+  choices:[
+    {label:'先动。咖啡还没凉', time:1,
+      test:{tag:'force', base:0.5, label:'先手', ok:'floor47_elevator', bad:'acc_hands', hard:true}},
+    {label:'"白先生叫我上来的。"', time:1,
+      test:{tag:'charm', base:0.42, label:'借势', ok:'floor47_elevator', bad:'acc_hands'}},
+    {label:'按"下"，把门关上', time:1,
+      test:{tag:'mobility', base:0.44, label:'退', ok:'mech39', bad:'acc_hands', hard:true}},
+  ]
+};
+
+S.elevator = {
+  chapter:'三 · 电梯厅',
+  text:`四十三层的电梯厅有三部客梯，其中一部停在四十二层。
+面板上有一个读卡区，蓝光一闪一闪。
+你的手里有一张卡，但你不知道它属于哪一层。`,
+  choices:[
+    {label:'刷那张卡', time:3,
+      act(){
+        if(s.flags.vipCard){
+          flash('四十七层。电梯动了。');
+          checkpoint('高层客梯'); go('floor47_elevator');
+        } else if(s.flags.guardCard){
+          flash('卡是货梯卡。客梯亮红灯。');
+          go('elevator_fail');
+        } else {
+          go('elevator_fail');
+        }
+      }},
+    {label:'干脆扒开电梯门，从井道往上', time:8,
+      test:{tag:'mobility', base:0.35, label:'井道攀爬', ok:'floor47_rail', bad:'shaft', hard:true}},
+    {label:'回楼梯井', time:3, act(){ go('stairwell'); }},
+  ]
+};
+
+S.elevator_fail = {
+  chapter:'三 · 电梯厅',
+  text:`读卡区闪了红。
+"哔——"
+整个电梯厅的灯忽然亮了一档，天花板上一台摄像机转过来，正对着你。
+轿厢停在四十二层，门开了。
+里面站着三个人。
+<span class="warn">他们没有出来。他们在等你进去。</span>`,
+  choices:[
+    {label:'不进。转身往楼梯井跑', time:1,
+      test:{tag:'mobility', base:0.5, label:'逃', ok:'stairwell', bad:'beaten', hard:true}},
+    {label:'进去。装作是走错的客人', time:2,
+      test:{tag:'charm', base:0.38, label:'硬着头皮', ok:'corridor3_bluff', bad:'door'}},
+    {label:'拔刀，往井道门缝里钻', time:1,
+      test:{tag:'mobility', base:0.3, label:'钻井道', ok:'floor47_rail', bad:'shaft', hard:true}},
+  ]
+};
+
+/* ==================================================================== */
+/* 四 · 四十七层                                                        */
+/* ==================================================================== */
+S.floor47_elevator = {
+  chapter:'四 · 直达梯',
+  text:`轿厢是黑的，镜面，连天花板上都是镜面。
+你看见无数个自己被叠在一起，往上升。
+楼层数字不亮，只有一个小小的绿灯在跳。
+电梯停下。门开了。
+外面是一条走廊，赤道的长度大概三十米，铺着很厚的地毯，深红色的，像一条被摊开的舌头。
+尽头是一扇双开的木门。
+<span class="cool">到了。</span>`,
+  choices:[
+    {label:'走过去。推门', time:4, act(){ checkpoint('四十七层 · 走廊尽头'); go('office_door'); }},
+    {label:'先在走廊里检查一下自己', time:5,
+      act(){ s.hp = Math.min(100,s.hp+10); s.susp = Math.max(0,s.susp-10); go('floor47_elevator'); }},
+  ]
+};
+
+S.floor47 = {
+  chapter:'四 · 四十七层',
+  allowWardrobe:true,
+  text:`楼梯通到四十七层，防火门后面是一条短廊。
+短廊尽头是双开木门，左边是侧门，写着"盥洗"，右边是露台的方向，雨声从那里进来。
+你身上全是汗、雨、和别人的血。
+<span class="cool">你现在可以停下来十秒，把最后那点东西准备好。</span>`,
+  choices:[
+    {label:'调整着装', act(){ openWardrobe(); }},
+    {label:'在盥洗室把自己整理干净', time:6,
+      act(){ s.hp = Math.min(100,s.hp+20); s.susp = Math.max(0,s.susp-20); s.expo -= 6; checkpoint('四十七层 · 盥洗室'); flash('镜子里的你，看起来几乎是个正常人。'); go('floor47'); }},
+    {label:'拐去露台看一眼', time:4, act(){ checkpoint('四十七层 · 露台'); go('pool_roof'); }},
+    {label:'推那扇双开木门', time:3, act(){ checkpoint('四十七层 · 书房门外'); go('office_door'); }},
+  ]
+};
+
+S.pool_roof = {
+  chapter:'四 · 顶层露台',
+  allowWardrobe:true,
+  text:`露台上有一个泳池，五米宽，二十五米长，瓷砖是深蓝的，水在雨里冒着一层白汽——是温水的。
+池边摆着两张躺椅，其中一张上搭着一条白色的浴巾。
+玻璃墙后面是室内，亮着暖黄的灯，你能看见里面有一张很大的床，和被踢到地上的丝质被子。
+<span class="cool">这是他的休息区。他今晚还没来。</span>`,
+  choices:[
+    {label:'把浴巾拿上', time:2,
+      act(){ s.bag.push('towel'); s.flags.canPool = true; flash('拿到：浴巾'); go('pool_roof'); }},
+    {label:'从露台的门进屋，看看那张床', time:4,
+      act(){ checkpoint('四十七层 · 卧室'); go('bedroom'); }},
+    {label:'翻过围栏，看下面', hint:'四十七层往下，是四十六层的机房屋顶',
+      time:4,
+      test:{tag:'mobility', base:0.5, label:'探路', ok:'roof_scout', bad:'fall'}},
+    {label:'下水，从泳池深水区的排水口那边摸过去', hint:'水是温的，但很深',
+      time:6,
+      test:{tag:'mobility', base:0.4, label:'潜泳', ok:'pool_roof_under', bad:'pool', hard:true}},
+    {label:'回走廊', time:3, act(){ go('floor47'); }},
+  ]
+};
+
+S.roof_scout = {
+  chapter:'四 · 顶层露台',
+  text:`你翻过栏杆，蹲在四十六层的机房屋顶上。
+下面三十公分处是一条检修马道，一直通到东侧的货运吊篮——那是擦窗用的。
+吊篮上有一根钢索，通到楼下某处。
+<span class="cool">这是一条退路。如果上面出事，你可以从这里走。</span>
+你把吊篮的插销拔了一半，让它不至于锁死。`,
+  choices:[
+    {label:'回露台', time:4, act(){ s.flags.escapeRoute = true; checkpoint('四十七层 · 露台'); go('pool_roof'); }},
+  ]
+};
+
+S.bedroom = {
+  chapter:'四 · 卧室',
+  allowWardrobe:true,
+  text:`卧室很大，很大，大到床显得孤零零。
+床头的柜子上有一只表、一杯水、一副眼镜。
+墙上挂着一张照片，是很多人站在一栋楼前面——楼是白鲸塔，人是很多年前的，穿的衣服旧得像另一个世纪。
+衣柜开着一条缝，里面是整排的西装，颜色很深，肩线很硬。
+<span class="cool">他没有来。这里今晚是空的。</span>`,
+  choices:[
+    {label:'翻他的床头柜', time:4,
+      act(){ s.flags.foundList = true; s.bag.push('blacklist'); flash('你找到了那份名单。七个名字，包括你的。'); go('bedroom'); }},
+    {label:'从衣柜里找一件能穿的', time:3,
+      act(){ s.bag.push('lab_coat'); flash('拿到：白大褂（他挂在衣柜角落的）'); go('bedroom'); }},
+    {label:'在床上撒一点东西，做心理战', hint:'如果他回来，他会知道有人来过',
+      time:4,
+      act(){ s.flags.mindgame = true; s.susp += 6; flash('你把手套留在了枕头上。'); go('bedroom'); }},
+    {label:'回露台', time:3, act(){ go('pool_roof'); }},
+  ]
+};
+
+S.vault_room = {
+  chapter:'四 · 书房暗间',
+  text:`书架第三排的右边，有一个按钮，做成了书脊的样子。
+按下去，书架滑开。
+里面是一间六平米的小间，正中间一个两米高的保险柜，门是液压的，开着一半。
+柜子里是文件，和一只黑色的公文包。
+<span class="warn">柜门是自动回位的。你会想把手伸进去——所有人都想。</span>`,
+  choices:[
+    {label:'用胶带把柜门固定住，再进去翻', hint:'你有胶带',
+      show:()=>bagHas('duct_tape'),
+      time:5,
+      act(){ s.bag.splice(s.bag.indexOf('duct_tape'),1); s.bag.push('blackcase'); s.flags.gotCase = true; flash('你拿到了公文包，还活着。'); go('office'); }},
+    {label:'直接伸手进去翻', time:4,
+      test:{tag:'mobility', base:0.42, label:'抢时间', ok:'office', bad:'vault', hard:true}},
+    {label:'不碰。这玩意儿看着就不对', time:2, act(){ go('office'); }},
+  ]
+};
+
+S.office_door = {
+  chapter:'四 · 书房门前',
+  allowWardrobe:true,
+  text:`双开木门，很高，门轴没有一点声音。
+门缝下面有一线光。
+你把耳朵贴上去——里面很静，只有一种很轻的、规律的声音：翻纸。
+<span class="cool">他在。</span>
+现在，你要决定以什么样子走进去。`,
+  choices:[
+    {label:'调整着装', act(){ openWardrobe(); }},
+    {label:'推门，直接进去', cls:'gold', time:2, act(){ checkpoint('四十七层 · 书房'); go('office'); }},
+    {label:'先绕到暗间，从书架的缝里看他', time:5, act(){ checkpoint('四十七层 · 暗间'); go('vault_room'); }},
+  ]
+};
+
+/* ==================================================================== */
+/* 五 · 书房                                                            */
+/* ==================================================================== */
+S.office = {
+  chapter:'五 · 书房',
+  text:()=>{
+    let t = `书房的墙全是书，从地板一直到天花板，书脊的颜色很整齐，像是有人按色系排过一遍。房间里只开了两盏灯，一盏在写字台上，一盏在他手边。
+他没有坐在办公桌后面。他坐在窗边那张深色的扶手椅上，膝盖上摊着一本很厚的册子，矮几上放着一杯酒，琥珀色的，冰已经化了一半，杯壁上挂着一层水。
+他知道你进来了。他没有抬头，只是把手里那一页看完，才开口。
+　<q>这扇门是电动的。</q>他说，声音不低，也不需要抬高，<q>电动的东西关起来有声音。你进来的时候，门没有响。所以你不是员工，也不是客人。</q>
+他终于抬头看你。六十二岁，头发理得很短，眼睛很干净，干净得像被人反复擦过很多遍的玻璃——那种干净里没有温度。
+　<q>你是第几个了？</q>
+他没有等你回答，把册子合上，放在膝盖上，手掌压着封面。
+　<q>名单上有七个名字。</q>他说，<q>前六个都来过人。你是哪一个？</q>
+`;
+    const ex = totalExpo();
+    if(ex >= 55) t += `\n<span class="warn">他看你的眼神在你的领口和腿上各停了一次，一共两秒。那两秒是什么意思，你比谁都清楚——他已经在想，今晚这件事可以用另一种方式先解决一半。</span>`;
+    else if(ex <= 20) t += `\n<span class="cool">他看你的眼神在你的手套上停了很久，比看你的脸还久。他也清楚那副手套是干什么用的——他见过上一副。</span>`;
+    else if(hasTag('uniform')) t += `\n<span class="cool">他看了你身上的制服一眼，眉毛动了一下。"值班表上今天没有人上来。"他说。他没有等你解释。</span>`;
+    else if(isBare('shoes')) t += `\n<span class="warn">他往下看了一眼，看见你光着的脚。这是他今晚第一次真正地意外。</span>`;
+    return t;
+  },
+  choices:[
+    {label:'不废话。拔刀冲上去', hint:'最快，也最没有余地', cls:'gold', time:2,
+      act(){ s.hp -= 20; go('duel'); }},
+    {label:'从暗袋里取出注射器，倒进他的酒里',
+      hint:'你还有一次倒酒的机会',
+      show:()=>bagHas('syringe'),
+      time:5,
+      test:{tag:'wit', base:0.72, label:'下毒', ok:'kill_poison', bad:'hypo'}},
+    {label:'绕到他身后，用钢丝', hint:'安静，但要贴到他的背上',
+      show:()=>has('wire')||bagHas('wire'),
+      time:4,
+      test:{tag:'stealth', base:0.44, label:'绞索', ok:'kill_wire', bad:'knife', hard:true}},
+    {label:'走过去，坐在他腿上。先让他相信你',
+      hint:'需要足够的注目度',
+      show:()=>totalExpo()>=55,
+      time:6,
+      test:{tag:'charm', base:0.4, label:'色诱', ok:'kill_seduce', bad:'toy_pre', hard:true,
+            tagBonus:{exposed:0.10, lace:0.07, sheer:0.04}}},
+    {label:'先把他的名单拿到手，再说别的', time:5,
+      test:{tag:'stealth', base:0.45, label:'取册子', ok:'office_tome', bad:'knife'}},
+    {label:'退出去。你还没准备好', time:4,
+      act(){ s.susp += 10; go('floor47'); }},
+  ]
+};
+
+S.duel = {
+  chapter:'五 · 交手',
+  text:()=>{
+    let t = `你拔刀的动作没有做完，他已经站起来了。
+六十二岁的人，起身的时候扶手椅往后滑出去半米，地毯上发出一声很闷的摩擦。他手里那本册子掉在地上，摊开，照片朝上。他站得很直，两只手垂在体侧，没有抬起来护胸——这是受过训练的人才有的姿势，普通人第一反应一定是抱头。
+你的第一刀刺向他的喉侧。他动了，动得很小：身体侧转十公分，左小臂横过来。刀刃在他小臂外侧划开一道，血立刻从袖子里渗出来，把深色的花呢洇成一块更深的黑。但他同时抓住了你的手腕。
+那只手的力气不像一个六十二岁的人。他把你往自己怀里带，你顺势换成肘击，撞在他右侧肋骨上，撞实了，他的呼吸顿了一下，抓你的手松了半指——你就用这半指把手抽出来。
+他推开你。你退了三步，后腰撞在书桌边缘，撞在髋骨上，那一下很实，疼得你眼前发白，有一瞬间站不直。
+你抓着桌沿把身体撑起来，喘。血从你自己的手背上流下来——刚才那一下抽手的时候，刀口回扫，在你自己的左手背上开了一道，不深，但很长，血顺着指缝滴在地毯上，一滴一滴。
+你们隔着两米。他没有追，只是站在原地，让你看他小臂上那道口子。他在等你先动。`;
+    if(s.flags.duelWounded) t += `\n\n<span class="warn">你的右肋从刚才撞上桌角起就一直在钝痛，吸气的时候尤其明显。大概是骨裂。这具身体你用了二十四年，从来没有像今晚这样，觉得它这么不经用。</span>`;
+    if(isBare('shoes') || isBare('socks')) t += `\n\n<span class="warn">你脚下什么也没有，地毯的绒毛直接蹭着脚心。刚才退那三步的时候，你的脚趾在地上抓紧了一下才站住——如果穿着那双软底靴，你不会撞上桌角。</span>`;
+    if(hasTag('armored')) t += `\n\n<span class="cool">背心里的凯夫拉衬层顶住了他刚才那一下手肘。没有它，你肋上现在已经断了一根。</span>`;
+    return t;
+  },
+  choices:[
+    {label:'贴上去。不给他的手任何出手的机会', hint:'贴身缠斗 · 成败在此', cls:'gold', time:2,
+      test:{tag:'force', base:0.36, label:'贴身', ok:'kill_blade', bad:'knife', hard:true}},
+    {label:'绕到书桌另一侧，拿那张椅子挡一下', hint:'拖时间，但你也需要拖时间', time:3,
+      test:{tag:'wit', base:0.44, label:'周旋', ok:'duel_desk', bad:'knife'}},
+    {label:'把刀横在前面，慢慢往门口退', hint:'放弃这一刀，先活下来', time:3,
+      test:{tag:'mobility', base:0.42, label:'脱身', ok:'kill_done_escape', bad:'knife'}},
+  ]
+};
+
+S.duel_desk = {
+  chapter:'五 · 交手',
+  text:`你把椅子拎起来挡在身前，他果然停了一下。
+你们围着书桌转，转了半圈，他的步子开始慢下来——小臂上那道口子在流血，血顺着他的指缝滴在地毯上，滴成一条不太整齐的线。
+你注意到他的呼吸。刚才还平平稳稳的人，现在每一次吸气都比上一次短一点。
+你把椅子朝他推过去，他抬手格了一下，那一下用了太多力气，身体前倾了半寸。
+就是这半寸。`,
+  choices:[
+    {label:'刀走他格挡的反方向', cls:'gold', time:1,
+      test:{tag:'wit', base:0.62, label:'取隙', ok:'kill_blade', bad:'knife'}},
+  ]
+};
+
+S.kill_done_escape = {
+  chapter:'五 · 收尾',
+  text:`你退到门口，他没有追。
+他就站在那盏台灯下面，小臂上流着血，看着你。他的表情比刚才更平静，像是终于把一件悬着的事放下来了。
+"你走吧。"他说，"名单你拿走。我明天会重新打印一份，这是流程。"
+你摸到门把手。金属很凉。
+<span class="cool">他确实没有动。你退出门口的时候，他还站在那里。</span>`,
+  choices:[
+    {label:'拉抽屉拿名单，然后走', time:4,
+      act(){ s.bag.push('blacklist'); s.flags.foundList = true; s.flags.spared = true; go('escape'); }},
+    {label:'什么都不拿，直接走', time:4,
+      act(){ s.flags.spared = true; go('escape'); }},
+  ]
+};
+
+S.fight_corridor = {
+  chapter:'二 · 走廊交手',
+  text:()=>{
+    let t = `你没有等他说完第二句话。
+第一步你就把距离吃掉了——走廊只有一米八宽，两个人并排站着，中间没有给你闪避的余地，也没有给他们退开的余地。你的刀从下往上走，扎进了拿电击棒那个人的右小臂，扎进去大约两指深，血喷在你的袖口上。
+他叫了一声，电击棒掉在地上，弹了一下。
+第二个人不是新手。他没有扑上来，他往后退了半步，把手里那根手电筒横过来——那是格挡的姿势，也是准备砸的姿势。你冲上去的时候，他用手电筒的尾端捅在你腹部，正中肋骨下面那块软的地方。
+那一下把你肺里的气全部挤了出去。你的腿软了半秒，这半秒里他抓住了你的头发，把你的头往墙上按。
+你的额头撞在墙面上，一下，两下。第二下的时候你听见自己脑子里有一种很怪的声音，像水流过管子。
+你反手去抓他的手腕，抓到了，指甲抠进他的皮肤。你们就这么贴着墙僵持了大约十秒——你抵着他的手，他压着你的头，谁都没有余力做别的动作。
+<span class="warn">腹部那一下让你到现在都吸不满气。额头上的血顺着眉毛流下来，进了右眼，右眼现在看东西是红的。</span>`;
+    if(hasTag('armored')) t += `\n\n<span class="cool">他那一记正捅在你背心的衬层上。要是没有凯夫拉，你现在已经跪下了。</span>`;
+    if(hasTag('grip') || hasTag('boots')) t += `\n\n<span class="cool">鞋底在地砖上稳住了。刚才那一下要是滑倒，你就再也站不起来了。</span>`;
+    return t;
+  },
+  choices:[
+    {label:'用膝盖，砸他刚才被你扎伤的那条腿', cls:'gold', time:1,
+      test:{tag:'force', base:0.44, label:'反制', ok:'corridor_break', bad:'taser', hard:true}},
+    {label:'松开头发，往下滑，从他胳膊底下钻出去', time:1,
+      test:{tag:'mobility', base:0.4, label:'脱身', ok:'stairwell', bad:'taser', hard:true}},
+    {label:'喊。就在这儿喊“着火了”', hint:'楼下有人在喝酒', time:1,
+      test:{tag:'wit', base:0.34, label:'赌', ok:'corridor_break', bad:'taser'}},
+  ]
+};
+
+/* 玩物之前的处理：他让人把你解掉 */
+S.toy_pre = {
+  chapter:'五 · 留下',
+  text:()=>{
+    let t = `他没有生气，也没有叫人来。他只是把手里的笔放下，抬起眼睛，看了你大概三秒。那三秒里你已经知道自己判断错了——他比你想象的清醒得多。
+"把她身上那些东西解了。"他说，"留着她自己会折腾。"
+两个人从你身后上来。他们没有抓你的胳膊，先抓的是领子：一只手从后面扣住你的后领，往下扯，扣子一颗一颗地从线头上蹦开，声音很密，像有人在剥一把豆子。风衣被从肩上剥下去的时候，你的手臂被迫向后拧了一下，肩膀里发出一声很轻的响。
+然后是高领衫。他们从下往上掀，领口卡在你的下巴上，卡了两下才过去，你的头发被带起来，散在脸上，遮住了一只眼睛。
+<span class="warn">布料一件一件离开身体的感觉你记得很清楚。那不是冷了，是忽然之间什么都在碰你——空气、光、还有他们的目光。</span>`;
+    if(isBare('socks')) t += `\n<span class="warn">最后是鞋。他们把你的鞋脱下来提到一边，有人低头看了一眼，说了一句"这小子连袜子都不给她"，笑了。你光着的脚踩在地毯上，地毯的绒毛很扎人。</span>`;
+    t += `\n他一直在看，看的不是你，是墙上那口钟。他在算自己还有多久要出门。`;
+    return t;
+  },
+  allowWardrobe:false,
+  choices:[
+    {label:'（不再挣了）', time:2,
+      act(){
+        s.lost = s.lost || [];
+        ['outer','top','bottom','socks','shoes','underwear'].forEach(k=>{
+          if(s.worn[k]){ s.lost.push(s.worn[k]); s.worn[k] = null; }
+        });
+        if(s.worn.tool){ s.lost.push(s.worn.tool); s.worn.tool = null; }
+        die('toy');
+      }},
+  ]
+};
+
+S.office_tome = {
+  chapter:'五 · 书房',
+  text:`你往前走了两步，他没有动。
+矮几上那本册子，封面是一张空白的地图。你伸手去拿——
+你的手刚碰到封面，他就把它按住了。他的手指很长，指甲修得很整齐，压在纸上。
+"这不是名单。"他说，"这是我女儿的照片集。她二十三岁的时候，在一场车祸里走了。"
+他翻开一页。照片上的女孩站在白鲸塔前面，笑着，穿着一件很旧的蓝色外套。
+"名单在我抽屉里。"他松开手，"你要就拿去。反正明天早上，它会重新打印一份。"
+<span class="cool">你想起了三层走廊里那句"上次那个女的"。</span>`,
+  choices:[
+    {label:'拉抽屉，拿名单', time:3, act(){ s.bag.push('blacklist'); s.flags.foundList = true; s.flags.metDaughter = true; go('office_after_tome'); }},
+  ]
+};
+
+S.office_after_tome = {
+  chapter:'五 · 书房',
+  text:`抽屉里是一张纸，七个名字，打印得很整齐。
+第七个是你的代号。
+你把纸折起来，塞进贴身的地方。
+他还在看那本照片集，翻得很慢，一页一页。
+"你走的时候，"他说，"把门带上。外面风大。"`,
+  choices:[
+    {label:'动手。现在', cls:'gold', time:1,
+      test:{tag:'force', base:0.42, label:'刺杀', ok:'kill_blade', bad:'knife'}},
+    {label:'下毒。他刚才喝了一口', show:()=>bagHas('syringe'), time:4,
+      test:{tag:'wit', base:0.7, label:'下毒', ok:'kill_poison', bad:'hypo'}},
+    {label:'走吧。名单到手了', time:6, act(){ s.flags.spared = true; go('escape'); }},
+  ]
+};
+
+/* ---------------- 击杀 ---------------- */
+S.kill_blade = {
+  chapter:'五 · 命中',
+  text:`你跨过矮几，刀在他腋下第三个肋间的缝里进去。
+他知道怎么死。他没有挣扎，只是把册子放在膝盖上，放得很稳，像怕弄皱了。
+"手很稳。"他说，"你叫什么？"
+你没有回答。
+他的血从扶手椅的缝隙往下滴，一滴一滴，落在很好的木地板上。
+<span class="cool">三十四秒。他停止了呼吸。</span>
+你站在窗前，喘。整个城市在下面，是红的和白的，一条河。`,
+  choices:[
+    {label:'翻他的口袋，找名单', time:4, act(){ s.bag.push('blacklist'); s.flags.foundList = true; go('kill_done'); }},
+    {label:'什么都不拿。走', time:3, act(){ go('kill_done'); }},
+  ]
+};
+
+S.kill_poison = {
+  chapter:'五 · 命中',
+  text:`你把注射器里的东西推进酒里的时候，他的手就搭在扶手上，离你不到二十公分。
+琥珀色对琥珀色，看不出来。
+他端起来喝了一口。放下。又拿起来，喝完了。
+"你今天动作比平时慢。"他说。这句话是对门口说的，门口没有人。
+他抬头看你，眼睛还是很干净。
+"你——"
+然后他停住了。他的表情没有变，只是从某一个瞬间开始，不再变化。
+<span class="cool">他的杯子从手里滑下去，在地毯上滚了一圈，没有碎。</span>`,
+  choices:[
+    {label:'拿走名单', time:4, act(){ s.bag.push('blacklist'); s.flags.foundList = true; go('kill_done'); }},
+    {label:'走', time:3, act(){ go('kill_done'); }},
+  ]
+};
+
+S.kill_wire = {
+  chapter:'五 · 命中',
+  text:`你走到他的背后，用了十一秒，一步都没有响。
+钢丝从他下巴下面过去，你双手一收——
+他没有喊。他抬手去抓，抓到了你的手腕，力气比你想象的大。
+你们僵持了大概二十秒。这二十秒里，他一直站着，你一直拉着。
+然后他的膝盖软了。
+你把他放下去的时候，他的头磕在扶手椅的木边上，很轻的一声。
+<span class="cool">你在他的扶手椅旁边坐了很久，才发现自己在发抖。</span>`,
+  choices:[
+    {label:'拿走名单', time:4, act(){ s.bag.push('blacklist'); s.flags.foundList = true; go('kill_done'); }},
+    {label:'走', time:3, act(){ go('kill_done'); }},
+  ]
+};
+
+S.kill_seduce = {
+  chapter:'五 · 命中',
+  text:`你走过去，坐在他的腿上。
+他没有推开你，也没有搂你。他只是把手里的册子放到一边，然后看着你，很近。
+近到你能看见他眼睛里的血丝，和一种很深的疲惫。
+"你要杀我。"他说。不是问句。
+你点头。
+"用什么？"
+你手里其实什么都没有。你伸手的时候，他先动了——他抓住你的手腕，力气很大，但不是为了杀你。
+他把你按在自己肩膀上，很轻地拍了两下你的背，像哄一个哭累的小孩。
+然后他松开了。
+"我不动你。"他说，"你从露台走。今晚没人看见你来过。"
+<span class="cool">你站起来的时候，腿是软的。</span>`,
+  choices:[
+    {label:'还是动手', hint:'他背对着你', time:2,
+      test:{tag:'force', base:0.66, label:'背后出手', ok:'kill_blade', bad:'knife'}},
+    {label:'走。这一晚已经够了', time:5, act(){ s.flags.spared = true; s.flags.heLetYou = true; go('escape'); }},
+  ]
+};
+
+S.kill_done = {
+  chapter:'五 · 收尾',
+  text:`书房里很静。
+窗外的雨小了，变成一层雾。城市在雾里，是一团很大的光。
+你站在那具还很热的身体旁边，忽然不知道该干什么。
+这是每一次都一样的时刻。你没有一次习惯过。
+<span class="cool">该走了。</span>`,
+  choices:[
+    {label:'去露台，走那条吊篮的退路', cls:'jade', time:5,
+      show:()=>s.flags.escapeRoute,
+      act(){ checkpoint('四十七层 · 露台'); s.flags.route='basket'; go('escape'); }},
+    {label:'坐直达梯下去', time:4, act(){ s.flags.route='elevator'; go('escape'); }},
+    {label:'走楼梯，一层一层往下', time:12, act(){ s.flags.route='stair'; go('escape'); }},
+    {label:'先去卧室，拿点东西', time:6, act(){ go('escape_bedroom'); }},
+    {label:'走地下检修隧道，从地铁存车线出去', hint:'很远，很黑，但没有人想到',
+      time:10,
+      test:{tag:'mobility', base:0.42, label:'钻隧道', ok:'escape_tunnel', bad:'train', hard:true}},
+  ]
+};
+
+S.escape_bedroom = {
+  chapter:'五 · 收尾',
+  text:`卧室里还是空的。
+你在床头的柜子里翻出了一部手机、一副老花镜、和一只很旧的皮夹。皮夹里有一张照片——和书房那本册子里的一样，同一个女孩，同一件蓝外套。
+你把照片放回去，只拿走了手机。
+外面的走廊里，有人在说话。不止一个。"他今晚谁都不见"——"但是经理说——"
+<span class="warn">时间到了。</span>`,
+  choices:[
+    {label:'去露台', cls:'jade', time:4, show:()=>s.flags.escapeRoute, act(){ s.flags.route='basket'; go('escape'); }},
+    {label:'坐直达梯', time:4, act(){ s.flags.route='elevator'; go('escape'); }},
+    {label:'走楼梯', time:10, act(){ s.flags.route='stair'; go('escape'); }},
+  ]
+};
+
+/* ==================================================================== */
+/* 六 · 撤离                                                            */
+/* ==================================================================== */
+S.escape = {
+  chapter:'六 · 撤离',
+  text:()=>{
+    const r = s.flags.route;
+    if(r==='basket') return `露台的风比楼下大十倍。
+吊篮在东侧，钢索有手腕粗，插销拔了一半，松的。
+你翻过围栏，蹲在马道上，雨点打在你的后颈上。
+<span class="cool">下面四十六层，四十五层，四十四层……吊篮在往下放。</span>
+放到三十层的时候，你听见楼里传来第一声警报。`;
+    if(r==='elevator') return `直达梯的门开着，里面的镜面把你切成无数个。
+你走进去，按了"地下二层"。
+电梯开始下行。三十层，二十层——
+<span class="warn">在二十一层，它忽然停了。</span>`;
+    return `楼梯间里没有灯。你扶着扶手，一级一级往下跳。
+四十六、四十五、四十四……
+你的膝盖在响，手心全是汗。
+<span class="warn">在第三十九层，防火门从外面被推开了。</span>`;
+  },
+  choices:[
+    {label:'（继续）', time:4, act(){
+      const r = s.flags.route;
+      if(r==='basket') go('escape_basket');
+      else if(r==='elevator') go('escape_elevator');
+      else go('escape_stair');
+    }},
+  ]
+};
+
+S.escape_basket = {
+  chapter:'六 · 吊篮',
+  text:`警报声一层一层往上传，像有人在爬。
+吊篮降到二十五层的时候，楼上的探照灯亮了，一道白光扫过幕墙。
+你缩在马道的阴影里，缩成很小的一团。
+光过去了。
+吊篮继续往下。第八层，第五层，第二层。
+你跳下吊篮的时候，脚踩在花坛的泥土里，软软的。雨还在下。
+<span class="cool">你翻过围栏，走进了街上的人群里。</span>`,
+  choices:[
+    {label:'往前走', time:3, act(){ checkpoint('撤离 · 街口'); go('epilogue'); }},
+  ]
+};
+
+S.escape_elevator = {
+  chapter:'六 · 电梯',
+  text:`停二十一层。
+门开了一条缝，缝外面是一只手，正在掰门。
+你按了开门键。门开了。
+外面是两个保安，手电筒的光直接打在你的脸上。
+<span class="warn">六秒。你决定怎么出去。</span>`,
+  choices:[
+    {label:'刀。一次两个', time:1,
+      test:{tag:'force', base:0.4, label:'杀出去', ok:'escape_elev_out', bad:'beaten', hard:true}},
+    {label:'从门缝里挤出去，往楼梯跑', time:1,
+      test:{tag:'mobility', base:0.48, label:'钻缝', ok:'escape_stair', bad:'door', hard:true}},
+    {label:'"我是四十七层的。"', time:1,
+      test:{tag:'charm', base:0.35, label:'唬', ok:'escape_elev_out', bad:'taser'}},
+  ]
+};
+
+S.escape_elev_out = {
+  chapter:'六 · 二十一层',
+  text:`你从电梯里出来的时候，走廊里只剩一个人还站着，另一个躺在地上，抱着自己的腿。
+你从他身边跑过去。他的对讲机掉在地上，声音很大。
+你跑到楼梯间，往下一口气跳了七层。
+<span class="cool">肺里像烧着一团火。但你在动。</span>`,
+  choices:[
+    {label:'继续往下', time:6, act(){ checkpoint('撤离 · 楼梯'); go('escape_stair'); }},
+  ]
+};
+
+S.escape_stair = {
+  chapter:'六 · 楼梯',
+  text:`楼梯间里全是回音。
+你往下跳，一层又一层，数字从三十九到十九，从十九到七。
+膝盖已经不是自己的了。
+一层的大厅是亮的，门是玻璃的，门外面是雨。
+你看见门里站着三个人，背对着你。
+<span class="warn">而你的脚，已经踩上了最后一段台阶。</span>`,
+  choices:[
+    {label:'直接冲出去，撞开门', time:1,
+      test:{tag:'force', base:0.44, label:'冲门', ok:'escape_out', bad:'hostage_moment', hard:true}},
+    {label:'退回地下二层，走车库', time:4,
+      test:{tag:'mobility', base:0.5, label:'改道', ok:'escape_garage', bad:'beaten'}},
+    {label:'躲进一层的洗手间，等人散', time:8,
+      test:{tag:'stealth', base:0.5, label:'藏', ok:'escape_out', bad:'taser'}},
+  ]
+};
+
+S.escape_garage = {
+  chapter:'六 · 地下二层',
+  text:`地下二层。
+灯是黄的，空气里有汽油、橡胶，和一种你记得的味道——狗。
+那两条杜宾还在笼子里，笼门虚掩。
+你走过它们身边的时候，第一条站起来了。它看着你，没有叫。
+你走过去。它没有动。
+<span class="cool">车库的卷帘门是半开的。你侧身钻出去，雨落在脸上。</span>`,
+  choices:[
+    {label:'走出去', time:4, act(){ checkpoint('撤离 · 街口'); go('epilogue'); }},
+  ]
+};
+
+S.escape_out = {
+  chapter:'六 · 门外',
+  text:`玻璃门被撞开的那一下，声音大得整条街都听得见。
+雨扑在脸上，很凉。街上有人打着伞，有车，有便利店亮着的灯箱。
+你跑过马路，跑过天桥的桥墩，跑进一条小巷。
+身后有人喊，但雨把声音吃掉了大半。
+<span class="cool">你在一台自动售货机后面停下来，弯着腰，喘。</span>`,
+  choices:[
+    {label:'继续走', time:4, act(){ checkpoint('撤离 · 街口'); go('epilogue'); }},
+  ]
+};
+
+S.epilogue = {
+  chapter:'终 · 雨停之前',
+  text:()=>{
+    let t = `凌晨三点二十。
+你坐在一栋居民楼的天台上，坐在一个没人收走的旧床垫上，裙摆还在往下滴水，一滴一滴地落在水泥上。
+远处，白鲸塔的四十七层还亮着灯——他们还没发现书房里那个人。那盏灯会一直亮到早上，然后换班的人上去，然后整栋楼的灯会一层一层地亮起来。
+耳麦在口袋里，你把它拿出来，握了一会儿，一直没打开。
+最后你还是按了。
+　<q>萤。</q>
+　<q>……在。</q>
+对面沉默了很长时间，久到你以为信号已经断了，久到你开始想第一句话应该说什么。
+　<q>回来。</q>
+就这两个字。没有问她杀了没有，没有问名单，没有问怎么出来的。
+天边有一点点白了。雨小了，变成很细的雾，飘在脸上像没有重量。
+天亮之前，你要走完这最后两条街。`;
+    if(bareCount() >= 3) t += `\n\n<span class="warn">你身上其实没剩下几块布。回来这一路，有三个人停下看过你，其中一个几乎要开口。你没有加快脚步，也没有回头——这一行里最贵的东西是"看起来没什么事"。</span>`;
+    return t;
+  },
+  choices:[
+    {label:'看结局', cls:'gold', act(){ go('win'); }},
+  ]
+};
+
+S.win = {
+  chapter:'终 · 落幕',
+  text:()=>{
+    const c = loadCodex();
+    let s2 = `你走回那间六平米的隔间，反锁门，把身上的衣服一件一件脱下来，堆在墙角。它们全都湿透了，皱成一团，其中一件上面还留着别人的味道，另一件的内侧有一道你出门前没有的口子。
+热水器还是坏的，你用冷水冲了十五分钟。水从头发流到肩膀上，从肩膀流到膝盖，把那点干了的血冲进地漏。你站着，什么也没想，只是让水一直流，流到手指开始发麻。
+镜子上的那道裂还在，把你的脸切成不相等的两半。你在两半之间看了自己一会儿，然后从抽屉里找出一件旧T恤套上，那件T恤领口已经松了。
+名单压在台灯下面。七个名字，打印得很整齐，第七个是你的代号，字母很小，小到不像是给人看的。
+天亮的时候，你睡着了。`;
+    if(s.flags.foundList) s2 += `\n\n<span class="cool">那份名单你没有交出去。它现在在台灯下面，压着，谁也不知道。你还没想好怎么办，但你已经很久没有过"还没想好"的事了。</span>`;
+    if(s.flags.heLetYou) s2 += `\n\n<span class="cool">你睡着的时候，手里一直捏着照片集上撕下来的那一页。你不知道自己是什么时候撕的，也不确定要不要把它扔掉。</span>`;
+    if(s.flags.gotCase) s2 += `\n\n<span class="cool">公文包还在门后，你还没打开过。那里面是什么，是下一部戏的事，和你今晚没关系。你今晚已经够累了。</span>`;
+    if(s.flags.spared) s2 += `\n\n<span class="cool">你放过了他。这在你们的行当里有一个专门的说法，叫"失手"。但你自己知道那不是失手——失手是运气，放过一个人是选择，而你已经很久没有自己做过选择了。</span>`;
+    if(s.flags.killedChef) s2 += `\n\n<span class="warn">你想起电梯里那个女厨工的手。她的手指很粗，指甲剪得很短。你后来一直没敢再想她的脸。</span>`;
+    if(bareCount() >= 3) s2 += `\n\n<span class="warn">你脱下来的那堆东西里，其实没有几件。你今晚几乎是空着身子穿过那栋楼的——这件事你以后会想很多次，想它到底是怎么成功的。</span>`;
+    s2 += `\n\n<em>通关。死法收集 ${c.length} / ${Object.keys(DEATHS).length}。换一身衣服，就是另一条命。</em>`;
+    return s2;
+  },
+  choices:[
+    {label:'翻一翻死法图鉴', natime:true, act(){ openCodex(); }},
+    {label:'从头开始，换一条路', natime:true, act(){ newGame(); }},
+    {label:'回到白鲸塔外面，再走一次', cls:'jade', natime:true,
+      act(){ s.t = T0; s.hp = Math.min(100,s.hp+40); s.susp = 0; s.alarm = 0; go('outer'); }},
+  ]
+};
+
+/* ==================================================================== */
+/* 挣扎脱身：所有“最后一搏”成功后的共同出口                              */
+/* ==================================================================== */
+function escScene(id, chapter, text, opts){
+  opts = opts || {};
+  S[id] = {
+    chapter: chapter,
+    text: text,
+    choices: [
+      { label: opts.a || '带着伤，继续往上', cls:'gold', time:6,
+        act(){
+          s.hp = clamp(s.hp - (opts.cost||40), 6, 100);
+          s.susp += 20; s.alarm += 1;
+          flash('你活着出来了。但代价很大。');
+          go(opts.next || 'floor43');
+        }},
+      { label: opts.b || '从楼里退出去。今晚到此为止', time:8,
+        act(){ s.hp = clamp(s.hp - (opts.cost||40), 6, 100); s.flags.withdrew = true; go('retreat'); }},
+    ]
+  };
+}
+
+escScene('kick_escape','弥留 · 走廊',
+`你用后脑撞上去，撞到了，但那一下没有把他的手撞开，只撞松了半秒。
+半秒够你把手从束线带里抽出来。抽出来的时候，腕上连皮带肉少了一块，那块皮留在带子上，像一片刮下来的姜。
+你滚到一边，撑地站起来，跑。
+他跟在后面，脚步一点都不乱，你能听见他的鞋底在地砖上打出的节奏——和你听过的所有巡逻一样。`,
+{next:'freight', a:'冲进消防门，往下跑'});
+
+escScene('desperate_out','弥留 · 肋下',
+`你把身体向上顶了一下，肩膀抵着地面，用腰把整个人往前推。
+刀从你的皮肉里滑了出去，带出一小股血，血落在他的手背上，他愣了一下。
+他没想到你还能动。他退了半步——这半步，是你今晚最贵的一步。
+你撞开他，撞开身后的玻璃门，跌进走廊。肋下那个洞在流血，你用手压着，压不实，一路走一路在墙上留下手印，五道一组，越来越淡。`,
+{next:'restroom', a:'扶着墙去洗手间'});
+
+escScene('crawl_out','弥留 · 走廊尽头',
+`你咬开了手腕上的血管，让血流得更快——这是一个赌，赌血比命跑得快。
+不，这是个蠢办法，蠢到你自己在咬下去的时候笑了一下。但你现在只剩下蠢办法了。
+你把风衣的内衬撕下来一条，卷成布卷，勒在肋下，用牙咬着另一头把结系紧。勒住了，没有全止住，大概止住了三分之一。
+你爬起来，扶着墙，一步一步往楼梯那边挪。墙是凉的，你走过的每一段都比前一段更滑。`,
+{next:'floor43'});
+
+escScene('impale_out','弥留 · 钢筋',
+`你抓住钢筋，把自己往上拔。
+疼得眼前发白，白得能看见星星——不是比喻，是真的有白色的点在视野里乱飞，飞了很久。
+你从钢筋上下来的那一下，整个人摔在水泥地上，腰侧留着一个两指宽的洞，血从洞里往外冒，冒着泡，像泉眼。
+你在雨里躺了整整一分钟，然后撑着地站起来。
+你没有回头去看那根钢筋。你不想知道上面挂了多少东西，也不想知道它本来应该穿在谁身上。`,
+{next:'kitchen_side'});
+
+escScene('door_escape','弥留 · 电梯门缝',
+`陶瓷刀卡进了门缝，刀刃发出一声很脆的响——没有断。
+门往回退了两公分，不多，但够了。
+你把自己从缝里抽出来，抽的过程里右髋的皮肤被整个刮掉一层，像揭掉一张不干胶，底下是粉色的。
+你趴在地砖上，像一条刚从水里捞上来的鱼，喘了大概三十秒。
+电梯门在你身后合上了，很平静，像什么都没发生过。楼层数字继续往上跳。`,
+{next:'stairwell'});
+
+escScene('dog_live','弥留 · 车库',
+`你把刀横进了它的嘴里。
+刀锋从它的上颚切到舌根，它退开了，甩着头，血溅在旁边那辆白车的车身上，一道一道，很鲜艳。它没有叫，只是退到柱子后面去舔自己的嘴。
+第二条扑上来的时候，你抬腿踢中了它的胸口。它在地上打了个滚，站起来，没有再上。
+你爬上一辆车的车顶，再从车顶翻到通风管上，趴下。
+两条狗在下面转圈，跳起来撞管子，撞了六次。你趴在上面，一直趴到它们不撞为止。`,
+{next:'freight'});
+
+escScene('pool_out','弥留 · 泳池底',
+`你蹬了池壁。
+身体从水下射出去，撞开水面上那层碎掉的灯光，一口气从肺里顶上来。
+你的手指抓住了池边，抓得很紧，指甲断了两根，断的地方在水里不疼，出了水才开始疼。
+你把自己拖上去，趴在大理石的地面上，吐出三口水，吐出来的水里有血的味道。
+池面上的波纹一圈一圈散开，慢慢平了，重新映出天花板那盏灯。灯还是那盏，你自己不太一样了。`,
+{next:'pool_roof'});
+
+escScene('freezer_out','弥留 · 冷库',
+`你短接了锁，听见"啪"的一声，门弹开一线。
+你用肩膀撞，撞了三次，第三次门开了，门轴上的冰被震下来，落了一地。
+外面的走廊是二十度，对现在的你来说，那是天堂。
+你跌出去，趴在地砖上，地砖是温的，你把手掌整个贴上去，一动不动。
+有人在走廊那头喊了一声，你听见了，但你没有力气跑。你只是趴着，让体温一点一点回来，回来的时候每一寸皮肤都疼。`,
+{next:'kitchen_side'});
+
+escScene('break_room','弥留 · 值班室',
+`换手的那一秒，你用了膝盖。
+踢中的是那个人的下巴，声音很实，他整个人向后去了，撞在铁柜上。
+你从桌子上滚下来，抓了台灯砸向第二个人，砸中的是肩膀。第三个人已经抓住了你的头发，把你往后拽，你反手把台灯上那颗还红着的灯泡按在他的手背上。
+那一声惨叫很响，响到走廊里有别的门开了。
+趁那一下，你冲出门。走廊里没有灯，你光着上身跑了四十米，跑进楼梯间。`,
+{next:'stairwell', cost:50});
+
+escScene('spit_on_him','弥留 · 顶层',
+`你咬住了他的袖口，咬得很紧，然后松开了。
+松开的那一秒，你用尽最后一点力气，把嘴里那口带血的口水吐在了他的皮鞋上。
+他低头看了一眼。他先看鞋，再看你，看了大概两秒钟。
+"有点意思。"他说。
+他没有杀你。他让人把你带到地下四层，塞进一辆车，运出城。车开了一整夜。
+三天后，你在一间没有窗的房间里醒来，手腕上有铁环，门上有编号。
+那不是结局。那只是另一种死法的开头。`,
+{next:'cargo_room', cost:55});
+
+escScene('bid_break','弥留 · 红房间',
+`你咬断了那根皮带。
+牙齿崩了一小块，碎渣在舌头上，但扣开了。
+你从椅子上下来，用了两秒——这两秒里，台下的人还在加价，木槌的声音隔着一层绒布传进来，没有人注意到帘子后面的动静。
+你从后台的通风口爬出去，通风口很窄，肩膀卡了两次。
+通风口外面是货梯井。你顺着钢索往下滑，手掌被磨得血肉模糊，一层一层的皮留在钢丝上，但你在往下走。`,
+{next:'mech39', cost:45});
+
+escScene('corridor_break','弥留 · 走廊',
+`你先动了。
+第一个人的电击棒还在掌心没举起来，你的刀已经进了他的小臂，刀在他的骨头边上划了一下。
+第二个人的对讲机掉在地上，你踩上去，把它踩碎，塑料壳裂开的声音很脆。
+他们退了半步——半步就够了。你冲过他们，撞开防火门。
+门后面是楼梯，楼梯下面是黑的，黑得很深。
+你跑了。`,
+{next:'stairwell'});
+
+escScene('hostage_moment','弥留 · 现场',
+`你伸手抓住最近的那个人，刀抵在他的颈侧。
+四周静了。
+"让开。"你说。
+他们让开了一条路。你退着走，退到楼梯间门口，把那个人推进人堆里。
+门在你身后关上。你开始往下跑。
+<span class="cool">你甚至没看清你抓的是谁。</span>`,
+{next:'stairwell'});
+
+/* ---------------- 额外死法 ---------------- */
+D('drain', {name:'管沟', kind:'意外', tagline:'水涨上来的时候，你正卡在管子里',
+  text:`你在管子里卡住了，卡在胸口那一截，前后都动不了，卡了四十分钟。
+四十分钟里，水从脚踝涨到胸口，从胸口涨到下巴。它不是一下子来的，是一厘米一厘米来的，慢到你能数清每一次上涨之后自己的呼吸要抬高多少。
+你抬着头，脸离管顶只有五公分。你还能呼吸。
+你能呼吸，是因为你贴着那个五公分的空腔。水每涨一厘米，你能呼吸的空气就少一点，那五公分就变成四公分、三公分，变成一条缝。
+你听见上游有人在放水——某个地方的水龙头开了，某个地方的马桶被冲了，某个地方的洗衣机进了漂洗程序。这些声音经过几百米的管道传到你的耳朵里，一声一声，很平常，平常得像宣判。
+你开始用嘴吸气，因为鼻子已经有一半在水里。你用嘴唇贴着管顶那层湿漉漉的水泥，把空气从最小的那道缝里刮进来。
+最后一刻，你是抬着脖子死的。
+水灌进鼻子的时候你还在往上顶，顶得颈椎发出了声音。那声音在管道里传得很远，一直传到下游的格栅那边，有人在几十米外的检修口听见了，以为是管子里的气。
+第二天，管沟检修工在下游的格栅上清出了很多东西，其中有一件黑色的高领衫。他把它挑出来，扔进了垃圾袋，继续往下清。`});
+
+D('duct_crush', {name:'管道', kind:'意外', tagline:'风阀在你身后启动了',
+  text:`你在管道里爬的时候，楼里的 BA 系统按计划启动了夜间风阀自检。这件事写在值班手册的第三页，没有人当回事过。
+那个阀门在离你三米的地方，一片直径八十公分的铁叶，装在轴上，由一台两吨压力的执行器驱动。
+它是自动的。它不认人，它甚至不知道管道里有东西——它的传感器只测风压。
+阀门转动的时候，你听见了金属摩擦的声音，很闷，从背后传来。你回头，但管道里没有空间可以回头，你只能把脸贴向管壁，用眼角的余光看见一片黑正在往你这边推。
+铁叶从你的右肩压过来，把你压在管壁上。
+先是肩胛骨，发出了一连串很碎的响；然后是肋骨，一排；然后是颈椎。你的脸被挤在管壁上，皮肤的纹路都印在了水泥上。
+执行器还有最后几公分的行程。它走完了。
+管道里的风停了。你也停了。
+BA 系统在控制台上打了一行日志：三号竖井风阀自检完成，用时 4.2 秒，正常。`});
+
+D('burn', {name:'火', kind:'意外', tagline:'四十层的变电室',
+  text:`你撞开的门后面，是四十层的变电室。你本来只是想穿过它，从另一头的门出去。
+门是防火门，很重，你把它推开的时候，触发了那套十年没维护过的气体灭火系统——不，是相反，那套系统早就没气了，所以它什么也没做。配电柜在你右手边三米的地方，有一处在冒烟，很淡，你没有在意。
+弧光先亮。白得刺眼，把你整个人照成一张剪影投在对面的墙上，那一瞬间，墙上那个影子比你自己还清楚。
+然后是火。不，先是你自己的衣服。化纤混纺，在两千度的电弧里不会烧起来，它会直接熔化，熔在皮肤上，然后跟着皮肤一起烧。
+你在地上滚，滚的时候火跟着你，像一块不肯松手的布，怎么都拍不掉。你的手在拍自己的肩，拍的是那层已经和皮长在一起的东西。
+烧焦的味道从你的鼻子里进去，从你的肺里出来。那种味道你以前闻过，在训练营的一次事故里，当时你站在二十米外，觉得还好。
+你最后是被烟熏倒的，倒在门口。门是开着的，外面就是走廊，走廊的灯是暖黄色的，还有一块"注意安全"的地垫。
+差四十公分。`,
+  struggle:{label:'往门口爬', base:0.28, tag:'mobility', ok:'burn_out', backup:'burn2'}});
+
+D('burn2', {name:'差四十公分', kind:'意外', tagline:'门是开着的',
+  text:`你往门口爬。
+你的手肘在地面上蹭，蹭出一条黑色的痕，那条痕后面跟着一小片一小片掉下来的东西。
+火在你的背上，像有人趴在你身上，很热，很重，不肯下来。你能感到它在往里面走，穿过皮，穿过肌肉，朝着骨头去。
+你爬到门口，手伸到走廊里，指尖碰到走廊的地毯——地毯是冰冷的，凉得让你整个人一哆嗦，那一瞬间你几乎要哭出来。你想起了很多不相干的事，比如安全屋那张床，比如冰箱里那半盒东西。
+然后你的手就不能再往前了。不是没力气，是手臂和肩膀之间那一部分已经不在了，你的手还在努力，但它收不回来，也推不出去。
+走廊里有两个人跑过去，看见了你，看见了一个还在动的东西。
+他们停了一下。其中一个往前迈了半步——你甚至看清了他鞋子上有一个泥点——然后他退了回去，跟另一个人一起跑了。
+你听见自己的头发在烧，噼啪的响，很像有人在很近的地方炒豆子。
+你最后看见的，是走廊尽头那盏暖黄色的灯，离你大概两米。`});
+
+/* ---------------- 收尾补充场景 ---------------- */
+S.kitchen_side = {
+  chapter:'二 · 后门通道',
+  allowWardrobe:true,
+  text:`后门通道连着后厨，地上是湿的，墙上挂着一排不锈钢挂钩，钩子上挂着两扇还没片完的猪肉。
+冷气从库门那边渗出来，很凉。
+再往前是传菜口，传出盘子碰撞的声音和油烟味。
+<span class="cool">你靠在墙上，喘了一会儿。血把内衬黏在皮肤上，扯一下就疼。</span>`,
+  choices:[
+    {label:'调整着装', act(){ openWardrobe(); }},
+    {label:'去冷库，找点能包伤口的东西', time:5,
+      act(){ s.bag.push('bandage'); s.hp = Math.min(100,s.hp+10); flash('你扯了一段保鲜膜和一根布条。'); go('kitchen_side'); }},
+    {label:'从传菜口混进后厨', time:5,
+      test:{tag:'stealth', base:0.55, label:'混入', ok:'kitchen', bad:'freezer'}},
+    {label:'直接走服务通道，往楼上', time:6,
+      test:{tag:'stealth', base:0.5, label:'上楼', ok:'corridor3', bad:'hostess'}},
+  ]
+};
+
+S.cargo_room = {
+  chapter:'终 · 无窗的房间',
+  text:`你在一间没有窗的房间里醒来。
+房间大概八平米，一张床垫，一个塑料桶，一盏嵌在天花板里的灯，二十四小时不灭。
+门上有编号，三十七。
+手腕上的皮革环还在，不过已经换成了铁的那一种，衬了一层软垫。
+有人每天来一次，送水，送饭，不说话。
+第七天，你开始不说话。第十四天，你开始在有人的时候也不遮身体。第三十天，你已经分不清自己是活着，还是只是还没死。
+<span class="warn">这不是一种死法。这是一种很长很长的死。</span>
+"回廊"的档案里，你的名字后面写着两个字：失联。`,
+  choices:[
+    {label:'用铁环磨墙，磨到手腕见骨', hint:'需要很久很久', natime:true, cls:'gold',
+      test:{tag:'force', base:0.16, label:'磨断铁环', ok:'cargo_break', bad:'cargo_dead', hard:true}},
+    {label:'接受这个结局', natime:true, act(){ go('cargo_stay'); }},
+  ]
+};
+
+D('cargo_dead', {name:'三十七号', kind:'屈辱', tagline:'磨到一半，血先流干了',
+  text:`你用铁环磨墙，磨了三天。
+第一天磨出一道浅槽，白色的，像有人用粉笔划了一下；第二天槽变深了，你的右手腕上磨掉了一圈皮，露出底下粉色的嫩肉；第三天磨到了肉，然后是筋膜，那种东西是白色的，一丝一丝，会随着你的动作滑开又收回去。
+第三天早上，你看见了骨头。比你想象的细，也比你想象的湿，上面有一层很淡的血色，像被水泡过的纸。你盯着它看了很久，然后继续磨。
+你也看见了血。这一次它不一样，它不是一点点渗出来的，是一直在流，从那个开口往下淌，沿着你的小臂，滴在床垫上，再从床垫渗到地上。你用手去摁，摁不住，手掌一松它就又开始了。
+你开始觉得冷，然后是困。你坐下来，靠着墙，把那只手腕放在膝盖上，像在抱一个别人的东西。
+送水的人第三天中午来的。他推开门，看了一眼，站了两秒，然后退出去，把门带上了。他后来对警察说，他以为你在睡觉。
+他们把床垫卷起来，扔进了垃圾通道。编号三十七空了两天，第三天就有人搬了进来。来的人二十四岁，进门第一件事是抬头看那盏不灭的灯。`});
+
+S.cargo_break = {
+  chapter:'终 · 断环',
+  text:`第九天，铁环断了。
+断口把你的手腕划开了一道很深的口子，血喷在墙上，喷成一个很随意的形状。
+门是铁的，但锁是老的。你用断下来的半只环，把锁舌撬回去。
+走廊里没有人。你光着脚，身上只有一层很薄的布。
+你走进了一个很长很长的、没有尽头的地方。`,
+  choices:[
+    {label:'往前走', cls:'jade', time:10, act(){ s.hp -= 40; s.flags.escapedCargo = true; go('retreat'); }},
+  ]
+};
+
+escScene('burn_out','弥留 · 变电室',
+`你往门口爬。
+手肘在地面上蹭，蹭出一条黑色的痕，火在你背上，一层一层地烧。
+你爬到门口，抓住门框，把自己拖了出去。
+走廊的地毯是冷的。你把整张脸贴上去，贴着那一点凉。
+你背上的皮已经没有一块是完整的，衣服熔在肉里，扯都扯不下来。
+但你出去了。`,
+{next:'stairwell', cost:55});
+
+S.cargo_stay = {
+  chapter:'终 · 三十七号',
+  text:`你不再磨了。
+你把铁环放在枕头下面，躺下来，看着天花板那盏不灭的灯。
+第一天你还在数日子。一个月之后你不数了。
+冬天的时候，房间里没有暖气；夏天的时候，送水的人会多给你一盆凉水。
+你慢慢忘了自己以前站在天桥上看那栋楼的样子，忘了风衣的内衬里藏着什么，忘了自己叫什么。
+<span class="cool">你还活着。这大概是唯一一件所有人都懒得纠正的事。</span>
+<em>—— 结局：三十七号</em>`,
+  choices:[
+    {label:'翻一翻死法图鉴', natime:true, act(){ openCodex(); }},
+    {label:'从头开始', natime:true, act(){ newGame(); }},
+  ]
+};
+
+/* 兜底：未经过 die() 就引用收官场景时使用 */
+if(!S.__death_hold){
+  S.__death_hold = {
+    chapter:'收官',
+    text:'雨还在下。这座城市不会为任何人停一秒。',
+    choices:[
+      {label:'回到上一个落脚点', natime:true,
+        act(){ if(cp){ s = JSON.parse(JSON.stringify(cp)); render(); } else { newGame(); } }},
+      {label:'从头开始', natime:true, act(){ newGame(); }},
+    ]
+  };
+}
+
+/* ---------------- 货梯（底层枢纽） ---------------- */
+S.freight = {
+  chapter:'二 · 货梯',
+  allowWardrobe:true,
+  text:()=>{
+    let t = `货梯是一个刷了绿漆的铁笼子，门口拉着一半卷帘。
+笼子里停着一台手推车，车上叠着十二箱红酒，其中一箱被拆开了，空瓶倒在角落。
+操作台上有一个读卡区，三个按钮：地下二、九、三十九。
+操作员不在。对讲机在挂钩上晃，里面在放一首很老的歌。
+<span class="cool">再往上，就得靠你自己了。</span>`;
+    if(s.flags.guardCard) t += `\n你手里那张门禁卡，正好可以刷这部梯。`;
+    return t;
+  },
+  choices:[
+    {label:'调整着装', act(){ openWardrobe(); }},
+    {label:'刷卡，按三十九', cls:'jade', time:6,
+      show:()=>s.flags.guardCard,
+      act(){ checkpoint('货梯 · 三十九层'); go('mech39'); }},
+    {label:'不刷卡，直接撬开面板短接上行', time:7,
+      test:{tag:'wit', base:0.42, label:'短接', ok:'mech39', bad:'acc_machine', hard:true}},
+    {label:'钻进酒箱堆里，让对讲机那头的人以为货还没卸', time:6,
+      test:{tag:'stealth', base:0.5, label:'藏', ok:'mech39', bad:'door'}},
+    {label:'先把手推车推回后厨，从服务通道走', time:5,
+      act(){ checkpoint('服务通道'); go('kitchen_side'); }},
+  ]
+};
+
+/* ---------------- 电梯井直上 ---------------- */
+S.floor47_rail = {
+  chapter:'三 · 井道',
+  text:`你从四十三层的井道门缝里挤出来，双手抓在钢缆的护套上。
+井道是方的，混凝土，每一层有一道门缝，缝隙里漏出一点光。
+往上四十米，是四十七层。
+你爬的时候不敢往下看，不是因为怕高，是因为往下看会知道你刚才冒了多大的险。
+第三十米的时候，护套上有一层油。
+第三十五米的时候，你的小臂开始抽筋。
+第四十米，你摸到了四十七层井道门的门闩。`,
+  choices:[
+    {label:'推开门闩，翻进去', time:4,
+      test:{tag:'mobility', base:0.5, label:'翻入', ok:'floor47', bad:'cable', hard:true}},
+    {label:'先用腰带把手腕和钢缆绑在一起，再推门', time:6,
+      act(){ flash('你绑好了。'); checkpoint('四十七层 · 井道口'); go('floor47'); }},
+  ]
+};
+
+/* ---------------- 其它补充 ---------------- */
+S.restroom_clean = {
+  chapter:'二 · 洗手间',
+  text:`瓶子上印着一行小字：生物酶清洁剂 · 请勿接触皮肤。
+你认得这个字，"生物酶"——你在训练课上见过一罐同样的东西，教官当时说："这东西在三十秒内不会有任何感觉。这就是它最厉害的地方。"
+你把瓶盖拧开一条缝，倒了一点在纸巾上，隔着纸巾去擦袖口的血渍。
+血渍淡了。
+<span class="cool">你把手洗了三遍。</span>`,
+  choices:[
+    {label:'把瓶盖拧紧，放回原处', time:2, act(){ s.hp = Math.min(100,s.hp+6); go('restroom'); }},
+  ]
+};
+
+S.floor43_gap = {
+  chapter:'二 · 四十三层',
+  text:`施工吊孔只有八十公分见方，底下是四十层的机电夹层，能看到一截桥架和一台停了的卷扬机。
+你蹲下去看，看见桥架上面放着一只工具包，还有一件叠得很整齐的外套——大概是哪个工人嫌热脱的。
+这两样东西都离你有四米。`,
+  choices:[
+    {label:'跳下去拿', time:5,
+      test:{tag:'mobility', base:0.5, label:'落点', ok:'floor43_cache', bad:'rebar', hard:true}},
+    {label:'算了，不值得', time:2, act(){ go('floor43'); }},
+  ]
+};
+
+S.floor43_cache = {
+  chapter:'二 · 四十三层',
+  text:`你落在桥架上，晃了一下，抓住了钢梁。
+工具包里有：一卷胶带、一把美工刀、半包烟。外套的口袋里有一张工牌，照片上的人四十来岁，笑得很敷衍。
+<span class="cool">这些东西，可能比你想的更有用。</span>`,
+  choices:[
+    {label:'收下，爬回吊孔', time:4,
+      act(){
+        s.bag.push('duct_tape'); s.bag.push('boning_knife');
+        if(!s.flags.guardCard){ s.bag.push('doorcard'); s.flags.guardCard = true; }
+        flash('拿到：胶带、美工刀、一张工牌');
+        checkpoint('四十三层 · 空楼'); go('floor43');
+      }},
+  ]
+};
+
+S.escape_tunnel = {
+  chapter:'六 · 检修隧道',
+  text:`检修隧道是砖砌的，一米七高，地上有一根很粗的电缆，还有一条锈死的铁轨——很久以前这里跑过运煤的小车。
+隧道尽头是地铁三号线的存车线，能听见列车进站时的风。
+你走了大概六百米，前面出现一个通风井，井口有光。
+<span class="cool">还有最后一段。</span>`,
+  choices:[
+    {label:'爬上去，从通风井出去', time:6,
+      test:{tag:'mobility', base:0.5, label:'爬井', ok:'epilogue', bad:'train', hard:true}},
+  ]
+};
+
+S.pool_roof_under = {
+  chapter:'四 · 泳池',
+  text:`你贴着池底，从鲸的眼睛那里往深水区的排水口游。
+水很清，也很静，只有你自己的气泡在响。
+排水口的栅栏是螺丝固定的，你用刀柄拧了三颗。
+第四颗滑丝了。你憋到肺开始烧，才从水里冒出来，扒在池边喘。
+<span class="cool">你没找到通道。但你摸清了这片水。</span>`,
+  choices:[
+    {label:'上岸', time:4, act(){ s.hp -= 10; checkpoint('四十七层 · 露台'); go('pool_roof'); }},
+  ]
+};
+
+S.car_cache = {
+  chapter:'二 · 地下车库',
+  text:`你从两辆正在挪的车之间穿了过去，后背贴在水泥柱上，柱子上包着橡胶。
+后视镜从你脸前二十公分的地方过去。
+你的手一直按在车上，一直没抖。
+<span class="cool">B 区后面就是货梯口。</span>`,
+  choices:[
+    {label:'走过去', time:3, act(){ checkpoint('车库 · 货梯前'); go('freight'); }},
+  ]
+};
+
+/* ---------------- 高危失败池：同一个死可能有很多种 ---------------- */
+function poolScene(caption, list){
+  return () => {
+    const id = pick(list);
+    die(id);
+    return { chapter:caption, text:'', choices:[] };
+  };
+}
+S.acc_machine = poolScene('失手', ['steam','burn','cable','duct_crush']);
+S.acc_street  = poolScene('失手', ['car','train','sniper','glass']);
+S.acc_hands   = poolScene('失手', ['neck','crew','beaten','taser']);
+S.acc_body    = poolScene('失手', ['cargo','bid','toy','crew']);
+S.acc_waste   = poolScene('失手', ['compactor','acid','hook','vise']);
+S.acc_fall    = poolScene('失手', ['rebar','pool','fall','glass']);
+
+
+
+/* ------------------------------------------------------------------ */
+/* 状态                                                                */
+/* ------------------------------------------------------------------ */
+const T0 = 23*60 + 40;      // 23:40
+const T_END = 26*60;        // 02:00 换班
+const SAVE_KEY = 'ying.whaletower.save.v1';
+const CODEX_KEY= 'ying.whaletower.codex.v1';
+
+let s = null;               // 当前状态
+let cp = null;              // 场景检查点
+let lastCheckpointName = '';
+
+function fresh(){
+  return {
+    scene:'brief',
+    hp:100, expo:0, susp:0, alarm:0, t:T0,
+    worn:{outer:'trench', top:'turtleneck', bottom:'trousers', underwear:'plain', socks:'nylon', shoes:'boots', tool:'blade'},
+    bag:['lockpick','lipstick'],
+    flags:{},
+    log:[],
+    lost:[],
+    deaths:[],
+    attempts:0,
+    wardrobeOpen:false,
+    pickSlot:null
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* 装备逻辑                                                            */
+/* ------------------------------------------------------------------ */
+function item(id){ return WEAR[id]; }
+function wornIds(){ return SLOT_ORDER.map(k=>s.worn[k]).filter(Boolean); }
+function wornItems(){ return wornIds().map(id=>WEAR[id]).filter(Boolean); }
+
+const STAT_KEYS = ['stealth','mobility','armor','charm','look'];
+function statSum(){
+  const o = {stealth:0,mobility:0,armor:0,charm:0,look:0,expo:0};
+  wornItems().forEach(it=>{
+    STAT_KEYS.forEach(k=>{ o[k] += (it[k]||0); });
+    o.expo += (it.expo||0);
+  });
+  return o;
+}
+function totalExpo(){
+  // 服装自带暴露 + 状态累加
+  return clamp(Math.round(statSum().expo + s.expo), 0, 100);
+}
+
+/* ---- 标签系统：衣服不只是数值，某些判定只认"你穿了什么" ---- */
+function hasTag(t){
+  return wornItems().some(it => (it.tags || []).includes(t));
+}
+function countTag(t){
+  return wornItems().filter(it => (it.tags || []).includes(t)).length;
+}
+function isBare(slot){ return !s.worn[slot]; }
+function bareCount(){
+  return SLOT_ORDER.filter(k => k !== 'tool' && !s.worn[k]).length;
+}
+function tagNames(){
+  const set = new Set();
+  wornItems().forEach(it => (it.tags || []).forEach(t => set.add(t)));
+  return [...set];
+}
+function doff(slot){
+  const id = s.worn[slot];
+  if(!id) return false;
+  s.worn[slot] = null;
+  const it = WEAR[id];
+  log(`脱下：${it.name}`);
+  tick(1);
+  if(it.onRemove) it.onRemove();
+  return true;
+}
+function don(slot, id){
+  const it = WEAR[id];
+  if(!it || it.slot !== slot) return false;
+  if(s.worn[slot]) {
+    // 换下旧的；只有"楼里拿到的"那一类才进随身包，常备衣物放回衣箱
+    const old = WEAR[s.worn[slot]];
+    if(SCENE_GEAR.has(old.id)) s.bag.push(old.id);
+    if(old.onRemove) old.onRemove();
+  }
+  const i = s.bag.indexOf(id);
+  if(i>=0) s.bag.splice(i,1);
+  s.worn[slot] = id;
+  log(`换上：${it.name}`);
+  tick(1);
+  if(it.onWear) it.onWear();
+  return true;
+}
+function has(id){ return wornIds().includes(id); }
+function bagHas(id){ return s.bag.includes(id); }
+
+/* ------------------------------------------------------------------ */
+/* 时间 / 警报                                                         */
+/* ------------------------------------------------------------------ */
+function tick(min){
+  s.t += min;
+  if(s.t >= T_END && !s.flags.timedOut){
+    s.flags.timedOut = true;
+    s.alarm += 2;
+    s.susp += 20;
+  } else if(s.t >= T_END - 15 && !s.flags.warned){
+    s.flags.warned = true;
+  }
+}
+function clockStr(){
+  const t = s.t % 1440;
+  const h = String(Math.floor(t/60)).padStart(2,'0');
+  const m = String(t%60).padStart(2,'0');
+  return h+':'+m;
+}
+function alarmLabel(){
+  if(s.alarm<=0) return '常态';
+  if(s.alarm===1) return '留意';
+  if(s.alarm===2) return '搜楼';
+  if(s.alarm===3) return '封锁';
+  return '猎杀';
+}
+function alarmMod(){ return s.alarm * 0.07; }
+
+/* ------------------------------------------------------------------ */
+/* 判定                                                                */
+/* ------------------------------------------------------------------ */
+/*
+  test 结构：
+  { tag:'stealth', base:0.62, label:'潜行', ok:'sceneId或函数', bad:'sceneId或函数',
+    bonus:{after:0.1}, expoHelp:true, expoHurt:false, hard:true }
+*/
+function computeOdds(t){
+  const st = statSum();
+  let p = t.base != null ? t.base : 0.6;
+  const tag = t.tag || 'stealth';
+
+  if(tag==='stealth'){
+    p += st.stealth * 0.011;
+    p -= totalExpo() * 0.0042;      // 太显眼，潜行变难
+    p -= s.susp * 0.0026;
+  } else if(tag==='mobility'){
+    p += st.mobility * 0.012;
+    p -= (100-s.hp) * 0.0013;       // 受伤拖慢
+  } else if(tag==='charm'){
+    p += st.charm * 0.013;
+    p += totalExpo() * 0.0035;      // 露得多，谈得开
+    p -= s.susp * 0.0030;
+  } else if(tag==='force'){
+    p += st.armor * 0.008;
+    p += (s.hp - 60) * 0.0035;
+  } else if(tag==='wit'){
+    p += 0.0;
+    p -= s.susp * 0.002;
+  }
+  if(t.bonus) for(const k in t.bonus) p += t.bonus[k];
+  // 标签修正：衣服的"特殊效果"在这里生效
+  if(t.tagBonus) for(const k in t.tagBonus) p += countTag(k) * t.tagBonus[k];
+  if(t.needTag && !hasTag(t.needTag)) p -= 0.18;
+  if(t.bareBonus) p += bareCount() * t.bareBonus;
+  if(t.bareSlot && isBare(t.bareSlot)) p += (t.bareSlotBonus || 0.15);
+  if(t.hard) p -= 0.12;
+  p -= alarmMod();
+  return clamp(p, 0.12, 0.94);
+}
+function roll(t, okId, badId){
+  const p = computeOdds(t);
+  const win = Math.random() < p;
+  const pct = Math.round(p*100);
+  if(win){ if(okId) go(okId); return true; }
+  else { if(badId) go(badId); return false; }
+}
+function oddsText(t){
+  const p = Math.round(computeOdds(t)*100);
+  let cls = 'ok', word = '稳';
+  if(p<35){ cls='bad'; word='凶'; }
+  else if(p<60){ cls='risk'; word='险'; }
+  return `<span class="${cls}">[${t.label||'判定'} ${p}% · ${word}]</span>`;
+}
+
+/* ------------------------------------------------------------------ */
+/* 死亡                                                                */
+/* ------------------------------------------------------------------ */
+function unlockDeath(id){
+  const c = loadCodex();
+  if(!c.includes(id)){ c.push(id); saveCodex(c); }
+}
+function loadCodex(){ try{ return JSON.parse(localStorage.getItem(CODEX_KEY)) || []; }catch(e){ return []; } }
+function saveCodex(c){ try{ localStorage.setItem(CODEX_KEY, JSON.stringify(c)); }catch(e){} }
+
+function autopsyHTML(r){
+  const rows = [
+    ['死亡时间', r.time],
+    ['发现地点', r.place],
+    ['衣着遗物', r.dress],
+    ['体表所见', r.surface],
+    ['内部损伤', r.inner],
+    ['鉴定意见', r.opinion],
+    ['死因判定', r.cause, 'cause'],
+    ['现场勘验', r.note],
+  ].filter(x => x[1]);
+  if(!rows.length) return '';
+  return `<div class="autopsy"><h4>法医检验报告${r.no?'　编号 '+r.no:''}</h4><dl>` +
+    rows.map(([k,v,cls]) => `<dt>${k}</dt><dd class="${cls||''}">${v}</dd>`).join('') +
+    `</dl></div>`;
+}
+
+/* 尸体被发现时的衣着状态——按你当时真正穿在身上的东西生成 */
+function dressReport(){
+  const w = s.worn;
+  const seg = [];
+  if(w.outer) seg.push(`外着${WEAR[w.outer].name}一件`);
+  else seg.push('躯干外层无衣物');
+  if(w.top) seg.push(`${w.outer?'内着':'上身唯一覆盖物为'}${WEAR[w.top].name}`);
+  else seg.push('上身无衣物覆盖');
+  if(w.bottom) seg.push(`下着${WEAR[w.bottom].name}`);
+  else seg.push('下身无衣物覆盖');
+  seg.push(w.underwear ? WEAR[w.underwear].name : '未着内衣');
+  seg.push(w.socks ? `双足着${WEAR[w.socks].name}` : '双足未着袜');
+  seg.push(w.shoes ? `足穿${WEAR[w.shoes].name}` : '双足赤裸');
+  let line = seg.join('，') + '。';
+  const bg = bareCount();
+  if(bg >= 3) line += '体表大部分区域直接暴露于环境，裸露部位见附着性污渍与多处擦伤，与时令及场所的常规着装不符。';
+  else if(totalExpo() >= 60) line += '衣着明显不整，多处接缝撕裂，纽扣缺失，符合遭受外力牵拉所致。';
+  if((s.lost||[]).length) line += '现场及沿途另拣取散落衣物：' + s.lost.map(x=>WEAR[x]?WEAR[x].name:x).join('、') + '。';
+  if(s.bag && s.bag.length) line += '随身物品：' + s.bag.map(x=>WEAR[x]?WEAR[x].name:x).join('、') + '。';
+  else line += '随身未见物品。';
+  return line;
+}
+
+/* 衣物在打斗、拖拽中脱落或被强行剥去 */
+function loseGear(slot, msg){
+  const id = s.worn[slot];
+  if(!id) return false;
+  const it = WEAR[id];
+  s.worn[slot] = null;
+  s.lost = s.lost || [];
+  s.lost.push(id);
+  log('失去：' + it.name);
+  if(msg) flash(msg);
+  return true;
+}
+
+/* 死亡发生时，身上的每一件东西都留下自己的痕迹 */
+function dressTail(){
+  const w = s.worn, out = [];
+  if(!w.shoes) out.push('你到最后都是光着脚的。脚底一直贴着地，凉，这个感觉到最后都没有断。');
+  else if(w.shoes === 'heels') out.push('右脚的鞋跟断了，斜插在地毯里，离你大概一米，孤零零地立着。');
+  else if(w.shoes === 'boots') out.push('那双软底靴还穿在脚上，鞋底几乎没沾到血——它本来是为了让你走路不出声的。');
+  else if(w.shoes === 'sneakers') out.push('跑鞋的鞋带还是两个死结，没有人解开过。');
+
+  if(w.outer === 'gown') out.push('墨绿的裙子浸了血，颜色变深，摊在身下像一小片没有光的湖。');
+  else if(w.outer === 'trench') out.push('风衣的下摆压在你身下，遮住了一半的伤。这件衣服跟了你三年。');
+  else if(w.outer === 'guard_jacket') out.push('那件藏青外套太大，肩线落到了你的肘上，袖口还留着别人的体温。');
+  else if(!w.outer) out.push('你身上没有外层。别人一眼就能把你从头看到脚。');
+
+  if(w.underwear === 'lace') out.push('蕾丝那一层被血浸硬了，边缘翘起一圈很细的毛边。');
+  else if(!w.underwear) out.push('你身上没有一处可以遮的。第一个发现你的人后来说，他起先以为那是一堆被扔掉的旧衣服。');
+
+  if(w.socks === 'stocking') out.push('吊带松了一根，长筒袜滑到膝盖以下，堆在脚踝上。');
+  else if(w.socks === 'nylon') out.push('丝袜在右膝那里勾破了一道，破口从膝上一直裂到脚踝。');
+  else if(!w.socks) out.push('袜子那一层是空的。你的脚踝在灯下露着，很白。');
+
+  if(w.tool === 'blade') out.push('刀还在你手边，只是刃口朝向了你自己。');
+  else if(!w.tool) out.push('你身上一件工具也没有留下。他们搜得很干净。');
+
+  return out.length ? '\n\n' + out.join('') : '';
+}
+
+function die(id, extra){
+  const d = DEATHS[id];
+  if(!d){ console.warn('missing death', id); return; }
+  s.lastDeath = id;
+  unlockDeath(id);
+  s.attempts++;
+  const rep = d.report ? Object.assign({}, d.report) : null;
+  if(rep) rep.dress = dressReport();
+  S.__death = () => ({
+    kind:'death',
+    chapter:'死',
+    name:d.name,
+    tagline: d.tagline,
+    kindName: d.kind,
+    report: rep,
+    text: d.text + dressTail() + (extra ? '\n\n'+extra : ''),
+    choices: d.struggle ? [
+      { label: d.struggle.label, hint:'最后一搏 · '+Math.round(d.struggle.base*100)+'%', cls:'gold',
+        test:{ tag:d.struggle.tag||'mobility', base:d.struggle.base, label:'挣扎', hard:true },
+        to: d.struggle.ok, death:true, act(){
+          if(!roll(d.struggle, d.struggle.ok, null)){
+            const id2 = d.struggle.backup || id;
+            setTimeout(()=>die(id2), 0);
+          }
+        }},
+      { label:'不再动了', hint:'接受这个结局', act(){ go('__death_hold'); } }
+    ] : [
+      { label:'不再动了', hint:'接受这个结局', act(){ go('__death_hold'); } }
+    ]
+  });
+  S.__death_hold = () => ({
+    kind:'hold', chapter:'收官',
+    text: d.after || '雨还在下。这座城市不会为任何人停一秒。\n\n白鲸塔的灯依旧亮着，四十七层，一格一格，像一副收好的牙。',
+    choices:[
+      { label:'回到上一个落脚点', hint: cp ? ('从「'+lastCheckpointName+'」重来') : '从开场重来', cls:'jade', act(){ if(cp){ s = JSON.parse(JSON.stringify(cp)); render(); } else { newGame(); } } },
+      { label:'从头开始', hint:'换一身衣服，换一条路', act(){ newGame(); } },
+      { label:'翻一翻死法图鉴', act(){ openCodex('death'); } }
+    ]
+  });
+  s.scene = '__death';
+  render();
+}
+
+/* ------------------------------------------------------------------ */
+/* 存档 / 检查点                                                       */
+/* ------------------------------------------------------------------ */
+function checkpoint(name){
+  cp = JSON.parse(JSON.stringify(s));
+  lastCheckpointName = name;
+}
+function saveGame(){
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({s, cp, lastCheckpointName, at:Date.now()})); }catch(e){}
+}
+function loadGame(){
+  try{ const o = JSON.parse(localStorage.getItem(SAVE_KEY)); if(o&&o.s){ s=o.s; cp=o.cp; lastCheckpointName=o.lastCheckpointName||''; return true; } }catch(e){}
+  return false;
+}
+function log(x){ s.log.push(x); if(s.log.length>160) s.log.shift(); }
+
+/* ------------------------------------------------------------------ */
+/* 渲染                                                                */
+/* ------------------------------------------------------------------ */
+function newGame(){
+  s = fresh();
+  cp = null; lastCheckpointName='';
+  render();
+}
+
+function updateHUD(){
+  const ex = totalExpo();
+  $('#hpv').textContent = Math.max(0, Math.round(s.hp));
+  $('#hpbar').style.width = clamp(s.hp,0,100)+'%';
+  $('#exv').textContent = ex;
+  $('#exbar').style.width = ex+'%';
+  $('#exv').style.color = ex>=70 ? 'var(--blood2)' : (ex>=45?'var(--gold)':'');
+  $('#suv').textContent = Math.round(s.susp);
+  $('#subar').style.width = clamp(s.susp,0,100)+'%';
+  $('#clk').textContent = clockStr();
+  $('#alv').textContent = alarmLabel();
+  const aw = $('#alarmwrap');
+  $('#alv').className = s.alarm>=2 ? 'alarm-on' : '';
+}
+
+function renderWardrobe(){
+  const box = $('#slots');
+  box.innerHTML = '';
+  SLOT_ORDER.forEach(k=>{
+    const id = s.worn[k];
+    const it = id ? WEAR[id] : null;
+    const d = document.createElement('div');
+    d.className = 'slot';
+    const tip = it
+      ? ((it.perk ? '效果：' + it.perk + '　' : '') + (it.draw && it.draw !== '无' ? '代价：' + it.draw : ''))
+      : '';
+    d.innerHTML = `<span class="k">${SLOT_NAMES[k]}</span>
+      <span class="v ${it?'':'empty'}" title="${tip}">${it?it.name:'（未穿）'}</span>
+      ${it?`<button class="rm" data-doff="${k}" title="脱下${it.name}">脱下</button>`:''}`;
+    box.appendChild(d);
+  });
+  box.querySelectorAll('[data-doff]').forEach(b=>{
+    b.onclick = ()=>{
+      const k = b.dataset.doff;
+      const it = WEAR[s.worn[k]];
+      if(it && it.sealed && !it.canRemove()) { flash('这件脱不下来。'); return; }
+      doff(k); renderWardrobe(); updateHUD();
+    };
+  });
+
+  const st = statSum();
+  const ex = totalExpo();
+  const bg = bareCount();
+  $('#statline').innerHTML =
+    `隐匿 <b>${st.stealth>=0?'+':''}${st.stealth}</b>　机动 <b>${st.mobility>=0?'+':''}${st.mobility}</b><br>` +
+    `防护 <b>${st.armor>=0?'+':''}${st.armor}</b>　魅力 <b>${st.charm>=0?'+':''}${st.charm}</b><br>` +
+    `注目 <b style="color:${ex>=70?'var(--blood2)':ex>=45?'var(--gold)':'var(--jade)'}">${ex}</b>` +
+    (bg ? `　暴露部位 <b style="color:var(--blood2)">${bg}</b>` : '') +
+    (tagNames().length ? `<br>特性 <b>${tagNames().join(' · ')}</b>` : '');
+  $('#stripAll').disabled = !canWardrobe();
+
+  $('#bag').textContent = s.bag.length ? s.bag.map(x=>'· '+(WEAR[x]?WEAR[x].name:x)).join('\n') : '（空）';
+  $('#btnWardrobe').disabled = !canWardrobe();
+}
+
+/* 全部脱下：只留下随身的东西 */
+function stripAll(){
+  if(!canWardrobe()){ flash('这个时候脱不了。'); return; }
+  let n = 0;
+  ['outer','top','bottom','underwear','socks','shoes'].forEach(k=>{
+    if(s.worn[k]){ doff(k); n++; }
+  });
+  if(!n) flash('本来就没穿什么了。');
+  else flash('你把身上所有的布都留在了原地。');
+  renderWardrobe(); updateHUD();
+}
+
+function canWardrobe(){
+  const sc = S[s.scene];
+  if(!sc) return true;
+  const out = (typeof sc==='function') ? null : sc;
+  if(s.scene.startsWith('__')) return false;
+  return !sc || sc.allowWardrobe !== false;
+}
+
+function flash(msg){
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.cssText='position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:rgba(179,39,43,.92);color:#fff;padding:10px 22px;border-radius:2px;z-index:300;font-size:14px;letter-spacing:.06em;font-family:ui-monospace,monospace';
+  document.body.appendChild(el);
+  setTimeout(()=>{el.style.transition='opacity .4s';el.style.opacity='0';},900);
+  setTimeout(()=>el.remove(),1400);
+}
+
+let _lockScroll = false;
+function render(){
+  const startScene = s.scene;
+  const raw = S[startScene];
+  if(!raw){ console.error('no scene', s.scene); return; }
+  const sc = (typeof raw === 'function') ? raw() : raw;
+  if(s.scene !== startScene) return;   // 求值过程中场景已被改写（例如池化死亡），交给新的渲染
+
+  // text 可以是字符串，也可以是函数（随状态变化的那几幕）
+  let body = sc.text;
+  if(typeof body === 'function') body = body();
+  if(s.scene !== startScene) return;
+
+  $('#chapter').textContent = sc.chapter || '白鲸塔';
+
+  const story = $('#story');
+  const deathClass = sc.kind==='death' ? 'death' : '';
+  const paras = String(body == null ? '' : body).split('\n').filter(l=>l!=='');;
+  if(sc.kind==='death'){
+    story.innerHTML = '';
+    const d = document.createElement('div');
+    d.className='death';
+    d.innerHTML = `<h2>${sc.name||'终'}</h2>
+      ${sc.tagline?`<div class="tagline">${sc.tagline}</div>`:''}
+      <div class="prose">${paras.map(p=>`<p>${p}</p>`).join('')}</div>
+      ${sc.report?autopsyHTML(sc.report):''}
+      <div class="meta">死因归类 ${sc.kindName||'未分类'}　·　${clockStr()}　·　第 ${s.attempts} 次尝试　·　已收集死法 ${loadCodex().length} / ${Object.keys(DEATHS).length}</div>`;
+    story.appendChild(d);
+  } else {
+    story.innerHTML = paras.map(p=>`<p class="${p.startsWith('　')?'':'na'}">${p}</p>`).join('');
+  }
+
+  const cbox = $('#choices');
+  cbox.innerHTML = '';
+  (sc.choices||[]).forEach((c)=>{
+    if(c.show && !c.show()) return;
+    const b = document.createElement('button');
+    b.className = 'choice ' + (c.cls||'');
+    let h = '';
+    if(c.test) h += oddsText(c.test) + '　';
+    if(c.hint) h += (typeof c.hint === 'function' ? c.hint() : c.hint);
+    b.innerHTML = '<span>'+c.label+'</span>' + (h ? '<span class="hint">'+h+'</span>' : '');
+    b.onclick = ()=>{ choose(c); };
+    cbox.appendChild(b);
+  });
+
+  updateHUD();
+  renderWardrobe();
+  saveGame();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function choose(c){
+  if(!c.natime) tick(c.time || 3);
+  if(c.act){ c.act(); return; }
+  if(c.test){ roll(c.test, c.test.ok || c.to, c.test.bad); return; }
+  if(c.to){ go(c.to); return; }
+}
+
+function go(id){
+  if(DEATHS[id]){ die(id); return; }        // 失败直通某一死法
+  if(!S[id]){ console.error('missing scene', id); return; }
+  s.scene = id;
+  render();
+}
+
+/* ------------------------------------------------------------------ */
+/* 着装面板                                                            */
+/* ------------------------------------------------------------------ */
+/* 只能"在楼里拿到"才能穿的装备；其余都是安全屋衣箱里的常备品 */
+const SCENE_GEAR = new Set(['guard_jacket','apron','towel','lab_coat','host_dress']);
+
+function openWardrobe(){
+  if(!canWardrobe()){ flash('这个时候顾不上换衣服。'); return; }
+  const m = $('#modal');
+  $('#mtitle').textContent = '调整着装';
+  $('#msub').textContent = '换下的衣物会进入随身包。有些地方穿得少是优势，有些地方是死因。';
+  $('#mtabs').innerHTML = '';
+  const body = $('#mbody');
+  body.innerHTML = '';
+  SLOT_ORDER.forEach(k=>{
+    const wornId = s.worn[k];
+    const bar = document.createElement('div');
+    bar.className = 'wbar';
+    const lab = document.createElement('span');
+    lab.className = 'chapter';
+    lab.style.cssText = 'margin:0;flex:1';
+    lab.textContent = SLOT_NAMES[k];
+    bar.appendChild(lab);
+    if(wornId){
+      const b = document.createElement('button');
+      b.className = 'rm';
+      b.textContent = '脱下 ' + WEAR[wornId].name;
+      b.onclick = ()=>{ doff(k); openWardrobe(); updateHUD(); };
+      bar.appendChild(b);
+    }
+    body.appendChild(bar);
+    const list = document.createElement('div');
+    list.className='picklist';
+    const candidates = Object.values(WEAR).filter(it=>it.slot===k &&
+      (s.worn[k]===it.id || bagHas(it.id) || !SCENE_GEAR.has(it.id)));
+    if(!candidates.length){
+      const p = document.createElement('div');
+      p.className='codebox'; p.textContent='（没有可换的）';
+      list.appendChild(p);
+    }
+    candidates.forEach(it=>{
+      const b = document.createElement('button');
+      b.className = 'pick ' + (s.worn[k]===it.id?'own':'');
+      b.innerHTML = `<span>${it.name}${s.worn[k]===it.id?' · 在身':''}</span>
+        <small>隐匿 ${it.stealth>=0?'+':''}${it.stealth} ／ 机动 ${it.mobility>=0?'+':''}${it.mobility} ／ 防护 ${it.armor>=0?'+':''}${it.armor} ／ 魅力 ${it.charm>=0?'+':''}${it.charm} ／ 注目 ${it.expo>=0?'+':''}${it.expo}</small>
+        ${it.perk?`<span class="perk">效果：${it.perk}</span>`:''}
+        ${it.draw && it.draw!=='无'?`<span class="draw">代价：${it.draw}</span>`:''}
+        <small style="color:#5f6672">${it.desc||''}</small>`;
+      b.onclick = ()=>{ don(k, it.id); openWardrobe(); updateHUD(); };
+      list.appendChild(b);
+    });
+    body.appendChild(list);
+  });
+  m.classList.add('on');
+}
+
+/* ------------------------------------------------------------------ */
+/* 法医检验报告（挂在死法上，死亡页正文之后展示）                        */
+/* ------------------------------------------------------------------ */
+const AUTOPSY = {};
+
+/* ---- 处决类 ---- */
+AUTOPSY.taser = {
+  no:'A-0311',
+  time:'推断为 00:58 ±10 分钟。依据：尸僵出现于下颌及颈部，强度中等；尸斑位于腰背及大腿后侧未受压部位，指压褪色；角膜轻度混浊。',
+  place:'白鲸塔 B2 货梯厅北侧辅助通道，卷帘门内侧 1.7 米处。通道宽 1.4 米，顶灯一盏，照度低。尸体呈仰卧，头朝向卷帘门。',
+  surface:'颈部可见环形闭合压痕一道，宽 4mm，水平走向，压痕底部及两侧见片状皮下出血，方向与颈部受力方向一致；左腕、右腕各见条状瘀痕两道，间距 4mm，与现场提取的束线带宽度一致；双踝同型瘀痕各两道；右腰部见电流斑一处，3×5cm，中心灰白、边缘隆起并见细密水泡，为典型电击入口；双手指甲完整，甲缝内有深色棉纤维及少量地板蜡成分。',
+  inner:'甲状软骨左上角骨折，舌骨完整；颈动脉内膜见横行撕裂，颈部深层肌群出血；喉腔闭合；肺组织切面见散在点状出血。心脏各腔含暗红色流动性血液。',
+  opinion:'颈部压痕形态、走向及皮下出血分布符合由体后施加的带状勒压；电流斑边缘的生活反应明显，为生前电击。电击后短时间内即被勒颈，两者间隔不超过三分钟。双手未见防御性创口，提示电击后已丧失有效反抗能力。',
+  cause:'机械性窒息（勒颈）合并电击伤',
+  note:'现场提取束线带三根，其中一根仍缠绕于死者颈部，两根散落地面。地面见拖行痕一道，长 9.4 米，自通道中段延伸至货梯门前，痕迹边缘有蜡质擦痕，与死者衣物纤维相符。监控于当日 00:40 起中断，硬盘记录缺失 41 分钟。'
+};
+
+AUTOPSY.taser2 = {
+  no:'A-0312',
+  time:'推断为 01:06 ±10 分钟。尸僵分布同前次记录，强度略强，提示死亡后经过时间稍长。',
+  place:'白鲸塔 B2 货梯厅北侧辅助通道，位置与 A-0311 相同，尸体距墙 0.4 米，呈左侧卧。',
+  surface:'颈部压痕较同类案件更深，宽度同为 4mm，环形闭合，压痕前沿及两侧皮下出血范围扩大，可见索沟两侧皮肤隆起；舌尖位于齿列之外，舌尖及舌缘见咬伤出血；双手指甲断折两枚，甲床出血，甲缝内提取到深色棉纤维；后枕部见一处 2×1.5cm 皮下血肿。',
+  inner:'甲状软骨于中线横断，断端错位；喉部黏膜广泛出血并见黏膜下淤血；肺组织切面见明显点状出血，双肺重量增加。',
+  opinion:'本例颈部受压程度重于同类案件，甲状软骨横断提示施力者持续加压并可能使用工具二次收紧；后枕部血肿与按压于硬质地面吻合。死亡过程短于同类案件，估计在 90 秒以内。',
+  cause:'机械性窒息（勒颈）',
+  note:'现场另发现燃至一半的烟蒂一枚，滤嘴处检出一名男性 DNA，已录入比对库。该层监控线路当日状态为"待检修"，无影像留存。'
+};
+
+AUTOPSY.neck = {
+  no:'A-0402',
+  time:'推断为 01:31 ±15 分钟。发现时尸僵尚未完全确立，角膜清晰，尸温约 33℃。',
+  place:'白鲸塔 12 层后勤通道，地毯走廊东段，距消防楼梯口 6 米。尸体被卷于长绒地毯内，卷筒两端各以束带固定，水平放置于墙边。',
+  surface:'解剖前先行展开地毯：尸体呈仰卧，头部向左过度旋转约 90°，颈部外观无开放创口；右侧颈部见指压痕四处，横向排列，间距约 3cm，与成人男性右手四指指腹分布相符；面部见轻度淤血，眼结膜散在出血点。',
+  inner:'第 2 颈椎椎体与齿突之间横断性脱位，脊髓于该平面完全断裂；椎动脉双侧撕裂，寰枕关节囊前部撕裂；颈前肌群内出血。',
+  opinion:'第 2 颈椎脱位为典型"旋转-牵拉"致伤机制，需在头颈被双手固定后施加突然的旋转力，且施力者力量明显大于受害者。颈部无指压痕位于前方，提示施力来自体后。伤后意识即刻丧失，死亡在数秒至数十秒内发生。',
+  cause:'颈椎脱位致脊髓横断（他杀，施力位于体后）',
+  note:'包尸地毯系该楼层走廊在用物品，编号可核对；地毯内侧检出与死者一致的毛发两根。走廊监控于该时段被转向，记录画面仅余天花板。'
+};
+
+AUTOPSY.choke = {
+  no:'A-0407',
+  time:'推断为 01:47 ±10 分钟。机房环境温度 58℃，尸温偏高，时间推断已作修正。',
+  place:'白鲸塔 3 层空调机房西南角，距机组 2.3 米。尸体呈俯卧，头朝墙角，右手前伸约 0.6 米。',
+  surface:'口鼻周围见条状压红，宽约 9cm，与现场抹布折叠加压后的形状吻合；颜面显著发绀，眼睑结膜及球结膜见大量点状出血；十指指甲缝内填充水泥灰与油漆碎屑，双侧手掌及前臂前侧见成片的刮擦伤，方向由外向内，共十道，与地面摩擦方向一致；右肘、双膝见地面压痕。',
+  inner:'喉头水肿，声门区黏膜充血；气管及支气管腔内见带刺激性气味的液体残留，黏膜呈片状脱落；双肺充血水肿，重量明显增加；胃内空虚，胃黏膜见散在出血点。',
+  opinion:'口鼻部压痕与现场抹布形态一致，为闭塞口鼻所致机械性窒息；气道内液体 pH 11.2，与现场桶内残液一致，提示闭塞同时伴有碱性液体吸入，加速死亡。双手的刮擦伤为典型濒死期挣扎所致，非搏斗伤。死亡过程估计持续 2 至 3 分钟。',
+  cause:'机械性窒息合并化学性气道损伤',
+  note:'现场塑料桶一只，桶盖印有"请勿饮用"，残液 pH 11.2，主要成分氢氧化钠及酶制剂。抹布已提取，纤维上检出与死者一致的唾液斑。机房门在外侧被人为反锁，锁具无破坏痕迹。'
+};
+
+AUTOPSY.beaten = {
+  no:'A-0419',
+  time:'推断为 01:12 ±20 分钟。尸僵尚未出现，尸斑淡薄，指压完全褪色。',
+  place:'白鲸塔 39 层楼梯间转角平台，平台面积约 4 平方米。尸体呈俯卧，双膝屈曲，双手位于体侧，面部压于水磨石台阶边缘。',
+  surface:'头面部多处挫裂创，右颞部创口长 6cm，创缘不整齐，创周见条形挫伤带，提示为棍棒类钝器所致；创腔内可见毛发与组织碎屑。左膝、右肘、双手背侧大面积皮下出血，压之凹陷；躯干背侧见平行排列的宽 4.5cm 条状挫伤六道，间距均匀，与现场消防斧柄直径相符。十指指甲完整，指甲缝内无异物，未见抓握性损伤。',
+  inner:'右侧第 5、6、7 肋骨于腋中线处骨折，断端向内错位，第 6 肋断端刺入左肺上叶，胸腔积血约 400ml；右颞部硬膜外血肿，厚约 1.8cm，脑组织受压变形；枕部未见对冲性损伤。',
+  opinion:'全身损伤呈现由同一类钝器反复打击形成的特征，打击部位集中，频率较高，属持续施暴。肋骨的断端方向提示打击来自体侧及体后。硬膜外血肿形成需要一定时间，死者在中枢损伤形成后仍存活约十分钟至二十分钟，其间处于失能状态。十指无抓握伤，提示自始未能有效反抗或已被控制。',
+  cause:'颅脑损伤合并血气胸（钝器多次打击）',
+  note:'现场提取消防斧柄一根，长 82cm，柄身血迹分布与损伤位置可对应；平台血迹呈喷射状，最高溅射点距地 1.4 米，最远延伸 2.3 米。楼梯间监控当日处于维修状态，无记录。'
+};
+
+AUTOPSY.beaten2 = {
+  no:'A-0420',
+  time:'推断为 01:29 ±20 分钟。因尸体移位，尸僵分布紊乱，仅作粗略推断。',
+  place:'白鲸塔 39 层楼梯间转角平台，位置与 A-0419 相近。尸体呈俯卧，右臂外展，左臂屈曲于头侧。',
+  surface:'右手背侧掌骨区见碾压性挫伤，皮肤呈网格状印痕，印痕间距与现场提取的鞋底纹路一致，共三处重叠；全身挫伤面积约占体表 40%，分布无固定走向；左足踝处见生前抓握伤四处，指甲嵌入处皮肤破裂，创缘见出血；面部见多处重叠性挫伤，左眼睑肿胀闭合。',
+  inner:'骨盆环多发性骨折，耻骨联合分离；脾脏被膜下及实质内破裂，腹腔积血约 900ml；腹膜后血肿形成；肋骨第 9、10 肋骨折。',
+  opinion:'右手的网格状压痕为鞋底反复踩踏所致，属生前伤；左足踝的抓握伤提示死者在极晚期仍有过抓握动作，但未持续。全身损伤分布无规律，符合随意性殴打。骨盆骨折合并脾破裂形成失血性休克，是主要致死路径，中枢损伤为加速因素。死亡过程估计持续二十分钟以上。',
+  cause:'钝器及踩踏致多脏器损伤、失血性休克',
+  note:'现场提取鞋印两枚（41 码、43 码），分别位于尸体右侧与台阶上方；门禁记录显示该楼梯间当日 01:31、01:44、02:02 各有一次通行。尸体于次日 06:00 由保洁人员发现。'
+};
+
+AUTOPSY.sniper = {
+  no:'A-0501',
+  time:'推断为 00:41 ±2 分钟。有目击者与监控双重佐证，时间可靠。',
+  place:'白鲸塔对面人行天桥东段，距塔体东南角约 210 米。尸体呈俯卧，躯干纵轴与天桥走向近乎平行，头部朝向护栏。',
+  surface:'右颞部见贯通创一处，入口呈类圆形，直径 9mm，创缘内卷并见宽 2mm 的环形挫伤圈，圈内皮肤可见金属刮擦痕；出口位于左颧骨区，呈星芒状撕裂，范围约 6×4cm，创缘外翻。贯通创周围的面部皮肤见点状火药颗粒沉着，数量极少，提示射击距离在数百米以上。',
+  inner:'颅骨呈贯穿性骨折，骨片呈放射状分离；脑组织于弹道周围广泛毁损并液化；弹道由右后上向左前下，仰角约 8°，与远处高点射击的几何关系相符。',
+  opinion:'单发贯通创，无第二处损伤，弹道单一且方向明确，符合远距离单发精确射击。入口处的环形挫伤圈与出口的星芒状撕裂为典型高速弹道表现。颅脑损伤为即时致死性损伤，意识在零点几秒内丧失。目击者所述"中弹后仍站立约一秒"与脑干损伤后的短暂肌张力维持相符，非自主行为。',
+  cause:'颅脑贯通伤（远距离枪击）',
+  note:'弹头未在现场寻获，沿弹道延长线搜索及周边建筑屋面搜查均未发现。地面血迹分布与目击证言吻合，自中弹点到倒地点距离约 1.1 米，其间无拖擦痕。天桥监控因角度问题未拍到弹道方向，仅记录到倒地过程。'
+};
+
+AUTOPSY.hostess = {
+  no:'A-0522',
+  time:'推断为 01:04 ±15 分钟。尸僵未现，尸斑浅淡。',
+  place:'白鲸塔 1 层员工通道，距后勤区防火门 3.2 米。尸体呈右侧卧，右臂压于身下，左腿微屈。',
+  surface:'颈右侧胸锁乳突肌前缘见针状穿刺点一处，直径约 1.2mm，周围见直径 2cm 的环形瘀斑；双手腕部见条状牵拉瘀痕，方向由后向前，提示双臂曾被人从体后反握拖拽；左小腿前侧见 4×2cm 擦伤，方向与地面平行；右足跟见鞋跟折损后的压痕。',
+  inner:'穿刺伤沿颈内静脉走行，深达 4cm，血管壁见破口，周围软组织出血；颈动脉未受累；气管完整。',
+  opinion:'穿刺点定位准确，避开了颈动脉与气管，直入颈内静脉，属熟悉颈部解剖者所为。穿刺口周围瘀斑为拔器时的牵拉形成。双臂的牵拉瘀痕与"被两人架行"的情形吻合。颈静脉损伤可致大量空气及血液进入循环，意识丧失极快。',
+  cause:'颈部血管穿刺伤（锐器）',
+  note:'现场未发现凶器，通道内排水口已排查。自尸体倒地位置至走廊尽头的墙面上共检出血滴七枚，方向由近及远，间距增大，提示死者被拖离时仍有血液滴落。该区域监控于当日 00:40 至 01:20 存在八分钟空白，已向物业管理方调取设备日志。'
+};
+
+AUTOPSY.hostess2 = {
+  no:'A-0523',
+  time:'推断为 01:11 ±10 分钟。尸体尚有余温，死亡至发现间隔很短。',
+  place:'白鲸塔 1 层员工通道，管理员铁柜前。尸体背靠柜门滑坐于地面，头部前垂，双腿向前伸展。',
+  surface:'后颈正中见穿刺创点一处，直径约 1.5mm，创缘整齐，周围皮下出血不明显；面部左颧区见挤压性瘀痕，形状与铁柜门板上的凸起装饰线一致；右手食指、中指指甲内提取到纸张纤维；左手掌侧见陈旧性划痕；膝盖及小腿前侧见下滑擦伤两道。',
+  inner:'穿刺伤自后颈进入，经枕骨大孔下缘伤及延髓，创道长约 5cm；延髓见局灶性出血破坏；颈髓上段挫伤。',
+  opinion:'创道方向由后上向前下，与从体后上方持笔刺入的力学关系相符。延髓为生命中枢所在，该部位损伤属即刻致死，死者应在上肢失力后沿柜门滑落，因此膝部出现下滑擦伤。右手指甲内的纸张纤维与柜门上的员工排班表材质一致，提示死者在滑落过程中抓取过该表。',
+  cause:'后颈穿刺伤及延髓',
+  note:'铁柜门上员工排班表右下角缺失一角，缺失部分与死者右手指甲内的纤维成分相符，已拼接固定。凶器疑为随身钢笔，未在现场找到。通道外的接待台在案发时段有一名员工在岗，其笔录称未听到声响。'
+};
+
+AUTOPSY.knife = {
+  no:'A-0602',
+  time:'推断为 01:38 ±10 分钟。死亡至发现间隔约 12 分钟。',
+  place:'白鲸塔 47 层书房，窗边扶手椅前地毯上。尸体呈仰卧，右手压于腹侧，双腿屈曲。扶手椅偏斜 0.3 米，坐垫上见少量转印血迹。',
+  surface:'左侧肋缘下见斜行刺创一处，创口长 2.8cm，创角一钝一锐，创缘整齐，周围皮肤见环形挫伤带（为刀柄短护手压迫所致）；创道方向由左下向前上，深约 11cm；双侧手掌及手指见切割伤共九处，其中左手食指、中指、无名指的掌侧创口深及腱鞘，为抓握刃部所致；左前臂内侧见一条长 8cm 的浅表划痕，方向与刺创创道一致。',
+  inner:'刺创自左侧肋缘下进入，贯穿肝左叶，伤及肝门部血管，创道末端抵达肝静脉分支处；腹腔积血约 1800ml；膈肌完整；心脏未见损伤。',
+  opinion:'创角一钝一锐，判定为单刃刀具所致。双侧手掌的多处切割伤为典型的握刃行为，即死者曾用双手抓住刀刃试图阻止其深入，属临终前的本能反应，此为生前伤的确证。需特别记录：致伤刀具刃长仅 7cm，与 11cm 的创道长度不符，说明刀具在进入后曾被施力者继续推动，直至创口深入至此。此细节与"死者本人刀具被反向利用"的现场情形相符。',
+  cause:'肝门部血管破裂致失血性休克',
+  note:'致伤物为死者本人携带的陶瓷折刀一把，刃长 7cm，刀柄及刃面血迹血型与死者一致，刀柄上检出第二人 DNA，已完成比对。书房门为电动门，控制记录显示当晚 01:20 至 01:50 间该门开启一次。房间内未见强行进入的痕迹。'
+};
+
+AUTOPSY.bleed = {
+  no:'A-0603',
+  time:'推断为 01:52 ±15 分钟。依据：尸斑已形成，指压褪色缓慢；角膜中度混浊。',
+  place:'白鲸塔 47 层走廊西段，双开木门前 0.3 米。尸体呈俯卧，双臂前伸，双手压于门下方缝隙处，面部朝下。',
+  surface:'腹部创口一处，与 A-0602 记录同源，创口以死者本人衣物内衬布料包裹，布料压入创口约 1cm；双手掌面、双前臂及双膝见爬行性擦伤，方向由东向西；墙面上检出血掌印五组，高度由 62cm 递减至 34cm，间距逐渐缩短；面部及颈部见轻微淤血。',
+  inner:'腹腔内积血量约 1200ml，肝左叶创口未闭合；脾脏完整无损伤；胃内见少量未消化食物。',
+  opinion:'五组血掌印的高度、间距及形态，显示死者为站起—跌倒—再爬起的重复过程，移动总距离 3.1 米，方向单一。双手最终压于门下缝隙处，说明其在最后阶段仍在尝试通过门缝或开启门体，此姿势为主动行为，死亡时间点应在该动作之后的数分钟内。腹部创口被人为填充布料，提示死者本人曾试图自救，布料取自其衣物内侧，需以破坏性方式撕取。',
+  cause:'失血性休克（腹部锐器伤）',
+  note:'自东侧 3.1 米处地面开始出现连续血迹，血迹在门前终止。门为向走廊方向推开的单向开启结构，门把手位于 1.05 米高度，把手上有血迹分布，说明死者曾触摸。该层走廊监控于当晚被关闭，具体时间待查。'
+};
+
+AUTOPSY.bleed2 = {
+  no:'A-0604',
+  time:'推断为 02:03 ±15 分钟。发现时体温已接近环境温度。',
+  place:'白鲸塔 47 层走廊西段，位置与 A-0603 相同，尸体仍为俯卧，右臂位置有变动。',
+  surface:'腹部创口同前次记录，周围组织颜色转暗；左腕内侧见不规则撕裂创两处，长分别为 2.2cm 与 1.8cm，创缘呈锯齿状并附有齿痕（上颌中切牙与侧切牙印），为生前自行咬合所致，创腔内有唾液与血液混合液；创口周围皮肤见环形压痕，与牙列弧线一致；面色苍白，口唇、甲床明显发绀；右膝关节处见 1cm 擦伤。',
+  inner:'左桡动脉见部分性断裂，断裂处管壁内卷；创口周围软组织见生活反应。全身失血量估算约 2600ml，肝、脾、肾切面呈贫血性改变，心脏各腔空虚。',
+  opinion:'左腕的两处撕裂创由死者本人咬合形成，创缘齿痕与自身牙列完全吻合，创周的生活反应明确，确认为生前自行造成。咬合位置位于腕部桡侧，目的是压迫或切断血管以加快失血，属自伤行为。综合判断，死者在原有腹部贯通伤的基础上，主动加重了出血过程，死亡发生在咬合之后约五分钟内。',
+  cause:'失血性休克（自行加重创口出血）',
+  note:'现场未见挣扎痕迹，尸体姿态与前一状态基本一致。衣物内衬夹层中搜出陶瓷折刀一把，刃部有血，血型与死者一致；刀身被仔细折叠后藏入内衬，内衬开口整齐，系事先剪开。此细节已记录在案。'
+};
+
+/* ---- 意外类 ---- */
+AUTOPSY.shaft = {
+  no:'B-0113',
+  time:'推断为 01:19 ±10 分钟。井底环境温度低，尸温下降较快，时间推断已作修正。',
+  place:'白鲸塔 3 号电梯井井底，配重区。坠落高度经现场测量为 27.4 米。尸体位于配重块北侧 0.8 米处，呈俯卧，右侧着地。',
+  surface:'全身见多发性损伤，以右侧为重。右颞部、右肩、右髋部可见撞击性挫裂创，创缘不整齐，创周伴有不规则挫伤带；右下肢呈多段明显畸形，可见异常活动；左侧肢体损伤相对轻微；双手未见抓握性损伤，指甲完整。',
+  inner:'双侧肋骨多发性骨折，胸骨于第二肋间水平横断塌陷；肝右叶、脾脏、双侧肾脏均见破裂；骨盆呈粉碎性骨折；胸腔及腹腔内大量积血；主动脉弓于峡部见横断。',
+  opinion:'损伤分布集中在身体右侧，与右侧先着地的坠落姿态相符。多项损伤（主动脉横断、多脏器破裂、骨盆粉碎）为高坠所特有的"多发、广泛、单次形成"特征，与钝器反复打击所造成的损伤形态明显不同。身体各部位损伤程度自下而上递减，符合垂直坠落时的力学传递顺序。全身未见生前防御性损伤。',
+  cause:'高坠致全身多发性脏器破裂（坠落高度实测 27.4 米）',
+  note:'现场配重盖板一侧铰链断裂，断口呈陈旧性锈蚀，非当日外力所致。井底拣取工装外套一件，尺码与死者不符，已另行登记。井道内钢缆表面检出人体皮屑，位置处于坠落轨迹的中段。电梯运行记录显示该时段轿厢停靠在 38 层，井道内无照明。'
+};
+
+AUTOPSY.compactor = {
+  no:'B-0121',
+  time:'推断为 03:15 前后（设备运行日志记录液压循环启动于 03:15:22，完成于 03:16:09，历时 47 秒）。',
+  place:'白鲸塔 B1 垃圾压缩站，液压箱体内。尸体于填埋场分拣时发现，已转运。',
+  surface:'尸体整体严重压扁变形，矢状径约 20cm，额面至背侧厚度最小处约 16cm；体表多处骨折端外露，创口无出血（系死亡后受压所致）；颜面部因挤压严重变形，相貌无法辨认，身份以指纹及齿列确认；头发部分残留于体外。',
+  inner:'全胸廓、脊柱、骨盆呈压榨性粉碎骨折，骨折端相互嵌插；胸腔与腹腔脏器受压破裂并融合，解剖结构无法分辨；颅骨呈多片状粉碎，颅内结构崩解。',
+  opinion:'结合设备运行日志、尸体变形程度与箱体内部尺寸，可确认死亡发生于液压循环的推进阶段。全身损伤为单次持续挤压所致，无重复打击特征。因胸腔在极短时间内被压至无法扩张，气道虽未闭塞但失去通气功能，意识丧失时间极短——法医学上，此类损伤通常认为死亡发生在数秒至二十秒内。尸体变形程度与箱体容积计算值吻合，未发现死后移动痕迹。',
+  cause:'挤压伤致全身毁损（机械设备作用）',
+  note:'清运车司机笔录称未察觉异常，直至填埋场分拣时发现异物。垃圾箱内部四壁的擦拭痕与尸体轮廓一致。设备维护记录显示该压缩机的安全联锁装置三个月前报修后未修复，红外感应探头被垃圾遮挡。'
+};
+
+AUTOPSY.rebar = {
+  no:'B-0205',
+  time:'推断为 01:34 至 02:14 之间，历时约 40 分钟。依据：创周皮肤见雨水浸泡后的浸渍表现，程度与当夜降雨量记录相符；尸斑分布集中于下肢及盆腔，与悬挂体位一致。',
+  place:'白鲸塔 4 层外挂施工平台下方，钢筋束堆场。尸体被一根竖直钢筋自左后腰贯穿，悬挂于离地 39cm 处。',
+  surface:'左侧腰背部见贯通性穿刺创一处，创口直径约 2.2cm，创缘内卷并见周边挫伤带，与钢筋表面的锈蚀毛刺形态一致；创周皮肤呈苍白皱褶样浸渍；双手掌侧见环状擦伤及金属锈迹，指间夹有铁锈碎屑，提示曾在钢筋上反复抓握；双足下垂，足背见摩擦性擦伤；面部见雨水冲刷后的苍白。',
+  inner:'穿刺物自左后腰进入，向左前下方贯穿腹膜后间隙，损伤左肾下极、部分小肠及肠系膜血管；腹膜后巨大血肿，约 1500ml；膈肌完整，胸腔未见积血。',
+  opinion:'创口形态与形态学特征明确指向钢筋一类固定穿刺物，与坠落高度 3.1 米的动能计算相符。关键判断：钢筋未伤及腹主动脉或下腔静脉等主干血管，故未即时致死，死者在悬挂状态下存活约 40 分钟，其间双手持续抓握以减轻下半身重量——这一动作延缓了坠落，也延长了痛苦。双手掌侧的环状擦伤为反复抓握—滑脱形成，属生前伤。死亡原因为持续性失血与体位性循环衰竭的叠加。',
+  cause:'贯通性穿刺伤致失血性休克（死于悬挂状态下）',
+  note:'钢筋一束共 11 根，其中 1 根竖直向上，顶端见血迹与人体组织残留，已作为物证提取。当夜降雨持续，地面血迹边缘被雨水冲刷成浅淡晕圈，最大晕圈直径约 1.8 米。现场发现于次日 02:00 前，由一名夜班工人报告。'
+};
+
+AUTOPSY.rebar2 = {
+  no:'B-0206',
+  time:'推断为 02:31 ±15 分钟。与 B-0205 相比迟约 17 分钟，处于同一持续过程的后段。',
+  place:'白鲸塔 4 层外挂施工平台下方，钢筋束堆场，位置同上。尸体仍悬挂于钢筋上，双足已触及地面。',
+  surface:'穿刺创口周围组织撕裂范围较前次记录扩大，创道内壁见新鲜撕裂缘，提示穿刺物曾在体内发生转动；双足背侧见摩擦性擦伤加重，足尖着地，鞋底纹路在地面留下压痕；双手仍处于抓握姿态，指间铁锈碎屑增多。',
+  inner:'左肾下极撕裂加重，肾蒂血管部分断裂；肠系膜血管断裂数量增加，腹腔及腹膜后血肿总量约 2400ml；肠管局部缺血坏死。',
+  opinion:'创道内壁的新鲜撕裂缘是关键证据：只有在死亡前、组织仍有弹性与血供的情况下，穿刺物转动才会形成此种撕裂形态。此细节证明死者曾在悬挂状态下主动试图将身体向上拔出，该动作使钢筋在体内旋转约 180°，直接造成了肾蒂损伤与大面积出血。此后创口出血由渗血转为涌出，形成记录中的"一汩一汩"，此过程在法医学上对应数分钟内的快速失血。',
+  cause:'贯通性穿刺伤加重致大出血',
+  note:'钢筋表面检出与死者一致的掌纹一枚，位置在创口上方 12cm 处。地面血迹分布显示，死者上半身的血液流至离地 39cm 处时，因持续下坠而呈近似垂直的流柱；现场照片已完整记录。'
+};
+
+AUTOPSY.cable = {
+  no:'B-0233',
+  time:'推断为 01:58 ±5 分钟。轿厢运行记录可精确定位：轿厢自 46 层上行至 47 层历时 12 秒。',
+  place:'白鲸塔 3 号电梯井，46 层与 47 层之间，位于轿厢顶板与井道结构梁之间。',
+  surface:'颈前见宽 6mm 的斜行压痕一道，走向与钢缆运行方向一致，压痕边缘皮肤完整、未破裂，宽度与钢缆直径吻合；面部、颈部及眼结膜见大量出血点，颜面青紫；双手及前臂见轻微擦伤；衣物表面见润滑油渍，位置集中于左肩与颈侧。',
+  inner:'第 3、4 颈椎骨折脱位，椎体间错位约 90°；气管于环状软骨下方完全离断；双侧颈总动脉受压变扁但未见破口，管腔内无血栓；颈部肌群及椎前软组织挫伤。',
+  opinion:'本例为典型的"非切割性颈部挤压伤"。因钢缆表面附有润滑油且受压速度快（轿厢上行过程中钢缆运行速度约 2.3m/s），受压瞬间软组织被推开而未形成开放性创口，造成皮肤完整、内部结构离断的特征性表现。颈部动脉未破裂说明外力被骨骼与软组织先行吸收，颈部因失去支撑而绕轴旋转，颈椎脱位先于动脉损伤发生。意识丧失时间为即刻。',
+  cause:'颈部机械性压迫致颈椎离断与气道中断',
+  note:'尸体位置随设备震动产生持续轻微摆动，尸斑分布因体位变化而不典型，主要集中于肩背部及颈部受压平面以下。现场在轿厢顶板检出掌纹及一枚鞋印，经比对与死者一致，确认其在轿厢顶部曾停留并移动。电梯维保记录显示该井道照明长期损坏。'
+};
+
+AUTOPSY.door = {
+  no:'B-0241',
+  time:'推断为 01:26 ±5 分钟。货梯运行记录显示该次上行发生于 01:24 至 01:27 之间。',
+  place:'白鲸塔货梯井道，躯体在第 2 腰椎水平离断，上段位于 40 层层门内，下段落于 B2 井底，两段相距约 12 米。',
+  surface:'躯体于第 2 腰椎水平完全离断，上下两段间距约 12 米。离断断面可见明显挤压挫灭特征，组织被压扁并伴有擦抹方向一致的拖痕，无切割痕；右上肢仍位于 40 层门内地面上，十指见抓挠性擦伤，指甲翻折；右髋部皮肤呈环形缺失，宽度与门缝闭合间隙一致。',
+  inner:'离断平面以外的脏器未见原发损伤；离断面软组织呈压榨性破碎，局部可见组织嵌顿于金属边缘的压痕；上段胸腔脏器无明显损伤。',
+  opinion:'离断平面的损伤形态是本案定性的核心：如为刀斧类锐器，创面应平整并见刀刃滑过形成的切线；本例断面组织呈压榨性破碎、有金属边缘嵌顿痕迹，符合被两片金属在闭合过程中持续加压剪切所致。结合门缝宽度（约 6cm）与闭合速度，可确认损伤由电梯门机在轿厢启动过程中形成。伤后躯体上段仍留于楼层一侧，下段随轿厢上行，导致了记录中的两段分离。',
+  cause:'躯体离断（机械挤压剪切）',
+  note:'轿厢门感应装置经检测确认失效，感应光幕无输出，已通知物业停用并出具隐患告知。10 层至 40 层井道内壁检出多处血迹擦拭痕，方向向上，为下段躯体随轿厢上行过程中形成。该货梯运行日志保存完整，已全部提取。'
+};
+
+AUTOPSY.door2 = {
+  no:'B-0242',
+  time:'推断为 01:34 ±5 分钟。记录与同类案件连续，为同一设备在相近时段内的第二起接触。',
+  place:'白鲸塔货梯井道，同样于 40 层附近。位置与 B-0241 一致。',
+  surface:'躯体离断平面同前次记录；离断面组织内嵌有陶瓷碎片三枚，最大一枚长 2.1cm，碎片边缘锐利；右髋部皮肤环形缺失，缺失宽度与门缝间隙一致；双手指甲完整，未见抓挠伤。',
+  inner:'离断平面软组织压榨破碎，断端见机械切割样改变，与嵌顿的硬质碎片有关；碎片周围组织见局部切割痕。',
+  opinion:'创内嵌顿的陶瓷碎片是本案与前案的区分关键。碎片在离断平面内呈斜向分布，说明碎片在离断发生时即位于该位置，即死者已将刀具卡入门缝，门机在闭合过程中首先破坏刀具，随后完成离断。断面的"切割样改变"由碎片在受压状态下的滑动形成，与刃器主动切割造成的损伤机制不同，仍需结合碎片断面拼接进一步确认。',
+  cause:'躯体离断（机械挤压剪切）',
+  note:'现场在井道底部提取到陶瓷折刀一把，刃部自中段断裂，断面与创内碎片可完整拼接，共由两片组成。该层地砖于事后整层更换，原砖已留样。40 层门机控制板留存，门缝闭合时序数据已导出。'
+};
+
+AUTOPSY.dog = {
+  no:'B-0302',
+  time:'推断为 00:52 ±10 分钟。犬只唾液干燥程度与现场温度支持该时段。',
+  place:'白鲸塔 B2 地下车库 B 区，两辆车之间，距犬笼 7.4 米。尸体呈仰卧，四肢外展，衣物为撕扯后的残片状态。',
+  surface:'全身见撕咬创四十余处，分布于双臂前侧（12 处）、大腿内收肌群（9 处）、腹壁（多处融合）、胸壁及颈部周围；创缘呈撕裂状，创内可见上下颌犬齿间的挫压带，宽度与杜宾犬咬合规格一致；腹壁于左下腹大面积缺损，范围为 18×12cm；右小腿见环形咬痕，创腔内可见骨碎裂片。',
+  inner:'肠管自腹壁缺损处脱出约 60cm，其中 12cm 见完全断裂；左侧桡动脉、尺动脉多处断裂；股动脉完好；失血量约 2500ml。',
+  opinion:'撕咬创的分布具有明确的选择性：损伤集中在四肢与腹部，颈部虽有多处浅表创，但未见致死性颈部损伤。这与受过训练的护卫犬的咬合习性一致——训练通常要求避免咬喉，以减少目标当场死亡而无法控制。四十七秒内形成此种密度的损伤，与两条大型犬同时攻击的力学条件相符。致死路径为腹壁缺损后的肠管外溢合并多血管断裂引起的大出血。',
+  cause:'犬类撕咬伤致失血性休克及腹腔脏器外溢',
+  note:'两条杜宾经麻醉后控制，口腔拭子与现场血迹、创内组织匹配。犬只训练记录查询显示，两只犬均接受过"限制性撕咬"训练。笼门插销未见破坏痕迹，呈开启状态。车库区域当日照明正常，监控仅覆盖坡道，未拍到犬笼区域。'
+};
+
+AUTOPSY.dog2 = {
+  no:'B-0303',
+  time:'推断为 01:03 ±10 分钟。与 B-0302 为同一时间段内的连续事件。',
+  place:'白鲸塔 B2 地下车库 B 区，距前例发现点约 5 米。尸体呈俯卧，左臂向前伸展。',
+  surface:'左腕部见横断性咬断伤，断端参差，腕骨呈粉碎状，断面见齿痕与骨折端交错；后颈部见致命性撕咬创，创口深达颈椎，创缘见多处重叠的齿痕；左手向前伸展，指尖距一把刀具的直线距离为 27cm；右手背侧见咬伤两处。',
+  inner:'左腕部桡动脉、尺动脉完全断裂；后颈部椎管呈开放性损伤，脊髓于颈 5、6 节段挫灭；颈部肌群大范围撕裂。',
+  opinion:'左腕的断离伤与地面的刀具距离构成关键的空间关系：死者左手在最后阶段仍朝刀具方向伸展，指尖与其相距 27cm，说明其在腕部断离后仍尝试取刀。现场勘查确认刀具位置未被移动，地面灰尘扰动范围仅局限于尸体周围，排除了他人拾取或移位的可能。后颈部的致命伤发生在腕部断离之后——两处创口的出血程度及组织反应可作先后判断：后颈创的出血量较腕部明显减少，提示伤时循环已接近衰竭。',
+  cause:'颈部撕裂伤（犬类咬伤）',
+  note:'刀具位于死者左手触及范围之外，现场勘查未发现刀具被移动的痕迹，地面灰尘分布完整。犬只爪印自犬笼方向呈直线排列至尸体位置。车库管理层未能提供该时段的犬只管理记录。'
+};
+
+AUTOPSY.car = {
+  no:'B-0311',
+  time:'推断为 01:44 ±10 分钟。车辆行车记录仪缺失，时间依据现场人员证言及车库门禁记录推定。',
+  place:'白鲸塔 B4 地下车库坡道，7 号车位前。尸体位于车位线内 0.5 米处，头部朝向坡道下方。',
+  surface:'躯干右侧见大面积轮胎印痕一处，宽度 21cm，横跨胸廓（自右肩下方至左肋缘），印痕内可见胎面花纹转印；头颅左侧塌陷变形，左耳撕裂并部分离断；左下肢于膝上 8cm 处呈横断，断端压挫明显；右上肢见两处压痕，与车轮二次经过相符。',
+  inner:'胸廓多发性骨折并塌陷，心脏、双肺破裂；颅骨粉碎性骨折，脑组织外溢；左股骨断端压挫，周围肌群毁损；盆腔脏器不同程度受压变形。',
+  opinion:'轮胎印痕的宽度、花纹与悬挂重量可对应一辆加长型轿车；印痕横跨胸廓，说明第一次接触时死者为平卧位。上肢与左下肢的附加压痕，以及左下肢的横断位置，均提示车轮在同一部位发生过一次以上的往复运动。三组损伤（胸部、头部、下肢）的压挫程度接近，时间间隔极短，可能发生在一次倒车—前进的往复过程中。死亡在第一次胸部受压后即已发生，后续头部损伤为死后伤。',
+  cause:'车辆碾压致胸腹联合损伤及颅脑毁损',
+  note:'涉事车辆倒车影像记录缺失，车载系统时间戳与现场门禁记录存在 11 分钟偏差。司机笔录称"完全没看见人"，其酒精检测结果为阴性。车库该区域照明经测量存在两处暗区，其中之一覆盖 7 号车位。'
+};
+
+AUTOPSY.pool = {
+  no:'B-0402',
+  time:'推断为 01:29 ±15 分钟。水温 31℃，尸体体温下降缓慢，时间推断已作修正。',
+  place:'白鲸塔 47 层露台泳池深水区池底，位于池底鲸形拼花图案的头部位置。水深实测 3.1 米。',
+  surface:'尸表无明显外伤，皮肤因长时间浸水呈轻度皱缩；指甲缝内见绿色藻类残留；面唇发绀，口腔及鼻腔周围见少量白色泡沫状液体；双眼角膜轻度混浊。',
+  inner:'双肺体积增大，重量增加，切面见大量液体流出；气管及支气管内见粉红色泡沫液；胃内见大量溺液并混有池水中的藻类碎屑；左心血与右心血的血红蛋白浓度差明显。',
+  opinion:'溺液的分布（胃内大量、气道内泡沫液）与双肺的水性肺气肿表现，均符合典型生前入水溺死。尸表无外伤，现场无搏斗痕迹，提示死者为失足或无所防备的情况下入水。浸水皮肤皱缩程度与水温、浸泡时长计算一致（31℃ 温水中约需 60 分钟以上才出现明显皱缩）。池底位置显示死者入水后未发生位移，与水深及水流条件相符。',
+  cause:'溺水窒息',
+  note:'池底拼花图案位于深水区中央，距浅水坡道约 10 米。池边见拖鞋一双，摆放整齐，鞋尖朝向池外；池边湿区未见拖拽或滑行痕迹。泳池循环系统当日处于关闭状态，水面平静。该露台为限制区域，进入需刷特定门禁，记录已提取。'
+};
+
+AUTOPSY.pool2 = {
+  no:'B-0403',
+  time:'推断为 01:41 ±15 分钟。与 B-0402 为同一时段内的连续过程。',
+  place:'白鲸塔 47 层露台泳池深水区池底，位置与前一记录相同。尸体仍位于池底鲸形图案处。',
+  surface:'同前次记录；此外左膝前侧、左足背侧见摩擦性擦伤，创面形态与池底防滑槽的条状纹路一致，方向自深水区指向浅水方向；右手五指见轻度皮肤剥脱；指甲缝内藻类残留量较前增多。',
+  inner:'溺液吸入量较同类案件显著增多，支气管深部及肺泡内均见大量液体；胃内溺液量亦高于常见水平，提示入水后在濒死期内仍有持续的呼吸运动。',
+  opinion:'左膝与左足背侧的擦伤方向极为关键：摩擦方向呈明确的"由深水指向浅水"，证明死者在入水后曾朝浅水坡道方向移动，且该移动通过膝部与足背与池底接触完成，符合力竭状态下的拖行姿态。指甲缝内藻类增多与手指剥脱，说明其曾多次抓扒池底。综合判断，死者在入水后保持了较长一段时间的主动求生，最终因体力耗尽而未能到达坡道。',
+  cause:'溺水窒息',
+  note:'尸体距浅水坡道第一级台阶 27cm。坡道水下边缘的积水膜上见指擦痕一道，方向向上，长度约 15cm，痕迹边缘清晰、未见二次叠加，说明该动作仅完成一次。此位置已拍照并做痕迹固定。'
+};
+
+AUTOPSY.freezer = {
+  no:'B-0501',
+  time:'推断为进入冷库后约 6 小时 40 分，具体死亡时刻约在次日 02:30 前后。依据：库内温度记录仪显示最低 -26.4℃ 并持续该温区。',
+  place:'白鲸塔 B1 后厨冷冻库，三号货架前地面。尸体呈屈曲坐姿，背靠货架立柱，双手环抱双膝。',
+  surface:'尸体表面覆盖一层薄霜，睫毛、发梢及眉毛见冰晶附着；四肢近端见鲜红色尸斑，与低温环境下的血红蛋白氧化过程有关；右手手指部分呈屈曲固定状（冻僵所致）；衣物被脱置于身侧地面上，摆放相对整齐，未见撕扯痕迹；面部表情平静，眼睑半闭；唇部及指端呈暗紫色。',
+  inner:'未见致命外伤；心脏内血液呈鲜红色流动状，未完全凝固；胃黏膜见多处急性溃疡（Wischnewski 斑），为冻死的特征性改变；右心室血液颜色较左心室为鲜，符合低温下氧合状态的改变；肺组织未见水肿。',
+  opinion:'本案的核心判断在于"反常脱衣现象"。低温致死过程中，皮肤血管在长时间收缩后突然发生麻痹性扩张，大量血液回流至体表，使人在临终前感受到强烈的热感并主动脱去衣物，现场衣物摆放相对整齐、无撕扯痕迹，即为该现象的确证。此外胃黏膜的多发溃疡斑为冻死的特异性指标，在溺水、失血等其他死因中极少出现。综合判断，死亡系环境低温导致的代谢衰竭，非外力所致。',
+  cause:'低温致死（冻死），核心体温降至约 22℃',
+  note:'库内温度记录仪数据完整：最低 -26.4℃，进入后持续 6 小时 40 分。库门密码锁记录显示该时段内未开启。死者脱下的衣物叠放于身侧，衣物口袋内未发现保暖物品。意外发生后，该冷库已加装内部应急开门装置。'
+};
+
+AUTOPSY.freezer2 = {
+  no:'B-0502',
+  time:'推断为次日 05:48 前约 7 小时，具体死亡时刻不晚于 23:00。依据：库门短接导致该回路断电，照明灭失时间可作为时间下限的旁证。',
+  place:'白鲸塔 B1 后厨冷冻库，库门内侧 0.4 米处。尸体呈俯卧，头部朝向门缝，双臂前伸。',
+  surface:'双手十指指端冻伤发黑，呈干性坏死表现；双掌面见反复拍打形成的挫伤，皮肤呈片状脱落；额部见一处 3×2cm 撞击性皮下血肿；睫毛与眼睑冻结粘连，闭合不全；唇部皲裂；右膝、左足踝见与地面摩擦形成的擦伤。',
+  inner:'肺组织见冻伤性改变，肺泡壁增厚；胃黏膜见应激性溃疡；心脏内血液呈暗红色并部分凝固（死前循环已明显减慢）；肝、肾切面未见明显异常。',
+  opinion:'双手的拍打性挫伤与指端干性坏死，表明死者在照明灭失后曾长时间用手拍击门体，冻伤从指端开始并向近端发展，符合长时间持续接触低温金属的表现。额部血肿为撞击形成，系拍打过程中前倾所致。尸体的最终体位（俯卧、头部朝门缝、双臂前伸）为一组连续的姿态，各关节屈曲角度自然，未见死亡后被摆动的迹象——结合门内侧地面灰尘的分布，可确认该姿态为临终姿态而非他人摆放。',
+  cause:'低温致死（冻死），伴手部冻伤',
+  note:'库门锁体存在明显的短接痕迹，金属表面见灼烧点两处，短路导致该回路断电，应急照明同时失效。库内备用应急灯经检查为亏电状态。死者手臂朝向门缝，手部未闭合，手指仍保持抓握姿势。'
+};
+
+AUTOPSY.steam = {
+  no:'B-0517',
+  time:'推断为 01:15 ±5 分钟。阀门开启时间有明确记录：00:41:00。',
+  place:'白鲸塔 B1 锅炉房，三寸蒸汽管道下方地面。尸体位于管道正下方偏南 1.2 米，呈侧卧，双膝屈曲。',
+  surface:'体表烫伤面积约占 76%，以右侧躯干、背部及右下肢为主；表皮大面积剥离，真皮外露呈熟白色，部分区域呈暗褐色焦化；面部烫伤严重，眼睑皮肤剥脱；呼吸道口唇黏膜剥脱，口腔内见大片黏膜脱落组织；左小腿前侧烫伤程度相对较轻，与其在跌落后受到躯体遮挡有关。',
+  inner:'喉、气管、支气管黏膜广泛坏死并脱落，管腔见纤维素性渗出物；肺组织充血水肿；食管上段黏膜剥脱；胃黏膜见热损伤表现。',
+  opinion:'损伤范围与蒸汽喷洒方向高度吻合：右侧与背部损伤重于左侧，与现场管道的布置及喷射方向一致。体表烫伤的分布形态（上部重于下部、暴露部位重于遮挡部位）符合高温蒸汽自上方短时喷淋的力学特征。气道黏膜的坏死与脱落证明死者曾吸入高温蒸汽，该损伤在数分钟内即导致气道堵塞与窒息。综合判断，体表烫伤本身并非即时致死因素，气道灼伤与随之而来的窒息才是直接死因。',
+  cause:'高温蒸汽致体表大面积烫伤合并气道灼伤（存活约 40 秒）',
+  note:'该管段阀门于楼上被人开启，开启时间记录为 00:41:00，值班表显示该时段为计划外试压。死者衣物因蒸汽浸透而与烫伤创面粘连，检验时未强行剥离，已整体留样。管道表面温度经事后测算超过 180℃。'
+};
+
+AUTOPSY.fan = {
+  no:'B-0521',
+  time:'推断为 01:33 ±5 分钟。设备运行记录可作为时间锚点：风机运行至 01:34 由值班人员手动停机。',
+  place:'白鲸塔 9 层排风机房，铸铁栅罩前。尸体位于栅罩正下方，呈仰卧，颈部位置上移，头部贴近栅罩。',
+  surface:'颈部于环状软骨水平横断，断面呈撕裂状且不规则，可见组织被撕扯成条索状；头皮及右侧颜面组织大面积缺损，缺损范围约 12×9cm，边缘呈参差的撕裂样；铁栅上残留黑色毛发与头皮组织；地面发现离断的手指三枚，位于尸体右前方 0.4 至 1.1 米扇形带内；右臂沿身体方向伸展，左臂屈曲于胸前。',
+  inner:'颈椎于第 5、6 节之间断裂，断面呈撕裂状；椎动脉断裂；颅底骨折；颈部大血管断离。',
+  opinion:'颈部断面的条索状撕裂形态是本案定性的关键：如为锐器切断，断面应平整、创缘整齐；本例断面呈明显的撕扯性条索结构，为旋转机械将组织逐步缠绕、牵拉后撕断所致。地面三枚手指的扇形分布位置，与死者右手在最后阶段伸向栅罩的动作方向一致。铁栅上残留的组织与毛发集中于叶片转动的切线位置，进一步印证损伤机制。此类损伤一旦发生，死亡在数秒内完成。',
+  cause:'颈部撕裂致大出血（旋转机械）',
+  note:'设备运行记录：该风机转速 2400rpm，持续运行至 01:34 由值班人员手动停机。栅罩尺寸与人体颈部位置的空间关系已测量：栅罩下缘距地 1.62m，符合死者身高条件下的颈部高度。三枚离断手指经指纹比对确认属死者本人。'
+};
+
+AUTOPSY.fall = {
+  no:'B-0533',
+  time:'推断为 01:07 ±10 分钟。当夜有降雨，地面痕迹冲刷明显，时间依据目击者证言推定。',
+  place:'白鲸塔西侧外立面下方人行道，距墙面 1.2 米。尸体位于幕墙检修轨的正下方投影位置附近。',
+  surface:'全身呈广泛性损伤，颅骨崩解，面部结构无法辨认；胸廓塌陷；四肢见多发性骨折并呈异常旋转，双下肢尤其明显；体表损伤集中于前侧，背侧损伤相对较轻；双手掌、前臂前方见擦挫伤。',
+  inner:'全身脏器破裂，肝、脾、肺、肾均见广泛碎裂；主动脉弓于峡部横断；颅腔内容物外溢；脊柱于胸腰段多处骨折。',
+  opinion:'损伤分布的"前侧重于背侧"特征，结合双手掌与前臂前方的擦挫伤，可确认坠落姿态为俯卧或前倾位——如为仰卧后背着地，则背侧损伤应重于前侧。多项损伤（主动脉横断、多脏器碎裂、颅骨崩解）为高坠所特有的"多发、广泛、单次形成"表现。坠落高度 46 层（约 138 米）已远超人体耐受极限，触地瞬间即发生死亡，无存活可能，也不存在死亡前的运动反应。',
+  cause:'高坠致全身多发性毁损伤（坠落高度 46 层，约 138 米）',
+  note:'尸体上方 2.4 米处即为幕墙检修轨，轨道边缘检出掌纹两枚，方向与抓握相符。现场降雨持续，微量物证提取受限；轨道表面的氧化粉有明显的手掌擦除痕迹，范围约 12cm。此细节证明死者曾在轨道上抓握并维持过一段时间。'
+};
+
+AUTOPSY.glass = {
+  no:'B-0541',
+  time:'推断为 01:50 ±15 分钟。现场遗留的电子设备时间戳与推定一致。',
+  place:'白鲸塔 46 层东立面走廊，落地玻璃幕墙处。尸体呈半悬状态，上半身位于幕墙外侧，上肢垂于墙外，下肢位于内侧。',
+  surface:'右侧锁骨中段闭合性骨折，断端错位；右侧胸壁见三处穿透性创口，长度分别为 6cm、4.5cm、3cm，创缘不规则，创腔内可见玻璃碎屑；左侧肋间嵌有玻璃碎片一枚，长约 14cm，斜向插入；头面部见多处浅表切割伤；双上肢垂于墙外，双手见切割性擦伤。',
+  inner:'右侧第 4、5、6 肋骨骨折，断端刺破右肺；右侧气胸形成，胸腔积血约 700ml；无脏器贯穿伤；创腔内的一枚玻璃碎片未伤及心脏及大血管。',
+  opinion:'三处胸壁穿透创的创缘均不规则、创腔内嵌有玻璃碎屑，符合钝性硬质物（玻璃）在较大动能下造成的穿透伤，与刃器切割所致损伤形态明显不同。锁骨骨折的位置提示撞击点位于右上胸，与扑向幕墙时的接触部位一致。嵌于肋间的 14cm 玻璃碎片未伤及心脏，因此死因并非即刻的心脏损伤，而是右肺破裂后形成的气胸与失血，死亡过程可能持续数分钟。',
+  cause:'胸壁穿透伤合并血气胸（玻璃锐器）',
+  note:'幕墙破损口呈不规则圆形，最大跨径约 34cm，边缘见衣物纤维残留，已取样。外立面的血溅形态呈扇形分布，水平溅射距离约 2.1 米，最高点距破损口下沿 0.6 米，与创口位置及出血压力相符。该层幕墙玻璃为非安全夹层结构，未按规范安装防撞标识。'
+};
+
+AUTOPSY.drain = {
+  no:'B-0601',
+  time:'推断为 01:22 ±15 分钟。依据：上游冲洗阀的开启时间记录及管沟水位变化曲线。',
+  place:'白鲸塔地下管沟中段，管径收窄至 42cm 处。尸体卡于该段管内，呈俯卧位，头部朝下游。',
+  surface:'颜面及颈部受压痕明显，压痕走向与管壁弧度一致；十指指端见管壁摩擦形成的环状擦伤；口鼻腔内见大量污水与油污残留；耳道内见同样液体；体表其余部位无外伤；指甲缝内见厌氧污泥残留。',
+  inner:'肺内见大量污水，支气管深部及肺泡内均见液体；胃内溺液成分与现场管沟水样一致；食管内见污水；全身未见其他外伤。',
+  opinion:'胃内溺液成分与现场水样一致，是生前入水的最直接证据——如为死后入水，液体难以进入胃及深部气道。尸表无外伤，说明死者并非因外力受创后在管中失去行动能力，而是在体位受限的状态下遭遇水位上涨。管沟水泥面无抓握痕迹，与管径不足以形成有效抓握的结构条件一致。颈部保持上抬姿态（解剖时可见颈部肌群的持续牵拉状态），进一步证实死者在最后阶段持续将头颈向上抬起以维持呼吸。',
+  cause:'溺死（体位受限状态下）',
+  note:'上游水样流量在 00:50 后明显增加，来源为一处被开启的冲洗阀，开启记录归属一名当日值班人员，已列为调查对象。管沟内积水的上涨速率经实测为每小时约 34cm，与该段管径计算出的淹没时间吻合。'
+};
+
+AUTOPSY.duct_crush = {
+  no:'B-0613',
+  time:'推断为 00:41:11 前后。系统日志可精确对应：风阀自检于 00:41:07 启动，00:41:11 完成。',
+  place:'白鲸塔 3 号通风竖井，第九层风阀处。尸体位于管径 80cm 的方形管道内，紧邻风阀叶缘。',
+  surface:'躯干呈斜向压扁，自右肩至左髂，压扁平面与风阀叶缘的形状完全一致；面部贴压于管壁，皮肤纹理（包括毛孔走向）印在水泥表面并被固定；右肩部软组织完全压碎；左下肢屈曲，呈挣扎姿态。',
+  inner:'右侧肩胛骨粉碎性骨折；多发肋骨骨折，胸腔受压变扁；胸椎压缩性骨折；右侧胸廓脏器受压变形；脑组织未见损伤。',
+  opinion:'皮肤纹理在水泥表面的印压固定，是判断"持续压力作用"的重要依据，此类痕迹需要受压时间与压力均达到一定条件才能形成。风阀执行器的输出压力为两吨，作用面积与躯干接触面积的比值，可在极短时间内造成胸廓塌陷。脑组织未见损伤，说明意识丧失并非源于头部撞击，而是胸廓受压后循环中断所致。系统日志的时间精度（4.2 秒）与损伤形成的速率高度吻合。',
+  cause:'机械挤压致胸廓毁损',
+  note:'风阀自检记录完整：00:41:07 启动，00:41:11 完成，历时 4.2 秒，系统未记录任何异常。该 BA 系统的风阀控制程序中未设置管道内人体检测，且事后核查发现该系统在维护模式下不会记录异常事件。管道内壁的接触痕已全部拍照固定。'
+};
+
+AUTOPSY.burn = {
+  no:'B-0621',
+  time:'推断为 01:41 ±10 分钟。变电室配电柜的故障记录时间与推定一致。',
+  place:'白鲸塔 40 层变电室，门内侧 40cm 处。尸体呈爬行姿态，头部朝向门口，双前臂前伸。',
+  surface:'体表烧伤面积约 85%，以三度烧伤为主；背部衣物熔融并与创面粘连，形成硬质结痂；右肩、右臂见电弧入口性金属沉着，呈灰黑色斑点状分布；面部烧伤严重，鼻毛烧焦；双手掌面见爬行性擦伤，创面已炭化；双膝前侧见同类擦伤。',
+  inner:'呼吸道广泛热损伤，气管黏膜坏死脱落；心血中检出高浓度碳氧血红蛋白；心肌未见明显梗死灶；肺组织充血。',
+  opinion:'右肩与右臂的金属沉着是电弧入口的特征性表现，可作为判定电弧通道方向的依据（自右上臂向下）。背部衣物熔融并与创面粘连，说明燃烧发生在死者处于伏卧位时，与其向前爬行的姿态相符。心血中的碳氧血红蛋白浓度处于中等水平，说明死亡既有热损伤因素，也有烟气吸入因素，且时间较短——若暴露时间更长，该指标应显著升高。',
+  cause:'电弧引燃衣物致体表大面积烧伤合并吸入性损伤',
+  note:'变电室配电柜绝缘老化，弧光温度估测 2000℃ 以上，故障记录已导出。尸体所在位置距门口 40cm，门为开启状态；门内侧把手上有手套纤维残留，来源待查。该层烟感报警器在故障发生后 90 秒才启动，晚于标准响应时间。'
+};
+
+AUTOPSY.burn2 = {
+  no:'B-0622',
+  time:'推断为 01:56 ±10 分钟。与 B-0621 为同一火灾中的连续事件。',
+  place:'白鲸塔 40 层变电室门口，走廊内侧。尸体部分位于门槛外侧，双手前伸至走廊地毯上。',
+  surface:'体表烧伤面积约 90%；背部创面见熔融纤维附着，形成硬质焦痂；右手掌面及双膝见爬行擦伤，擦伤方向朝向走廊；右手掌与前臂的擦伤创面可见地毯纤维嵌入；面部炭化，口鼻腔内见烟灰沉着。',
+  inner:'呼吸道热损伤明显，气管及主支气管黏膜坏死；心肌未见明显异常，提示死亡过程较短；肺组织见充血与水肿；血液碳氧血红蛋白浓度低于同类案件记录值。',
+  opinion:'尸体位置跨越门槛（部分躯体位于走廊侧），说明死者在最后阶段已越过门框，其肢体前伸至地毯上的姿态为典型的前爬终止姿态，各关节角度自然，可排除死后被摆放。血迹与体液在门槛处的分布形态显示体液流向走廊一侧，说明死亡时体位为头低脚高。走廊侧未见任何拖拽痕迹，排除他人施救或移动的可能。',
+  cause:'大面积烧伤合并吸入性损伤',
+  note:'尸体距走廊尽头照明灯约 2 米。走廊地面检出两组跑动脚印，为一男一女，鞋底型号分别为 41 码运动鞋与 37 码平底鞋，两组脚印均径直离开现场，未在现场停留，现场亦未发现任何灭火或施救尝试的痕迹。该记录已单独归档并移交调查部门。'
+};
+
+/* ---- 屈辱类 ---- */
+AUTOPSY.crew = {
+  no:'C-0111',
+  time:'推断为 01:47 ±30 分钟。因尸体被转移，尸温记录中断，时间依据值班记录与搬运路径推定。',
+  place:'白鲸塔 B1 值班室西侧，货梯厅出口处。尸体被发现时裹于地毯内，置于货梯后方。',
+  surface:'全身多处软组织挫伤，以双膝前侧、双肘后侧及双腕背侧为著，挫伤形态呈不规则片状，符合与硬质平面反复接触所致；颈部未见勒痕或压迫性痕迹；右手掌心见陈旧性划伤（已结痂）；双手双足腕踝部位见环形皮下出血，宽度约 1cm，提示曾长时间受到束缚；左肩后侧见两处指甲抓痕。',
+  inner:'生殖道见新鲜损伤，损伤形态提示由多人次、多次外力作用形成，损伤范围超出单一行为可能造成的程度；骨盆周围软组织广泛挫伤；腹腔积血少量；颅脑未见损伤；心脏未见器质性病变。',
+  opinion:'四肢腕踝的环形皮下出血具备"长时间束缚"的特征：出血带宽度一致、走行规则，且损伤处皮肤无开放创口，符合宽幅束缚物长期压迫所致，与短时间抓握造成的挫伤形态不同。全身挫伤集中在与硬质平面接触的部位（膝、肘、腕背），提示死者长期处于被迫与桌面接触的体位。生殖道损伤的分布特征及肩后抓痕，可作为判断施加者人数的形态学依据。最终死因与束缚后体位改变导致的通气障碍有关。',
+  cause:'机械性窒息（转移过程中体位性窒息）合并多人次外力作用',
+  note:'包裹尸体的地毯内侧检出速溶咖啡颗粒，与值班室内泡面桶的品牌一致。搬运痕迹自值班室门口沿货梯厅向货梯后方延伸，总长约 21 米，中途有一次转向，未发现停顿。遗物中无任何个人证件、手机或可辨识身份的物品。该案已与同期另两起无名尸案并案侦查。'
+};
+
+AUTOPSY.crew2 = {
+  no:'C-0112',
+  time:'推断为 01:40 ±25 分钟。尸体于垃圾箱内发现，箱内温度较高，尸温数据已作修正。',
+  place:'白鲸塔垃圾房，大型垃圾箱内。尸体位于箱体下层，上方覆盖有其他垃圾。',
+  surface:'左膝髌骨闭合性骨折，局部见凹陷性瘀肿，皮肤未见开放创口，符合钝器直接打击所致；全身挫伤面积约占体表 35%，分布无固定走向；右手肘部见条状压痕，宽约 3cm，长 8cm，与手电筒筒身规格一致；骨盆周围软组织损伤特征同前例记录；左踝见两处抓痕。',
+  inner:'脾脏包膜下血肿，未破裂，血肿范围约 5×4cm；第 9、10 肋骨骨折；其他脏器未见明显损伤。',
+  opinion:'脾包膜下血肿的性质值得注意：包膜未破裂说明损伤发生后，死者仍存活了一段时间，血肿在包膜约束下积聚。该状态本身不足以致死，但它会持续引起失血性休克的风险；最终的致死机制应为束缚状态下的体位性窒息。右手肘部的条状压痕与被按压在地面时手电筒筒身接触形态一致，可作为施暴方式的物证支撑。',
+  cause:'钝器打击致脾包膜下血肿合并体位性窒息',
+  note:'垃圾箱盖内侧见指甲刮痕数道，方向向上，刮痕深度不一，最深一处已达金属底层，说明死者曾试图从内部推开箱盖。取证时该箱已装车，未能追回全部内容物；已就运输路线向清运公司发出协助调查通知。'
+};
+
+AUTOPSY.toy = {
+  no:'C-0203',
+  time:'推断为死后约 24 至 36 小时被转移，最终发现时间距死亡时间较久。依据：尸斑分布紊乱、多处舟样改变及体表干燥程度。（原卷宗记录有缺页。）',
+  place:'白鲸塔 B4 货梯井底。尸体被发现于井底导轨旁，呈俯卧。',
+  surface:'尸表见多处陈旧性擦伤与压迫性瘀斑，分布于肩背部、腰骶部及髋部，形态与本人体重长期受压的位置相符，瘀斑颜色多呈黄褐色，提示形成时间不一；体表无致命创口；颜面部见轻度干燥脱水表现；双手指甲完整。',
+  inner:'多脏器呈应激性改变：肾上腺皮质明显耗竭，胃黏膜见应激性溃疡；心脏各腔血液呈暗红色且无明显凝块；胃内空虚；膀胱充盈。',
+  opinion:'体表瘀斑的颜色差异（含深紫与黄褐两类）是判断损伤时间跨度的重要依据：黄褐类瘀斑通常形成于死前 24 小时以上，说明死者在死亡之前已长时间处于受外力作用的受控状态。肾上腺皮质耗竭与应激性溃疡，是长时间精神与生理应激状态下的典型表现。需要特别指出：本案的坠落高度经测量约 17 米，按此高度推算的全身损伤程度应远重于实际所见——体表未见高坠应有的广泛骨折与脏器碎裂，判断尸体系死后经其他方式转移至井底，坠落发生于死亡之后。',
+  cause:'长时间持续外力作用及应激状态下心源性猝死',
+  note:'尸者被发觉时已在顶层停留 48 小时以上，停留期间的具体情形缺乏记录。井底另发现非死者所有的衣物纤维若干，已送检。原卷宗中关于发现过程的一页缺失，缺失情况已上报。本报告为补做，所依据的材料有限。'
+};
+
+AUTOPSY.toy2 = {
+  no:'C-0204',
+  time:'推断为 01:52 ±15 分钟。尸体移送时体表温度接近常温。',
+  place:'白鲸塔 B2 货梯厅。尸体位于货梯门前的装卸区地面。',
+  surface:'面部覆盖白色丝质手帕一方，手帕与死者唇部出血处粘连，取下时见撕脱；唇内侧见撕裂创一处，长 1.2cm；颈部见指压性瘀痕三处，位于颈前部；右手食指与中指见轻微擦伤。',
+  inner:'颈动脉窦区域见局灶性受压痕迹；口鼻部见机械性闭塞的形态学特征（鼻翼两侧见压迫性压红）；心脏各腔含流动性血液；脑组织轻度水肿。',
+  opinion:'口鼻部被丝质布类闭塞，属机械性窒息的一种。颈部指压痕位于颈前部，主要用于固定头部而非直接扼颈，此点与单纯扼杀的法医特征不同。颈动脉窦受压可引起反射性心搏停止，结合创周的反应性变化，判断该反射机制在本案中发挥了作用，死亡时间因此短于单纯窒息。面部覆盖的手帕未见于尸体附近地面，系他人置放。',
+  cause:'口鼻闭塞致机械性窒息（合并颈动脉窦反射）',
+  note:'手帕上检出男性香水残留，气味为冷调木质香，已记录特征以供比对。尸体移送时身着他人衣物，尺码明显不符，原衣着下落不明。移送路径上未见血迹，说明移送时出血已停止。'
+};
+
+AUTOPSY.cargo = {
+  no:'C-0301',
+  time:'推断为死亡后约 6 小时被发现。依据：尸僵主要分布于下颌与颈部，强度中等，尚未扩展至四肢。',
+  place:'白鲸塔 B4 装货区外，冷链运输车辆货箱内。尸体被置于纸箱中，位于箱堆第三层。',
+  surface:'颈左侧见注射针孔一处，周围见直径 1.5cm 的淤斑，针孔方向由前下向后上；体表无明显外伤；双手指甲完整，未见抓挠伤；口唇轻度发绀；双眼瞳孔散大。',
+  inner:'血液中检出快速起效的镇静类药物，血药浓度接近致死量上限；肝、肾切面未见明显器质性病变；肺组织淤血；未见窒息或外伤性死因表现。',
+  opinion:'针孔的方位（由前下向后上）与"被他人从体后施行注射"的力学关系相符：自行注射者多形成由前上向后的通道，且多在体表易及部位留下多个试探性针孔，本例仅一处，且方位不符，支持他杀。血药浓度接近致死量上限，提示注射剂量经过预估而非随意施用。全身未见外力痕迹，说明药物在起效前死者未进行有效反抗，也可能对注射的来源缺乏防备。',
+  cause:'药物过量致呼吸中枢抑制（他杀，方式为颈侧注射）',
+  note:'纸箱印有某酒业商标，箱内衬泡沫，规格与冷链运输标准一致；箱体条码指向一家已注销的贸易公司，注册信息已调取。车辆于凌晨四点十七分通过一处无监控路口后去向不明。车厢内的温度记录仪被拆除，安装位置留有拆除痕迹。'
+};
+
+AUTOPSY.bid = {
+  no:'C-0311',
+  time:'推断死亡时间不详。尸体在移交途中被截走，本案未完成全套尸检，以下为现场初步检验记录。',
+  place:'城外一处私人物业，拍卖厅后台通道。尸体发现时为半坐姿态，置于通道尽头的推车上。',
+  surface:'双腕见皮革束缚带所致环形压痕，压痕处衬垫完整，皮肤无破损，符合使用带衬垫束具的情形；左腕内侧皮肤见一处擦破，创面方向自内向外；右小腿外侧见条状压痕，宽 2cm；口唇干燥，舌质暗。',
+  inner:'（未行解剖）',
+  opinion:'初步检验所见仅限于体表。束缚带的衬垫完整、压痕规则，说明施束者使用的器具为制式产品，且对皮肤的保护有明确考虑——这与一般的暴力行为不同，更接近于某种有规程的处置方式。左腕内侧的擦破方向为自内向外，提示死者曾反复以该处磨蹭束缚带，其目的应为挣脱。就此记录为止，其余项目待补充检验。',
+  cause:'（未能确定，尸体在移交途中被截走，卷宗止于此页）',
+  note:'本案未完成全套尸检，尸体于移交检验机构途中被截走，护送人员笔录与车辆牌照均无法核实。卷宗中另附有编号三十七的登记卡一张，姓名栏空白，背面以铅笔写有一个笔画极简的符号，含义不明。'
+};
+
+AUTOPSY.bid2 = {
+  no:'C-0312',
+  time:'不详。',
+  place:'同上。',
+  surface:'口唇内侧见撕裂创一处；右下颌第一磨牙见崩缺一角，断口断面新鲜，未见死后磨损；舌缘见切割样创口一处，创缘整齐，长度约 0.8cm。',
+  inner:'（未行解剖）',
+  opinion:'下颌磨牙的崩缺断面新鲜，说明该损伤发生在死前不久；牙冠崩缺通常需要咬合硬质物，结合口唇内侧的撕裂创，可推断死者在最后阶段曾以牙齿撕咬某种坚固物体。舌缘创口的创缘整齐、创道浅表，与崩缺牙齿的边缘形态可对应，判断为咬合过程中牙齿自身造成的继发损伤，而非他人施加。',
+  cause:'（未完成鉴定）',
+  note:'文件显示该标的以低于预估的价格成交。购入方登记信息为一家离岸注册的公司，无实际经营地址，联系方式为一次性号码。交易款项经三次转账，已无法追溯。'
+};
+
+AUTOPSY.exposed = {
+  no:'C-0401',
+  time:'推断为 02:00 至 04:00 之间。尸体于天亮前被移出，发现时已无体温。',
+  place:'白鲸塔 39 层设备层，离心机南侧地面。尸体移出前所在位置的地面痕迹已拍照固定。',
+  surface:'全身大面积淤伤与抓握性压迫痕迹，分布于肩部、腰部、髋部及四肢内侧；颈部见环形压迫痕，宽度约 3cm，与徒手扼压相符；双膝、双肘见地面摩擦挫伤，创面内见水泥灰与设备层特有的油渍；双手指甲缝内检出两人份皮肤组织；双足赤裸，足底见与地面摩擦形成的片状擦伤。',
+  inner:'生殖道及周围组织损伤严重，符合多人次、多次外力作用；腹腔内出血约 400ml；未见脏器破裂；心脏各腔血液呈流动性；脑组织未见损伤。',
+  opinion:'四条判断值得记录。第一，双手指甲缝内检出两人份皮肤组织，说明死者曾对至少两人实施过抓挠，且抓挠有效（皮屑组织量足以检出），此与"被动承受"的情形不符，可作为其曾反抗的物证。第二，颈部的环形扼压痕为徒手形成，宽度与成人手掌虎口位置相符。第三，双足底的片状擦伤与地面摩擦方向一致，显示死者曾被拖行。第四，腹腔出血量不大，说明未发生脏器破裂，最终致死机制应为持续外力作用下循环系统的衰竭，而非某一处致命伤。',
+  cause:'持续外力作用下的心搏抑制与失血（多方施加）',
+  note:'现场提取到两枚不同型号的鞋印，以及一只印有部门编号的搪瓷杯。该层该时段监控线路损坏，无影像记录，损坏原因未查明。尸体于天亮前由清运车辆运出，运出路线与车辆信息未能调取。'
+};
+
+AUTOPSY.cargo_dead = {
+  no:'C-0417',
+  time:'推断为发现前约 70 小时。依据：床垫与地面血迹的干涸程度，以及人体消瘦状态的持续时间。',
+  place:'城内一处无窗单间，房间编号三十七。尸体位于房间角落，背靠墙面，呈坐姿，双手垂于体侧。',
+  surface:'右腕见环形缺损，由皮革与铁件长期摩擦形成，深度自表皮达骨质，创面边缘见反复撕裂与部分愈合交替的痕迹；创口下方沿前臂方向的皮肤见多条陈旧性血痂带；床垫及地面见大量干涸血迹，自床垫边缘向地砖缝隙延伸；体表其余部位消瘦明显，皮下脂肪菲薄，肋骨与髂骨轮廓可辨；双眼睑闭合不全。',
+  inner:'全身失血量估算约 1500ml；创口周围组织见多次愈合与再破溃的病理痕迹，提示该损伤为长期过程中逐步形成；肝、肾切面见贫血性改变；胃内充盈少量内容物。',
+  opinion:'创口周围"愈合—破溃—再愈合"的交替痕迹，是本例最重要的形态学特征：它证明该损伤不是在短时间内形成，而是死者在一段持续数日的过程中反复以束缚物与墙面摩擦的结果。这一过程的持续性，排除了急性致死因素，也说明死者在大部分时间内保持清醒与自主行动能力。死因应认定为慢性失血导致的循环衰竭，而非某一处创伤的直接后果。',
+  cause:'慢性失血致循环衰竭',
+  note:'房间无窗，门从外部反锁。送水记录显示最后一次送水时间为发现前三天，送水人未进入房间，笔录称"放下东西就走了"。门上的编号为喷涂式，字体与同一区域内其他房间不一致，疑为后加。'
+};
+
+/* ---- 极刑类 ---- */
+AUTOPSY.acid = {
+  no:'D-0103',
+  time:'推断为 01:36 ±20 分钟。尸体于次日晨被发现，死亡至发现的间隔较长。',
+  place:'白鲸塔 B1 后厨洗消间。尸体位于房间东南角，呈蜷曲姿态，双腿向内收拢，双臂抱于胸前。',
+  surface:'双下肢自膝以下组织大面积液化性坏死，软组织缺失，胫腓骨裸露，骨面呈灰白色并见点状腐蚀；右前臂屈侧见同一性质创面，创面下深层肌腱暴露并呈半透明状态；其余体表见大小不一的溅落液滴状损伤多处，分布于左小腿外侧、双手背侧及臀下部；面部未见损伤；衣物在膝下部分与创面混杂，无法分离。',
+  inner:'液滴沿组织间隙纵向渗入，深达肌层，肌纤维呈灰白色皂化样改变；局部血管见腐蚀性破坏；未见全身中毒表现；胃黏膜正常。',
+  opinion:'损伤的分布位置（膝以下、前臂屈侧、双手背侧）与液体的泼溅方向一致：死者站立时液体首先接触小腿，随后在移动或跌倒过程中向前臂与双手扩散。四十分钟的存活时间为本案的关键——强碱损伤不引起即刻意识丧失，其疼痛与组织破坏同步持续，死者在此期间保持了清醒。直接死因并非化学腐蚀本身，而是大面积组织液化后导致的体液丢失、低血容量与电解质紊乱。',
+  cause:'强碱性液体腐蚀致组织液化坏死，合并体液丢失性休克（存活时间约 40 分钟）',
+  note:'现场塑料桶一只，残液 pH 13.4，主要成分为氢氧化钠与酶制剂。桶身标签经水浸后仍可辨认"生物酶"字样。洗消间地面设有排水口，但排水口被杂物堵住，液体未能及时排出。房间门为一扇防火板门，从外面以插销锁闭。'
+};
+
+AUTOPSY.hook = {
+  no:'D-0117',
+  time:'推断为 02:06 ±20 分钟。冷冻库内温度较低，尸温下降快，时间推断已作修正。',
+  place:'白鲸塔 B1 冷冻库滑轨区，距入口 6 米。尸体被悬挂于不锈钢挂钩上，双足距地面约 12cm。',
+  surface:'右侧肩胛下区见贯通性穿孔创一处，创口呈不规则的三棱形，与挂钩的截面规格完全一致；右上肢呈脱臼后下垂状，肩峰处见凹陷；双腕见铁丝环绞所致的环状压痕各一道，压痕处见铁丝勒入皮下形成的沟槽，深度约 5mm；右侧胸壁见片状挫伤。',
+  inner:'肩胛骨下缘骨折，断端刺入深部肌群；胸廓上口的软组织撕裂，创道内壁见环形金属摩擦痕迹；肩关节囊完全撕裂，关节盂见压缩性骨折。',
+  opinion:'钩体的截面形态（三棱形）在创口上留下了清晰的印痕，为确认致伤器械提供了直接物证。关键判断：挂钩自肩胛骨下缘进入后卡于肩胛骨与胸廓之间，未伤及肺、心脏及大血管，因此死亡并非来自器官损伤本身。死者的全部体重由这两块骨与其间的软组织承担，肩关节囊在承受量超过极限后离断，身体下坠约半个手掌。存活时长达 11 分钟以上，说明该状态本身不构成即时致死条件，最终机制为悬挂导致的呼吸肌功能受限与循环障碍。',
+  cause:'悬挂性贯通伤合并肩关节离断性损伤',
+  note:'滑轨运行记录显示该段运行为 11 分 20 秒，与推定存活时间吻合。挂钩已于事后拆下，作为物证封存。库内地面见滴落状血迹，分布范围与死者体位相符，未见第二人的鞋印。'
+};
+
+AUTOPSY.vise = {
+  no:'D-0122',
+  time:'推断为 01:58 ±10 分钟。设备压力记录显示四段加压，整个过程持续约 6 分钟。',
+  place:'白鲸塔 B4 地下车库维修位，液压升降台与上方水泥梁之间。设备间隙经测量为 12cm。',
+  surface:'躯干整体压扁，厚度约 12cm，与设备间隙一致；体表呈广泛压榨性损伤，皮肤呈不规则撕裂；四肢骨折端外露，手掌与足部因受压变形；颜面部压扁，相貌无法辨认；衣物与创面混杂。',
+  inner:'胸廓、脊柱、骨盆粉碎性骨折，骨折端相互嵌入；胸腔及腹腔脏器受压破裂并互相融合，解剖结构难以分辨；颅骨未见明显骨折。',
+  opinion:'尸体的最终厚度（12cm）与设备间隙的实测值完全一致，可作为"持续受压至设备行程终点"的直接证据。四段加压的间隔使得压力并非一次施加，因此损伤呈累积性而非单次冲击性——这一点从骨折端的相互嵌插形态可以判定，多次重复施压会使骨折端反复错位并最终嵌合。颅骨未见骨折，说明头部未直接受压，意识丧失源于胸廓塌陷后的循环中断。',
+  cause:'挤压伤致全身毁损（液压设备作用）',
+  note:'升降台压力记录完整，四段加压，峰值 8.2 吨。现场遗留铁锹两把，铲面沾附人体组织，其中一把的铲口为卷曲状，卷口处沾附物已单独取样。该维修位的照明开关位于柱体背面，作业时处于关闭状态。'
+};
+
+AUTOPSY.train = {
+  no:'D-0201',
+  time:'推断为 02:07 ±3 分钟。列车运行记录、司机制动报告与调度日志三者一致。',
+  place:'地铁三号线存车线，检修隧道出口处轨道。残肢散落范围自撞击点起沿行车方向延伸约 40 米。',
+  surface:'躯体呈广泛性离断与毁损，损伤沿轨道方向分布，断裂平面多重且不规则；残肢散落于道床及两轨之间；衣物碎片与生物组织混合并于道床石碴间隙中；可辨识的人体部位包括左前臂、右足及部分躯干组织。',
+  inner:'（因躯体毁损严重，未进行完整解剖。已提取组织样本用于身份确认，结果与死者一致。）',
+  opinion:'损伤沿轨道方向呈线状分布、断裂平面多重且不规则，符合列车撞击后躯体的连续碾轧过程，而非单次机械作用。散落范围 40 米与列车制动距离（140 米）及运行速度（60km/h）的换算关系相符，可反推撞击发生的位置。死者被发现时呈俯卧位，位于两条钢轨之间，说明撞击前躯体已处于倒伏状态。现场未发现任何生前防御行为形成的损伤特征。',
+  cause:'列车撞击及碾轧致躯体毁损',
+  note:'司机紧急制动记录完整：制动距离 140 米，车速 60km/h。调度日志显示该次列车为回库车次，未载客。尸者被发现位置位于两条钢轨之间，距站台边缘 8 米，与死者本人的行进路线记录一致。清扫作业后更换轨道三节，原轨道段已留样。'
+};
+
+AUTOPSY.vault = {
+  no:'D-0221',
+  time:'推断为前一日 01:30 至 08:30，存活约 7 小时。依据：尸斑分布、角膜混浊程度及柜内镜面雾痕的范围与干涸程度。',
+  place:'白鲸塔 47 层书房暗间，保险柜内。柜门处于闭合状态，门板重约 120kg。',
+  surface:'尸者上半身位于柜内，第 13 胸椎水平向后折弯，角度约 110°；背部见宽幅压痕一道，宽度与柜门内缘的形状一致，压痕处皮肤完整、无破损，呈压扁样改变；双下肢垂于柜外，膝关节屈曲；双手位于柜内，手指呈抓握姿态，指甲缝内见纸张纤维。',
+  inner:'第 13 胸椎压缩爆裂性骨折，脊髓于该平面完全横断；膈肌受压上抬，双肺下叶膨胀不全；肋骨未见骨折；腹腔脏器未见损伤。',
+  opinion:'本例的核心在于存活时间与死亡机制。脊髓在第 13 胸椎水平横断属截瘫水平，不影响呼吸肌的主要支配（膈肌由颈髓 3 至 5 节段支配），因此死者在伤后可维持自主呼吸，但被限制在柜内无法脱身——这解释了长达 7 小时的存活期。死亡机制为长时间限制性体位导致的呼吸功能不全：胸腔被固定、膈肌上抬、双肺下叶长期膨胀不全，氧合功能逐步丧失。柜门内侧镜面上的呼出气体雾痕分布集中、范围有限，且干涸程度一致，可作为判断死者长时间保持清醒并持续呼气的直接依据。',
+  cause:'脊髓横断合并长时间呼吸功能不全（存活约 7 小时后死亡）',
+  note:'柜门内侧镜面检出呼出气体凝结形成的雾痕，集中分布于距死者面部约 20cm 的扇形区域。房间在当日该时段曾有人活动（门禁记录一次开启），未报告异常。保险柜的使用手册中明确标注了门体自动回位机构的危险性，提示在使用时避免肢体置于柜内。'
+};
+
+AUTOPSY.hypo = {
+  no:'D-0301',
+  time:'推断为 00:37 ±5 分钟。宴会厅监控及侍者证言可精确定位：死者倒地时间为 00:36:40。',
+  place:'白鲸塔 42 层宴会厅，西南侧立柱旁。尸体呈侧卧，位于立柱与地毯交界处。',
+  surface:'尸表无明显外伤；口唇轻度发绀；右手掌侧见玻璃杯碎裂造成的浅表切割伤三处，创口方向与握持碎裂杯体的动作一致；裙装前襟见香槟渍，渍痕呈不规则喷洒状；左膝见与地面接触形成的轻微淤痕；双眼睑半开。',
+  inner:'心血内检出不明来源的生物碱类物质，浓度足以在数分钟内抑制心肌传导；心脏肉眼检查未见器质性病变，冠状动脉通畅；脑组织轻度水肿；胃内容物中未检同种物质。',
+  opinion:'本案的证据关系需要特别说明。胃内容物中未检出该物质，说明死者并非经口摄入——这是本案最关键的一点，直接排除了"饮用含毒酒液"的常规路径。该物质在心血中的浓度呈分布均匀的状态，与经口摄入后自门静脉系统进入肝脏代谢的分布模式不符，更符合同一时间内通过其他途径进入体循环的情形。死者右手掌侧的切割伤由握持碎裂杯体形成，此细节提示酒杯在倒地前已经碎裂，其碎裂原因未能在现场还原。死者贴身暗袋中检出微量同种物质残留，但残留量与投毒所需剂量不符。',
+  cause:'急性心搏停止（毒物作用，摄入途径未明）',
+  note:'现场酒杯碎片已全部提取（共 11 片），碎片上未检出该物质。同一托盘的另外一只杯子未找到，侍者笔录称"托盘上原本就是两只杯"。宴会厅的监控覆盖西南侧立柱区域，但当晚该路画面存在 47 秒的丢帧，丢帧时间与事发时间部分重叠。'
+};
+
+Object.keys(AUTOPSY).forEach(k => { if(DEATHS[k]) DEATHS[k].report = AUTOPSY[k]; });
+
+/* ------------------------------------------------------------------ */
+/* 图鉴                                                                */
+/* ------------------------------------------------------------------ */
+let codexTab = 'death';
+function openCodex(tab){
+  codexTab = tab || codexTab;
+  const c = loadCodex();
+  const m = $('#modal');
+  $('#mtitle').textContent = '死法图鉴';
+  $('#msub').textContent = `已收集 ${c.length} / ${Object.keys(DEATHS).length}　—　失败是这出戏的主要台词。`;
+  const tabs = $('#mtabs');
+  tabs.innerHTML = '';
+  const groups = {};
+  Object.entries(DEATHS).forEach(([id,d])=>{
+    const g = d.kind || '其他';
+    (groups[g] = groups[g]||[]).push([id,d]);
+  });
+  const keys = ['全部', ...Object.keys(groups)];
+  keys.forEach(k=>{
+    const b = document.createElement('button');
+    b.textContent = k;
+    b.className = (codexTab===k?'on':'');
+    b.onclick = ()=>{ codexTab = k; openCodex(k); };
+    tabs.appendChild(b);
+  });
+
+  const body = $('#mbody');
+  body.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className='grid';
+  let n=0;
+  Object.entries(DEATHS).forEach(([id,d])=>{
+    if(codexTab!=='全部' && (d.kind||'其他')!==codexTab) return;
+    n++;
+    const got = c.includes(id);
+    const e = document.createElement('div');
+    e.className = 'ent ' + (got?'got':'locked');
+    e.innerHTML = got
+      ? `<b>${d.name}</b><small>${d.kind||''} · ${d.tagline||''}</small>`
+      : `<b>？？？</b><small>${d.kind||''} · 未遭遇</small>`;
+    grid.appendChild(e);
+  });
+  body.appendChild(grid);
+  if(!n) body.innerHTML = '<div class="codebox">这一类还没有内容。</div>';
+  m.classList.add('on');
+}
+
+/* ------------------------------------------------------------------ */
+/* 绑定                                                                */
+/* ------------------------------------------------------------------ */
+window.addEventListener('DOMContentLoaded', ()=>{
+  $('#btnCodex').onclick = ()=>openCodex();
+  $('#btnGear').onclick = ()=>openWardrobe();
+  $('#btnWardrobe').onclick = ()=>openWardrobe();
+  $('#stripAll').onclick = ()=>stripAll();
+  $('#btnRestart').onclick = ()=>{
+    if(confirm('放弃当前进度，从白鲸塔外重新开始？')) newGame();
+  };
+  $('#mclose').onclick = ()=>$('#modal').classList.remove('on');
+  $('#modal').onclick = e=>{ if(e.target.id==='modal') $('#modal').classList.remove('on'); };
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') $('#modal').classList.remove('on'); });
+  if(!loadGame()) newGame();
+  else { render(); }
+});
+
+</script>
+</body>
+</html>
